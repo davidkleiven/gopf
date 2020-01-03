@@ -8,7 +8,7 @@ import (
 
 // SolverCB is function type that can be added to the solver it is executed after each
 // iteration
-type SolverCB func(s *Solver)
+type SolverCB func(s *Solver, epoch int)
 
 // FourierTransform is a type used to represent fourier transforms
 type FourierTransform interface {
@@ -93,7 +93,7 @@ func (s *Solver) Solve(nepochs int, nsteps int) {
 		s.Propagate(nsteps)
 
 		for _, cb := range s.Callbacks {
-			cb(s)
+			cb(s, i)
 		}
 	}
 }

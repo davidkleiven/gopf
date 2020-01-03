@@ -146,3 +146,35 @@ func Dot(a []float64, b []float64) float64 {
 	}
 	return res
 }
+
+// RealPartAsUint8 return the real part of the field as uint8. The data is scaled
+// such that min --> 0 and max --> 255
+func RealPartAsUint8(data []complex128, min float64, max float64) []uint8 {
+	res := make([]uint8, len(data))
+	for i := range data {
+		res[i] = uint8(255 * (real(data[i]) - min) / (max - min))
+	}
+	return res
+}
+
+// MaxReal calculates the maximum real part
+func MaxReal(data []complex128) float64 {
+	maxval := real(data[0])
+	for i := range data {
+		if real(data[i]) > maxval {
+			maxval = real(data[i])
+		}
+	}
+	return maxval
+}
+
+// MinReal returns the minimum real-part value
+func MinReal(data []complex128) float64 {
+	minval := real(data[0])
+	for i := range data {
+		if real(data[i]) < minval {
+			minval = real(data[i])
+		}
+	}
+	return minval
+}
