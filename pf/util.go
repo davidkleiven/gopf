@@ -137,3 +137,12 @@ func ProdInt(a []int) int {
 	}
 	return res
 }
+
+// Dot calculates the dot product between two slices
+func Dot(a []float64, b []float64) float64 {
+	res := 0.0
+	for i := range a {
+		res += a[i] * b[i]
+	}
+	return res
+}
