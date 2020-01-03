@@ -188,6 +188,7 @@ func (m *Model) SyncDerivedFields() {
 
 // Init prepares the model
 func (m *Model) Init() {
+	m.RHS = m.RHS[:0]
 	for _, eq := range m.Equations {
 		m.RHS = append(m.RHS, Build(eq, m))
 	}
@@ -203,4 +204,26 @@ func (m *Model) AllVariableNames() []string {
 		idx++
 	}
 	return names
+}
+
+// GetRHS evaluates the right hand side of one of the equations
+func (m *Model) GetRHS(fieldNo int, freq Frequency, t float64) []complex128 {
+	data := make([]complex128, len(m.Fields[fieldNo].Data))
+	tmp := make([]complex128, len(m.Fields[fieldNo].Data))
+	for _, f := range m.RHS[fieldNo].Terms {
+		f(freq, t, tmp)
+		ElemwiseAdd(data, tmp)
+	}
+	return data
+}
+
+// GetDenum evaluates the denuminator
+func (m *Model) GetDenum(fieldNo int, freq Frequency, t float64) []complex128 {
+	data := make([]complex128, len(m.Fields[fieldNo].Data))
+	tmp := make([]complex128, len(m.Fields[fieldNo].Data))
+	for _, f := range m.RHS[fieldNo].Denum {
+		f(freq, t, tmp)
+		ElemwiseAdd(data, tmp)
+	}
+	return data
 }
