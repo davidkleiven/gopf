@@ -1,0 +1,84 @@
+package pf
+
+import (
+	"fmt"
+
+	"github.com/davidkleiven/gosfft/sfft"
+)
+
+// FourierTransform is a type used to represent fourier transforms
+type FourierTransform interface {
+	FFT(data []complex128) []complex128
+	IFFT(data []complex128) []complex128
+	Freq(i int) []float64
+}
+
+// Solver is a type used to solve phase field equations
+type Solver struct {
+	Model *Model
+	FT    FourierTransform
+	Dt    float64
+}
+
+// NewSolver initializes a new solver
+func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
+	var solver Solver
+	m.Init()
+	solver.Model = m
+	solver.Dt = dt
+
+	if len(domainSize) == 2 {
+		solver.FT = sfft.NewFFT2(domainSize[0], domainSize[1])
+	} else if len(domainSize) == 3 {
+		solver.FT = sfft.NewFFT3(domainSize[0], domainSize[1], domainSize[2])
+	} else {
+		panic("solver: Domain size has to be an array of length 2 (2D calculation) or 3 (3D calculation)")
+	}
+
+	// Sanity check for fields
+	N := ProdInt(domainSize)
+	for _, f := range m.Fields {
+		if len(f.Data) != N {
+			panic("solver: Inconsistent domain size and number of grid points")
+		}
+	}
+	return &solver
+}
+
+// Propagate evolves the equation a fixed number of steps
+func (s *Solver) Propagate(nsteps int) {
+	cDt := complex(s.Dt, 0.0)
+	for i := 0; i < nsteps; i++ {
+		s.Model.SyncDerivedFields()
+		for _, f := range s.Model.Fields {
+			s.FT.FFT(f.Data)
+		}
+		for _, f := range s.Model.DerivedFields {
+			s.FT.FFT(f.Data)
+		}
+
+		for i := range s.Model.Fields {
+			rhs := s.Model.GetRHS(i, s.FT.Freq, 0.0)
+			denum := s.Model.GetDenum(i, s.FT.Freq, 0.0)
+			d := s.Model.Fields[i].Data
+			// Apply semi implicit scheme
+			for j := range d {
+				d[j] = (d[j] + cDt*rhs[j]) / (complex(1.0, 0.0) - cDt*denum[j])
+			}
+		}
+
+		// Inverse FFT
+		for _, f := range s.Model.Fields {
+			s.FT.IFFT(f.Data)
+			DivRealScalar(f.Data, float64(len(f.Data)))
+		}
+	}
+}
+
+// Solve solves the equation
+func (s *Solver) Solve(nepochs int, nsteps int) {
+	for i := 0; i < nepochs; i++ {
+		fmt.Printf("Epoch %5d of %5d\n", i, nepochs)
+		s.Propagate(nsteps)
+	}
+}
