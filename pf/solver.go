@@ -1,6 +1,7 @@
 package pf
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/davidkleiven/gosfft/sfft"
@@ -23,6 +24,7 @@ type Solver struct {
 	FT        FourierTransform
 	Dt        float64
 	Callbacks []SolverCB
+	Monitors  []PointMonitor
 }
 
 // NewSolver initializes a new solver
@@ -32,6 +34,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	solver.Model = m
 	solver.Dt = dt
 	solver.Callbacks = []SolverCB{}
+	solver.Monitors = []PointMonitor{}
 
 	if len(domainSize) == 2 {
 		solver.FT = sfft.NewFFT2(domainSize[0], domainSize[1])
@@ -95,5 +98,24 @@ func (s *Solver) Solve(nepochs int, nsteps int) {
 		for _, cb := range s.Callbacks {
 			cb(s, i)
 		}
+
+		// Update monitors
+		for _, monitor := range s.Monitors {
+			monitor.Add(real(s.Model.Bricks[monitor.Field].Get(monitor.Site)))
+		}
 	}
+}
+
+// AddMonitor adds a new monitor to the solver
+func (s *Solver) AddMonitor(m PointMonitor) {
+	s.Monitors = append(s.Monitors, m)
+}
+
+// JSONifyMonitors return a JSON representation of all the monitors
+func (s *Solver) JSONifyMonitors() []byte {
+	res, err := json.Marshal(s.Monitors)
+	if err != nil {
+		panic(err)
+	}
+	return res
 }
