@@ -6,6 +6,10 @@ import (
 	"github.com/davidkleiven/gosfft/sfft"
 )
 
+// SolverCB is function type that can be added to the solver it is executed after each
+// iteration
+type SolverCB func(s *Solver)
+
 // FourierTransform is a type used to represent fourier transforms
 type FourierTransform interface {
 	FFT(data []complex128) []complex128
@@ -15,9 +19,10 @@ type FourierTransform interface {
 
 // Solver is a type used to solve phase field equations
 type Solver struct {
-	Model *Model
-	FT    FourierTransform
-	Dt    float64
+	Model     *Model
+	FT        FourierTransform
+	Dt        float64
+	Callbacks []SolverCB
 }
 
 // NewSolver initializes a new solver
@@ -26,6 +31,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	m.Init()
 	solver.Model = m
 	solver.Dt = dt
+	solver.Callbacks = []SolverCB{}
 
 	if len(domainSize) == 2 {
 		solver.FT = sfft.NewFFT2(domainSize[0], domainSize[1])
@@ -43,6 +49,11 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 		}
 	}
 	return &solver
+}
+
+// AddCallback appends a new callback function to the solver
+func (s *Solver) AddCallback(cb SolverCB) {
+	s.Callbacks = append(s.Callbacks, cb)
 }
 
 // Propagate evolves the equation a fixed number of steps
@@ -80,5 +91,9 @@ func (s *Solver) Solve(nepochs int, nsteps int) {
 	for i := 0; i < nepochs; i++ {
 		fmt.Printf("Epoch %5d of %5d\n", i, nepochs)
 		s.Propagate(nsteps)
+
+		for _, cb := range s.Callbacks {
+			cb(s)
+		}
 	}
 }
