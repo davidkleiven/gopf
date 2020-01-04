@@ -1,4 +1,4 @@
-module pf
+module github.com/davidkleiven/gopf
 
 go 1.13
 

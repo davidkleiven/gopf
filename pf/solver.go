@@ -100,8 +100,8 @@ func (s *Solver) Solve(nepochs int, nsteps int) {
 		}
 
 		// Update monitors
-		for _, monitor := range s.Monitors {
-			monitor.Add(real(s.Model.Bricks[monitor.Field].Get(monitor.Site)))
+		for i, m := range s.Monitors {
+			s.Monitors[i].Add(real(s.Model.Bricks[m.Field].Get(m.Site)))
 		}
 	}
 }
