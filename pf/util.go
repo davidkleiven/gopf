@@ -151,6 +151,9 @@ func Dot(a []float64, b []float64) float64 {
 // such that min --> 0 and max --> 255
 func RealPartAsUint8(data []complex128, min float64, max float64) []uint8 {
 	res := make([]uint8, len(data))
+	if math.Abs(max-min) < 1e-10 {
+		max = min + 1.0
+	}
 	for i := range data {
 		res[i] = uint8(255 * (real(data[i]) - min) / (max - min))
 	}
