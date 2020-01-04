@@ -1,6 +1,7 @@
 package pf
 
 import (
+	"fmt"
 	"math"
 	"math/cmplx"
 	"regexp"
@@ -120,6 +121,11 @@ func ConcreteTerm(term string, m *Model) Term {
 			lap.Eval(freq, field)
 			return field
 		}
+	}
+
+	if fieldName == "" {
+		msg := fmt.Sprintf("rhseBuilder: Could not determine field name for term %s.\nAll field names\n%s\n", term, m.AllFieldNames())
+		panic(msg)
 	}
 
 	// Term with out laplacian operators
