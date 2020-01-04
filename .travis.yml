@@ -8,8 +8,7 @@ script:
 - go test -v ./... -covermode=count -coverprofile=coverage.out
 - "$HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken
   $COVERALLS_TOKEN"
-- go run examples/diffusion/main.go
-- rm *.bin
+- bash runExamples.sh
 
 env:
   global:
