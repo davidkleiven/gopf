@@ -28,7 +28,7 @@ func main() {
 	solver.AddMonitor(monitor)
 
 	// Initialize uint8 IO
-	out := pf.NewUint8IO("diffusion2D")
+	out := pf.NewFloat64IO("diffusion2D")
 	solver.AddCallback(out.SaveFields)
 
 	// Solve the equation
@@ -37,4 +37,7 @@ func main() {
 	// Save the monitor
 	res := solver.JSONifyMonitors()
 	ioutil.WriteFile("diffusionMonitor.json", res, 0644)
+
+	// Write XDMF
+	pf.WriteXDMF("diffusion.xdmf", []string{"conc"}, "diffusion2D", 10, domainSize)
 }
