@@ -9,9 +9,9 @@ func main() {
 	ny := 128
 	N := nx * ny
 	model := pf.NewModel()
-	K := 1.75e-5
-	dt := 0.1
-	rateForward := pf.NewScalar("rateForward", complex(1.0/K, 0.0))
+	//K := 1.75e-5
+	dt := 0.00001
+	rateForward := pf.NewScalar("rateForward", complex(1.0, 0.0))
 	rateBackward := pf.NewScalar("rateBackward", complex(1.0, 0.0))
 	m1 := pf.NewScalar("m1", complex(-1.0, 0.0))
 	model.AddScalar(rateBackward)
@@ -54,7 +54,7 @@ func main() {
 	solver := pf.NewSolver(&model, domainSize, dt)
 
 	// Initialize uint8 IO
-	out := pf.NewUint8IO("acidDiss")
+	out := pf.NewFloat64IO("acidDiss")
 	solver.AddCallback(out.SaveFields)
 
 	// Solve the equation
