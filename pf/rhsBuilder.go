@@ -129,7 +129,12 @@ func ConcreteTerm(term string, m *Model) Term {
 			for j := range brickNames {
 				field[i] *= cmplx.Pow(m.Bricks[brickNames[j]].Get(i), complex(powers[j], 0.0))
 			}
-			field[i] *= m.Bricks[fieldName].Get(i)
+		}
+
+		if fieldName != "" {
+			for i := range field {
+				field[i] *= m.Bricks[fieldName].Get(i)
+			}
 		}
 		return field
 	}
