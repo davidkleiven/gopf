@@ -276,3 +276,23 @@ func (m *Model) IsUserDefinedTerm(desc string) bool {
 	}
 	return false
 }
+
+// RegisterFunction registers a function that may be used in the equations
+func (m *Model) RegisterFunction(name string, F GenericFunction) {
+	term := GenericFunctionTerm{
+		Name: name,
+	}
+
+	dFields := []DerivedField{
+		DerivedField{
+			Data: make([]complex128, len(m.Fields[0].Data)),
+			Name: name,
+			Calc: func(out []complex128) {
+				for i := range out {
+					out[i] = F(i, m.Bricks)
+				}
+			},
+		},
+	}
+	m.RegisterUserDefinedTerm(term.Name, &term, dFields)
+}

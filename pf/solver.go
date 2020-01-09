@@ -86,6 +86,10 @@ func (s *Solver) Propagate(nsteps int) {
 			s.FT.IFFT(f.Data)
 			DivRealScalar(f.Data, float64(len(f.Data)))
 		}
+
+		for i := range s.Model.UserDef {
+			s.Model.UserDef[i].OnStepFinished(0.0, s.Model.Bricks)
+		}
 	}
 }
 

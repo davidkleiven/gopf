@@ -59,9 +59,18 @@ func Displacements(ftBodyForce [][]complex128, freq Frequency, matProp Rank4) []
 // fourier transformed displacements
 func Strain(ftDisp [][]complex128, freq Frequency, m, n int) []complex128 {
 	s := make([]complex128, len(ftDisp))
+	tol := 1e-10
 	for i := range ftDisp {
 		f := freq(i)
-		s[i] = complex(0.0, math.Pi*f[n])*ftDisp[i][m] + complex(0.0, math.Pi*f[m])*ftDisp[i][n]
+		fm := f[m]
+		fn := f[n]
+		if math.Abs(math.Abs(fm)-0.5) < tol {
+			fm = 0.0
+		}
+		if math.Abs(math.Abs(fn)-0.5) < tol {
+			fn = 0.0
+		}
+		s[i] = complex(0.0, math.Pi*fn)*ftDisp[i][m] + complex(0.0, math.Pi*fm)*ftDisp[i][n]
 	}
 	return s
 }

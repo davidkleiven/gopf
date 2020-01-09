@@ -108,6 +108,25 @@ func Isotropic(bulkMod float64, poisson float64) Rank4 {
 	return tensor
 }
 
+// CubicMaterial returns the elastic tensor for a cubic material, where
+// c11, c12 and c44 are constants in the Voigt representation
+func CubicMaterial(c11 float64, c12 float64, c44 float64) Rank4 {
+	tensor := NewRank4()
+	for i := 0; i < 3; i++ {
+		tensor.Set(i, i, i, i, c11)
+	}
+	for i := 0; i < 3; i++ {
+		for j := i + 1; j < 3; j++ {
+			tensor.Set(i, i, j, j, c12)
+			tensor.Set(j, j, i, i, c12)
+
+			tensor.Set(i, j, i, j, c44)
+			tensor.Set(j, i, j, i, c44)
+		}
+	}
+	return tensor
+}
+
 // RotationMatrix creates the rotation matrix corresponding to a
 // rotation around the specified axis
 func RotationMatrix(angle float64, axis int) *mat.Dense {
