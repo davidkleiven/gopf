@@ -86,6 +86,7 @@ type Model struct {
 	Fields        []Field
 	DerivedFields []DerivedField
 	Bricks        map[string]Brick
+	UserDef       map[string]UserDefinedTerm
 	Equations     []string
 	RHS           []RHS
 	AllSources    []Sources
@@ -94,7 +95,8 @@ type Model struct {
 // NewModel returns a new model
 func NewModel() Model {
 	return Model{
-		Bricks: make(map[string]Brick),
+		Bricks:  make(map[string]Brick),
+		UserDef: make(map[string]UserDefinedTerm),
 	}
 }
 
@@ -133,6 +135,9 @@ func (m *Model) UpdateDerivedFields(eq string) {
 	}
 
 	for i := range splitted {
+		if m.IsUserDefinedTerm(splitted[i]) {
+			continue
+		}
 		newFields := GetNonLinearFieldExpressions(splitted[i], field, fieldNames)
 
 		if newFields != "" && !m.IsFieldName(newFields) {
@@ -238,4 +243,36 @@ func (m *Model) GetDenum(fieldNo int, freq Frequency, t float64) []complex128 {
 		ElemwiseAdd(data, tmp)
 	}
 	return data
+}
+
+// RegisterUserDefinedTerm defines a new term. To add the term to an equation add the
+// name as one of the terms.
+//
+// Example:
+// If there is a user defined term called LINEAR_ELASTICITY, and we have a PDE where
+// the term is present on the right hand side, the equation would look like
+// dx/dt = LINEAR_ELASTICITY
+// where x is the name of the field. The additional derived fields (which are fields that are
+// contructed from the original fields) is specified via dFields
+func (m *Model) RegisterUserDefinedTerm(name string, t UserDefinedTerm, dFields []DerivedField) {
+	m.UserDef[name] = t
+
+	if dFields != nil {
+		for _, f := range dFields {
+			if !m.IsFieldName(f.Name) {
+				m.DerivedFields = append(m.DerivedFields, f)
+				m.Bricks[f.Name] = &f
+			}
+		}
+	}
+}
+
+// IsUserDefinedTerm checks if the given term is a user defined term
+func (m *Model) IsUserDefinedTerm(desc string) bool {
+	for k := range m.UserDef {
+		if k == desc {
+			return true
+		}
+	}
+	return false
 }

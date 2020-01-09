@@ -81,6 +81,9 @@ func isBilinear(term string, field string) bool {
 
 // ConcreteTerm returns a function representing the passed term
 func ConcreteTerm(term string, m *Model) Term {
+	if m.IsUserDefinedTerm(term) {
+		return m.UserDef[term].Construct(m.Bricks)
+	}
 	fieldReg := regexp.MustCompile("[^\\*]*")
 	res := fieldReg.FindAllStringSubmatch(term, -1)
 

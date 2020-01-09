@@ -2,6 +2,7 @@ package pf
 
 import (
 	"math"
+	"math/cmplx"
 	"sort"
 	"testing"
 )
@@ -100,5 +101,93 @@ func TestReactionDiffusion(t *testing.T) {
 		if len(m.RHS[i].Denum) != test.numDenum {
 			t.Errorf("Test #%d: Wrong number of denums. Expected %d got %d", i, len(m.RHS[i].Denum), test.numTerms)
 		}
+	}
+}
+
+// LapDensitySquared is a struct that is used to represent the term
+// nabla^2 density^2, where u is a function
+type LapDensitySquared struct {
+	numCallConstruct int
+}
+
+// Construct returns the function needed to evaluate the fourier transformed
+// version of the term
+func (l *LapDensitySquared) Construct(bricks map[string]Brick) Term {
+	l.numCallConstruct++
+	lap := LaplacianN{Power: 1}
+	return func(freq Frequency, t float64, field []complex128) []complex128 {
+		for i := range field {
+			field[i] = bricks["density^2"].Get(i)
+		}
+		lap.Eval(freq, field)
+		return field
+	}
+}
+
+// OnStepFinished does nothing for this term
+func (l *LapDensitySquared) OnStepFinished(t float64) {}
+
+// GetUsquared returns a function that calculates u-squared
+func GetUsquared(fields []Field) DerivedFieldCalc {
+	for _, f := range fields {
+		if f.Name == "density" {
+			return func(out []complex128) {
+				for i := range f.Data {
+					out[i] = cmplx.Pow(f.Data[i], 2)
+				}
+			}
+		}
+	}
+	panic("No field called density!")
+}
+
+func TestUserDefinedTerms(t *testing.T) {
+	N := 64
+	model := NewModel()
+	field := NewField("density", N*N, nil)
+	model.AddField(field)
+
+	// Initialize the user defined term
+	var lapUsq LapDensitySquared
+	dField := DerivedField{
+		Name: "density^2",
+		Calc: GetUsquared(model.Fields),
+		Data: make([]complex128, N*N),
+	}
+	model.RegisterUserDefinedTerm("LAP_DENSITY_SQUARED", &lapUsq, []DerivedField{dField})
+	model.AddEquation("ddensity/dt = LAP_DENSITY_SQUARED")
+	model.Init()
+
+	// Check status
+	if len(model.Fields) != 1 {
+		t.Errorf("Unexpected number of fields. Expected 1 got %d", len(model.Fields))
+	}
+
+	if model.Fields[0].Name != "density" {
+		t.Errorf("Expected density got %s", model.Fields[0].Name)
+	}
+
+	if len(model.DerivedFields) != 1 {
+		t.Errorf("Expected 1 derived field. Got %d", len(model.DerivedFields))
+	}
+
+	if model.DerivedFields[0].Name != "density^2" {
+		t.Errorf("Expected first derived field to be called density^2. Got %s", model.DerivedFields[0].Name)
+	}
+
+	if len(model.UserDef) != 1 {
+		t.Errorf("Expected 1 user defined field. Got %d", len(model.UserDef))
+	}
+
+	if lapUsq.numCallConstruct != 1 {
+		t.Errorf("Expected 1 call to Construct. got %d", lapUsq.numCallConstruct)
+	}
+
+	if len(model.RHS[0].Terms) != 1 {
+		t.Errorf("Expected 1 term in the right hand side. Got %d", len(model.RHS[0].Terms))
+	}
+
+	if len(model.RHS[0].Denum) != 0 {
+		t.Errorf("Expected 0 terms in the denuminator. Got %d", len(model.RHS[0].Denum))
 	}
 }
