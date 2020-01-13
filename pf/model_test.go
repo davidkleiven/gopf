@@ -125,7 +125,7 @@ func (l *LapDensitySquared) Construct(bricks map[string]Brick) Term {
 }
 
 // OnStepFinished does nothing for this term
-func (l *LapDensitySquared) OnStepFinished(t float64) {}
+func (l *LapDensitySquared) OnStepFinished(t float64, bricks map[string]Brick) {}
 
 // GetUsquared returns a function that calculates u-squared
 func GetUsquared(fields []Field) DerivedFieldCalc {
@@ -189,5 +189,32 @@ func TestUserDefinedTerms(t *testing.T) {
 
 	if len(model.RHS[0].Denum) != 0 {
 		t.Errorf("Expected 0 terms in the denuminator. Got %d", len(model.RHS[0].Denum))
+	}
+}
+
+func TestFunction(t *testing.T) {
+	model := NewModel()
+
+	N := 8
+	f := NewField("myfield", N, nil)
+	for i := 0; i < N; i++ {
+		f.Data[i] = complex(float64(i), 0.0)
+	}
+	model.AddField(f)
+
+	model.RegisterFunction("myfunc", func(i int, bricks map[string]Brick) complex128 {
+		return bricks["myfield"].Get(i)
+	})
+
+	function := model.UserDef["myfunc"].Construct(model.Bricks)
+	model.SyncDerivedFields()
+	res := make([]complex128, N)
+	function(func(i int) []float64 { return []float64{} }, 0.0, res)
+
+	tol := 1e-10
+	for i := 0; i < N; i++ {
+		if math.Abs(real(res[i])-float64(i)) > tol {
+			t.Errorf("Expected %d got %v", i, res[i])
+		}
 	}
 }

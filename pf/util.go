@@ -120,6 +120,13 @@ func ElemwiseAdd(dst []complex128, data []complex128) {
 	}
 }
 
+// ElemwiseMul multiplies dst and data and places the result in dst.
+func ElemwiseMul(dst []complex128, data []complex128) {
+	for i := range dst {
+		dst[i] *= data[i]
+	}
+}
+
 // DivRealScalar divides each element in the comlex array by a real scalar
 func DivRealScalar(data []complex128, factor float64) []complex128 {
 	cfactor := complex(factor, 0.0)

@@ -92,6 +92,64 @@ func TestDilatationalMisfits(t *testing.T) {
 	}
 }
 
+func TestStrain(t *testing.T) {
+	N := 8
+	ux := make([]complex128, N*N)
+	expectDeriv := make([]float64, N*N)
+	for i := range ux {
+		row := i / N
+		x := float64(row) / float64(N)
+
+		ux[i] = complex(math.Pow(x*(1.0-x), 2), 0.0)
+		expectDeriv[i] = 2.0*x*(1-x)*(1-x) - 2*x*x*(1-x)
+		expectDeriv[i] /= float64(N)
+	}
+
+	ft := sfft.NewFFT2(N, N)
+	ft.FFT(ux)
+
+	ftDisplacement := make([][]complex128, N*N)
+	for i := range ftDisplacement {
+		ftDisplacement[i] = make([]complex128, 2)
+		ftDisplacement[i][0] = ux[i]
+	}
+	zeros := make([]float64, N*N)
+	for tnum, test := range []struct {
+		i      int
+		j      int
+		expect []float64
+	}{
+		{
+			i:      0,
+			j:      0,
+			expect: expectDeriv,
+		},
+		{
+			i:      0,
+			j:      1,
+			expect: zeros,
+		},
+		{
+			i:      1,
+			j:      1,
+			expect: zeros,
+		},
+	} {
+		strain := Strain(ftDisplacement, ft.Freq, test.i, test.j)
+		ft.IFFT(strain)
+		tol := 1e-3
+		for i := range strain {
+			re := real(strain[i]) / float64(len(strain))
+			im := imag(strain[i]) / float64(len(strain))
+
+			if math.Abs(re-test.expect[i]) > tol || math.Abs(im) > tol {
+				t.Errorf("Test #%d: Expected (%f,0) got (%f, %f)\n", tnum, test.expect[i], re, im)
+			}
+		}
+	}
+
+}
+
 func EshelbyEnergyDensityDilatational(poisson float64, shear float64, misfit float64) float64 {
 	return 2.0 * (1.0 + poisson) * shear * misfit * misfit / (1.0 - poisson)
 }
