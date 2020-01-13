@@ -60,9 +60,17 @@ Parameter settings in the example:
 
 | Quantity | Value |
 | -------- | ----- |
-| *A*      | 0.1   |
-| *B*      | 0.1   |
+| *a*      | 0.1   |
+| *b*      | 0.1   |
 | *W*      | 0.1   |
 | *M*      | 1.0   |
 | *L*      | 1.0   |
 | kappa    | 0.1   |
+
+Here, we started from a square precipitate, and due to the initial misfit strain it prefers to form an elongated domain
+
+<p>
+    <img src="fig/early.png" width="400">
+    <img src="fig/final.png" width="400">
+</p>
+
