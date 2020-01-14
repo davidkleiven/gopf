@@ -56,7 +56,7 @@ func TestDilatationalMisfits(t *testing.T) {
 			}
 		}
 
-		disp := Displacements(force, ft.Freq, matProp)
+		disp := Displacements(force, ft.Freq, &matProp)
 		strains := make([]*mat.Dense, len(disp))
 		for k := range strains {
 			strains[k] = mat.NewDense(3, 3, nil)
@@ -82,7 +82,7 @@ func TestDilatationalMisfits(t *testing.T) {
 
 		energy := 0.0
 		for i := range strains {
-			energy += EnergyDensity(matProp, strains[i])
+			energy += EnergyDensity(&matProp, strains[i])
 		}
 		expect := EshelbyEnergyDensityDilatational(poisson, shear, eps)
 		vol := 4.0 * math.Pi * test.a * test.b * test.c / 3.0

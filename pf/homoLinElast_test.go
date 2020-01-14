@@ -41,7 +41,7 @@ func TestHomogeneousRHS(t *testing.T) {
 	homogenous := NewHomogeneousModolus("x", []int{N, N}, matProp, misfit)
 	homogenous.FT.FFT(ux)
 
-	homogenous.Disps = func(force [][]complex128, freq elasticity.Frequency, matProp elasticity.Rank4) [][]complex128 {
+	homogenous.Disps = func(force [][]complex128, freq elasticity.Frequency, matProp elasticity.Rank4Tensor) [][]complex128 {
 		res := make([][]complex128, len(force))
 		for i := range res {
 			res[i] = make([]complex128, 2)
