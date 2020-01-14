@@ -12,7 +12,7 @@ type Frequency func(i int) []float64
 
 // DisplacementMatrixElement returns the (m, n) element of the matrix needed to
 // find the displacements
-func DisplacementMatrixElement(m, n int, freq []float64, matProp Rank4) float64 {
+func DisplacementMatrixElement(m, n int, freq []float64, matProp Rank4Tensor) float64 {
 	elem := 0.0
 	for j := 0; j < 3; j++ {
 		for l := 0; l < 3; l++ {
@@ -22,8 +22,14 @@ func DisplacementMatrixElement(m, n int, freq []float64, matProp Rank4) float64 
 	return elem * math.Pow(2.0*math.Pi, 2)
 }
 
+// Rank4Tensor is an interface of entities that implementes an getter
+// with four indices
+type Rank4Tensor interface {
+	At(i, j, k, l int) float64
+}
+
 // Displacements calculates the fourier transformed displacements from a given body force
-func Displacements(ftBodyForce [][]complex128, freq Frequency, matProp Rank4) [][]complex128 {
+func Displacements(ftBodyForce [][]complex128, freq Frequency, matProp Rank4Tensor) [][]complex128 {
 	matrix := mat.NewDense(3, 3, nil)
 	bodyF := mat.NewDense(3, 2, nil)
 	disp := mat.NewDense(3, 2, nil)
@@ -76,7 +82,7 @@ func Strain(ftDisp [][]complex128, freq Frequency, m, n int) []complex128 {
 }
 
 // EnergyDensity calculates the strain energy
-func EnergyDensity(matProp Rank4, strain *mat.Dense) float64 {
+func EnergyDensity(matProp Rank4Tensor, strain *mat.Dense) float64 {
 	res := 0.0
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {

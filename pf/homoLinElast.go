@@ -18,7 +18,7 @@ func IndicatorDeriv(x float64) float64 {
 
 // DisplacementGetter is a functon that type that returns the displacement, when given fourier
 // transformed body forces (force), a corresponding frequency getter and a set elasticity tensor
-type DisplacementGetter func(force [][]complex128, freq elasticity.Frequency, matProp elasticity.Rank4) [][]complex128
+type DisplacementGetter func(force [][]complex128, freq elasticity.Frequency, matProp elasticity.Rank4Tensor) [][]complex128
 
 // HomogeneousModulusLinElast is a type that is used in phase field models where the elastic
 // constants are homogeneous throughout the domain. In other words it represents the energy
@@ -57,7 +57,7 @@ func (h *HomogeneousModulusLinElast) Construct(bricks map[string]Brick) Term {
 		h.FT.FFT(work)
 
 		force := h.Force(work)
-		disp := h.Disps(force, h.Freq, h.MatProp)
+		disp := h.Disps(force, h.Freq, &h.MatProp)
 
 		// Fill work with the derivative of the indicator
 		for i := range work {
@@ -85,7 +85,7 @@ func (h *HomogeneousModulusLinElast) Construct(bricks map[string]Brick) Term {
 			}
 		}
 
-		eDensity := elasticity.EnergyDensity(h.MatProp, h.Misfit)
+		eDensity := elasticity.EnergyDensity(&h.MatProp, h.Misfit)
 
 		// Fill work with indicator times indicatorDerov
 		for i := range work {
