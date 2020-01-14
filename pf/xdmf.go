@@ -48,6 +48,7 @@ type XDMFAttribute struct {
 // XDMFTime is used to represent the time attribute in paraview xfdmf format
 type XDMFTime struct {
 	XMLName  xml.Name `xml:"Time"`
+	Type     string   `xml:"TimeType,attr"`
 	DataItem XDMFDataItem
 }
 
@@ -61,6 +62,7 @@ type XDMFGrid struct {
 	Attributes     []XDMFAttribute `xml:"Attribute"`
 	Topology       XDMFTopology    `xml:"Topology,omitempty"`
 	Geometry       XDMFGeometry    `xml:"Geometry,omitempty"`
+	Time           *XDMFTime       `xml:"Time"`
 }
 
 // XDMFDomain represent domain attribute in paraview xdmf format
@@ -114,11 +116,20 @@ func CreateXDMF(fieldNames []string, prefix string, num int, domainSize []int) X
 		},
 	}
 
+	timeStr := ""
+	for i := 0; i < num; i++ {
+		timeStr += fmt.Sprintf("%f ", float64(i)/float64(num))
+	}
+	timeStr += fmt.Sprintf("%d", num)
+
 	xdmf.Domain.Grid = XDMFGrid{
 		Name:           "TimeSeries",
 		Type:           "Collection",
 		CollectionType: "Temporal",
 		Grids:          make([]XDMFGrid, num),
+		Time: &XDMFTime{Type: "HyperSlab",
+			DataItem: XDMFDataItem{Format: "XML", NumberType: "Float", Dimensions: fmt.Sprintf("%d", dim), Value: timeStr},
+		},
 	}
 
 	for i := 0; i < num; i++ {
