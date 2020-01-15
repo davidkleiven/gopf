@@ -10,13 +10,14 @@ import (
 // StrainEnergyInput is a struct that holds all parameters needed
 // to calculate the strain energy
 type StrainEnergyInput struct {
-	HalfA         float64
-	HalfB         float64
-	HalfC         float64
-	Misfit        []float64
-	MatPropMatrix []float64
-	MatPropInc    []float64
-	DomainSize    int
+	HalfA             float64
+	HalfB             float64
+	HalfC             float64
+	Misfit            []float64
+	MatPropMatrix     []float64
+	MatPropInc        []float64
+	DomainSize        int
+	ApplyPerturbation bool
 }
 
 // CalculateStrainEnergy calculates the strain energy according to the parameters
@@ -66,11 +67,30 @@ func CalculateStrainEnergy(params StrainEnergyInput) float64 {
 	}
 
 	disp := Displacements(force, ft.Freq, &matPropMatrix)
-
 	// Inservse FFT such that we can use it distinguish regions
 	ft.IFFT(indicator.Data)
 	for i := range indicator.Data {
 		indicator.Data[i] /= complex(float64(len(indicator.Data)), 0.0)
+	}
+
+	diffMatProp := NewRank4()
+	if params.MatPropInc != nil {
+		propInc := FromFlatVoigt(params.MatPropInc)
+		for i := range diffMatProp.Data {
+			diffMatProp.Data[i] = propInc.Data[i] - matPropMatrix.Data[i]
+		}
+
+		if params.ApplyPerturbation {
+			correctionForce := PerturbedForce(ft, misfit, disp, func(i int) float64 { return real(indicator.Data[i]) }, &diffMatProp)
+			dispCorr := Displacements(correctionForce, ft.Freq, &matPropMatrix)
+
+			// Add the correction to the original displacements
+			for i := range dispCorr {
+				for comp := 0; comp < 3; comp++ {
+					disp[i][comp] += dispCorr[i][comp]
+				}
+			}
+		}
 	}
 
 	energy := 0.0
@@ -96,6 +116,12 @@ func CalculateStrainEnergy(params StrainEnergyInput) float64 {
 	}
 	for i := range strains {
 		energy += EnergyDensity(&matPropMatrix, strains[i])
+	}
+
+	if params.MatPropMatrix != nil {
+		for i := range strains {
+			energy += EnergyDensity(&diffMatProp, strains[i])
+		}
 	}
 	vol := 4.0 * math.Pi * params.HalfA * params.HalfB * params.HalfC / 3.0
 	return energy / vol

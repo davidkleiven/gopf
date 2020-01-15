@@ -21,7 +21,7 @@ func main() {
 
 	c11 := bulkMod + 4.0*shear/3.0
 	c12 := bulkMod - 2.0*shear/3.0
-
+	f := 2.0
 	params := elasticity.StrainEnergyInput{
 		HalfA:  10.0,
 		HalfB:  10.0,
@@ -33,7 +33,14 @@ func main() {
 			0.0, 0.0, 0.0, shear, 0.0, 0.0,
 			0.0, 0.0, 0.0, 0.0, shear, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, shear},
-		DomainSize: 64,
+		MatPropInc: []float64{f * c11, f * c12, f * c12, 0.0, 0.0, 0.0,
+			f * c12, f * c11, f * c12, 0.0, 0.0, 0.0,
+			f * c12, f * c12, f * c11, 0.0, 0.0, 0.0,
+			0.0, 0.0, 0.0, f * shear, 0.0, 0.0,
+			0.0, 0.0, 0.0, 0.0, f * shear, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, f * shear},
+		DomainSize:        64,
+		ApplyPerturbation: true,
 	}
 
 	file, err := json.MarshalIndent(params, "", " ")
