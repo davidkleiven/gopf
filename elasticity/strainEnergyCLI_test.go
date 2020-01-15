@@ -1,13 +1,12 @@
 package elasticity
 
 import (
-	"fmt"
 	"math"
 	"testing"
 )
 
 func TestStrainEnergyCLI(t *testing.T) {
-	N := 32
+	N := 64
 	poisson := 0.3
 	bulkMod := 50.0
 	shear := Shear(bulkMod, poisson)
@@ -77,11 +76,10 @@ func TestEnergyWithPerturbation(t *testing.T) {
 
 	// We expect a linear dependence on f
 	diff := energies[1] - energies[0]
-	fmt.Printf("%v\n", energies)
 	for i := 1; i < len(energies); i++ {
 		d := energies[i] - energies[i-1]
-		if math.Abs(d-diff) > 0.05*diff {
-			t.Errorf("%d: Not a linear relation: %v\n", i, energies)
+		if math.Abs(d-diff) > 0.1*diff {
+			t.Errorf("%d: Not a linear relation: %v. Dev. %f tolerates %f \n", i, energies, d-diff, 0.1*diff)
 		}
 	}
 
