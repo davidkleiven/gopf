@@ -127,6 +127,32 @@ func CubicMaterial(c11 float64, c12 float64, c44 float64) Rank4 {
 	return tensor
 }
 
+// FromFlatVoigt constructs the elasticity tensor from the voigt representation of it
+func FromFlatVoigt(voigt []float64) Rank4 {
+	tensor := NewRank4()
+
+	voigtMap := make(map[int][]int)
+	voigtMap[0] = []int{0, 0}
+	voigtMap[1] = []int{1, 1}
+	voigtMap[2] = []int{2, 2}
+	voigtMap[3] = []int{1, 2}
+	voigtMap[4] = []int{0, 2}
+	voigtMap[5] = []int{0, 1}
+
+	for i := range voigt {
+		q := i / 6
+		p := i % 6
+
+		i1 := voigtMap[q]
+		i2 := voigtMap[p]
+		tensor.Set(i1[0], i1[1], i2[0], i2[1], voigt[i])
+		tensor.Set(i1[0], i1[1], i2[1], i2[0], voigt[i])
+		tensor.Set(i1[1], i1[0], i2[0], i2[1], voigt[i])
+		tensor.Set(i1[1], i1[0], i2[1], i2[0], voigt[i])
+	}
+	return tensor
+}
+
 // RotationMatrix creates the rotation matrix corresponding to a
 // rotation around the specified axis
 func RotationMatrix(angle float64, axis int) *mat.Dense {

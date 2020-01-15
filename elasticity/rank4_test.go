@@ -165,3 +165,42 @@ func TestCubicMaterial(t *testing.T) {
 		}
 	}
 }
+
+func TestFromVoigt(t *testing.T) {
+	strainEng := []float64{1.0, 2.0, 3.0, 8.0, 10.0, 12.0}
+	strain := mat.NewDense(3, 3, []float64{1.0, 6.0, 5.0,
+		6.0, 2.0, 4.0,
+		5.0, 4.0, 3.0})
+
+	tensor := make([]float64, 36)
+	for i := range tensor {
+		tensor[i] = float64(i)
+	}
+	res := FromFlatVoigt(tensor)
+	voigtTensor := mat.NewDense(6, 6, tensor)
+
+	// Check that stresses are the same
+	stress := res.ContractLast(strain)
+	stressVoigt := mat.NewVecDense(6, nil)
+	stressVoigt.MulVec(voigtTensor, mat.NewVecDense(6, strainEng))
+	tol := 1e-10
+	for i := 0; i < 3; i++ {
+		for j := i; j < 3; j++ {
+			v1 := stress.At(i, j)
+			v2 := 0.0
+			if i == j {
+				v2 = stressVoigt.AtVec(i)
+			} else if i == 0 && j == 1 {
+				v2 = stressVoigt.AtVec(5)
+			} else if i == 0 && j == 2 {
+				v2 = stressVoigt.AtVec(4)
+			} else if i == 1 && j == 2 {
+				v2 = stressVoigt.AtVec(3)
+			}
+
+			if math.Abs(v1-v2) > tol {
+				t.Errorf("At (%d, %d): Expected %f got %f\n", i, j, v1, v2)
+			}
+		}
+	}
+}
