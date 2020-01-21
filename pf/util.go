@@ -231,3 +231,10 @@ func Pos(domainSize []int, nodeNum int) []int {
 	}
 	panic("util: Domain size has to be either 2 or 3")
 }
+
+// Clear sets all elements in the slice to zero
+func Clear(data []complex128) {
+	for i := range data {
+		data[i] = complex(0.0, 0.0)
+	}
+}
