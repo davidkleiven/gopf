@@ -47,7 +47,7 @@ func (s *SquaredGradient) Construct(bricks map[string]Brick) Term {
 				if math.Abs(f[d]-0.5) < tol {
 					f[d] = 0.0
 				}
-				work[i] = bricks[s.Field].Get(i) * complex(0.0, 2.0*math.Pi*f[d]*s.Factor)
+				work[i] = bricks[s.Field].Get(i) * complex(0.0, 2.0*math.Pi*f[d])
 			}
 
 			s.FT.IFFT(work)
@@ -57,7 +57,7 @@ func (s *SquaredGradient) Construct(bricks map[string]Brick) Term {
 			s.FT.FFT(work)
 
 			for i := range work {
-				field[i] += work[i]
+				field[i] += work[i] * complex(s.Factor, 0.0)
 			}
 		}
 		return field
