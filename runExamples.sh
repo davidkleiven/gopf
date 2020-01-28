@@ -17,3 +17,8 @@ echo "Running elasticity CLI"
 go run cmd/gopf-elast-input/main.go -out="inputParams.json"
 go run cmd/gopf-elast-energy/main.go -input="inputParams.json"
 rm inputParams.json
+
+echo "Running Kardar-Parisi-Zhang example"
+go run examples/kardar_parisi_zhang/main.go -prefix="kpz"
+rm *.bin
+rm *.xdmf
