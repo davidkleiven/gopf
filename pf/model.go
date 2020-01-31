@@ -296,3 +296,9 @@ func (m *Model) RegisterFunction(name string, F GenericFunction) {
 	}
 	m.RegisterUserDefinedTerm(term.Name, &term, dFields)
 }
+
+// RegisterDerivedField registers a new derived field
+func (m *Model) RegisterDerivedField(d DerivedField) {
+	m.DerivedFields = append(m.DerivedFields, d)
+	m.Bricks[d.Name] = &d
+}
