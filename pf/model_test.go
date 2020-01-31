@@ -5,6 +5,8 @@ import (
 	"math/cmplx"
 	"sort"
 	"testing"
+
+	"github.com/davidkleiven/gosfft/sfft"
 )
 
 func Freq(i int) []float64 {
@@ -215,6 +217,52 @@ func TestFunction(t *testing.T) {
 	for i := 0; i < N; i++ {
 		if math.Abs(real(res[i])-float64(i)) > tol {
 			t.Errorf("Expected %d got %v", i, res[i])
+		}
+	}
+}
+
+func TestAddGradientCalculator(t *testing.T) {
+	model := NewModel()
+	N := 16
+	field := NewField("conc", N*N, nil)
+	expectDerivX := make([]float64, N*N)
+	expectDerivY := make([]float64, N*N)
+	for i := range field.Data {
+		col := i % N
+		row := i / N
+
+		x := float64(col - N/2)
+		y := float64(row - N/2)
+
+		r := math.Sqrt(x*x + y*y)
+		v := math.Exp(-math.Pow(r/2.0, 2.0))
+		field.Data[i] = complex(v, 0.0)
+		expectDerivX[i] = -2.0 * x * v / 4.0
+		expectDerivY[i] = -2.0 * y * v / 4.0
+	}
+
+	model.AddField(field)
+	ft := sfft.NewFFT2(N, N)
+	gradX := GradientCalculator{
+		FT:   ft,
+		Comp: 1,
+	}
+	gradY := GradientCalculator{
+		FT:   ft,
+		Comp: 0,
+	}
+
+	model.RegisterDerivedField(gradX.ToDerivedField("grad_conc_x", N*N, model.Bricks["conc"]))
+	model.RegisterDerivedField(gradY.ToDerivedField("grad_conc_y", N*N, model.Bricks["conc"]))
+	model.SyncDerivedFields()
+
+	tol := 1e-4
+	for i := range expectDerivX {
+		gradXCmp := real(model.Bricks["grad_conc_x"].Get(i))
+		gradYCmp := real(model.Bricks["grad_conc_y"].Get(i))
+
+		if math.Abs(gradXCmp-expectDerivX[i]) > tol || math.Abs(gradYCmp-expectDerivY[i]) > tol {
+			t.Errorf("Expected (%f, %f) got (%f, %f)\n", expectDerivX[i], expectDerivY[i], gradXCmp, gradYCmp)
 		}
 	}
 }
