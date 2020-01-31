@@ -36,3 +36,112 @@ func TestGradientCalculator(t *testing.T) {
 		}
 	}
 }
+
+func GaussianProfile(x, y, sigma float64) float64 {
+	rSq := x*x + y*y
+	return math.Exp(-0.5 * rSq / (sigma * sigma))
+}
+
+func FillData(nx, ny int) ([]float64, []float64) {
+	data := make([]float64, nx*ny)
+	dg := make([]float64, nx*ny)
+	sigma := 1.0 / 10.0
+	for i := 0; i < nx*ny; i++ {
+		x := float64(i%nx) / float64(nx)
+		y := float64(i/nx) / float64(ny)
+		x -= 0.5
+		y -= 0.5
+		data[i] = GaussianProfile(x, y, sigma)
+		dg[i] = ((2.0*x*x+2.0*y*y)/(sigma*sigma) - 2.0) * data[i] * data[i] / (sigma * sigma)
+	}
+	return data, dg
+}
+
+func TestDivGrad(t *testing.T) {
+	divGrad := DivGrad{
+		Field: "myfield",
+		F: func(i int, bricks map[string]Brick) complex128 {
+			return bricks["myfield"].Get(i)
+		},
+	}
+
+	got := divGrad.FuncName()
+	want := "DivGrad_myfield_Func"
+	if got != want {
+		t.Errorf("Expected: %s got %s\n", want, got)
+	}
+
+	got = divGrad.GradName(1)
+	want = "GRAD_myfield_1"
+
+	if got != want {
+		t.Errorf("Expected: %s got %s\n", want, got)
+	}
+
+	// Compare against known solution
+	N := 64
+	model := NewModel()
+	field := NewField("myfield", N*N, nil)
+	data, dg := FillData(N, N)
+	for i := range data {
+		field.Data[i] = complex(data[i], 0.0)
+	}
+	model.AddField(field)
+
+	ft := sfft.NewFFT2(N, N)
+	divGrad.PrepareModel(N*N, &model, ft)
+	model.Init()
+
+	rhs := divGrad.Construct(model.Bricks)
+	for i := range model.Fields {
+		ft.FFT(model.Fields[i].Data)
+	}
+	for i := range model.DerivedFields {
+		ft.FFT(model.DerivedFields[i].Data)
+	}
+
+	res := make([]complex128, len(data))
+	rhs(ft.Freq, 0.0, res)
+	ft.IFFT(res)
+	DivRealScalar(res, float64(len(res)))
+
+	tol := 1e-3
+	mismatch := false
+	maxdiff := 0.0
+	maxrelDiff := 0.0
+	for i := range dg {
+		re := real(res[i]) * float64(N*N)
+		expect := dg[i]
+		atolOK := math.Abs(re-expect) < tol
+		rtolOK := math.Abs(re-expect) < expect*tol
+		if !atolOK && !rtolOK {
+			mismatch = true
+			if math.Abs(re-expect) > maxdiff {
+				maxdiff = math.Abs(re - expect)
+				maxrelDiff = maxdiff / math.Abs(expect+tol)
+			}
+		}
+	}
+
+	if mismatch {
+		t.Errorf("Mismatch. Maximum difference: %f (%f %%)\n", maxdiff, 100.0*maxrelDiff)
+	}
+
+	// Make sure that the data is real
+	isReal := true
+	tol = 1e-10
+	maxIm := 0.0
+	for i := range res {
+		im := math.Abs(imag(res[i]))
+		if im > tol {
+			isReal = false
+			if im > maxIm {
+				maxIm = im
+			}
+		}
+	}
+
+	if !isReal {
+		t.Errorf("DivGrad: Result is not real. Max. imaginary part: %e\n", maxIm)
+	}
+}
