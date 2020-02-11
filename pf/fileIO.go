@@ -63,3 +63,24 @@ func (fl *Float64IO) SaveFields(s *Solver, epoch int) {
 		binary.Write(out, binary.BigEndian, realPart)
 	}
 }
+
+// LoadFloat64 loads an array of float64 encoded as binary data
+// it is assumed that the it is stored with BigEndian
+func LoadFloat64(fname string) []float64 {
+	infile, err := os.Open(fname)
+	if err != nil {
+		panic(err)
+	}
+	defer infile.Close()
+
+	stats, err := infile.Stat()
+	if err != nil {
+		panic(err)
+	}
+	size := stats.Size()
+	bytes := make([]byte, size)
+
+	data := make([]float64, len(bytes)/8)
+	binary.Read(infile, binary.BigEndian, data)
+	return data
+}
