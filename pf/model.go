@@ -17,6 +17,13 @@ func (f Field) Get(i int) complex128 {
 	return f.Data[i]
 }
 
+// Copy returns a new field that is a deep copy of the current
+func (f Field) Copy() Field {
+	field := NewField(f.Name, len(f.Data), nil)
+	copy(field.Data, f.Data)
+	return field
+}
+
 // NewField initializes a new field
 func NewField(name string, N int, data []complex128) Field {
 	var field Field
