@@ -22,6 +22,7 @@ func main() {
 
 	// Initialize solver
 	solver := pf.NewSolver(&model, domainSize, dt)
+	model.Summarize()
 
 	// Add a monitor at the center
 	monitor := pf.NewPointMonitor(center, "conc")
