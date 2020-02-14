@@ -32,6 +32,7 @@ func main() {
 
 	// Initialize solver
 	solver := pf.NewSolver(&model, domainSize, dt)
+	model.Summarize()
 
 	// Initialize uint8 IO
 	out := pf.NewUint8IO("cahnHilliard2D")

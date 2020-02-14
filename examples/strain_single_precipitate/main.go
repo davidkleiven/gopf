@@ -111,6 +111,7 @@ func main() {
 
 	// Initialize the solver
 	solver := pf.NewSolver(&model, domainSize, dt)
+	model.Summarize()
 
 	// Initialize uint8 IO
 	out := pf.NewFloat64IO("precipitate2D")

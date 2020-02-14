@@ -36,6 +36,7 @@ func main() {
 	model.AddEquation("dheight/dt = LAP height + GRAD_SQ + WHITE_NOISE")
 
 	solver := pf.NewSolver(&model, []int{N, N}, dt)
+	model.Summarize()
 	out := pf.NewFloat64IO(*prefix)
 	solver.AddCallback(out.SaveFields)
 

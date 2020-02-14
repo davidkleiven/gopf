@@ -1,6 +1,7 @@
 package pf
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -301,4 +302,24 @@ func (m *Model) RegisterFunction(name string, F GenericFunction) {
 func (m *Model) RegisterDerivedField(d DerivedField) {
 	m.DerivedFields = append(m.DerivedFields, d)
 	m.Bricks[d.Name] = &d
+}
+
+// Summarize prints a summary of the model
+func (m *Model) Summarize() {
+	if len(m.RHS) != len(m.Equations) {
+		fmt.Printf("Model not initialized - summary not available\n")
+		return
+	}
+	fmt.Printf("=========================================================================================\n")
+	fmt.Printf("                                    MODEL SUMMARY                                        \n")
+	fmt.Printf("=========================================================================================\n")
+	fmt.Printf("NE - Number of expclit terms in time stepping\n")
+	fmt.Printf("NI - Number of implicit terms in time stepping\n")
+	fmt.Printf("-----------------------------------------------------------------------------------------\n")
+	fmt.Printf("| Eq |                         String representation                          | NE | NI |\n")
+	fmt.Printf("-----------------------------------------------------------------------------------------\n")
+	for i := range m.Equations {
+		fmt.Printf("| %2d | %-70s | %2d | %2d |\n", i, m.Equations[i], len(m.RHS[i].Terms), len(m.RHS[i].Denum))
+	}
+	fmt.Printf("=========================================================================================\n")
 }

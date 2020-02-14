@@ -18,7 +18,9 @@ func TestTermDiffusion(t *testing.T) {
 	conc := NewField("conc", 2, []complex128{complex(1.0, 0.0), complex(2.0, 0.0)})
 	m.AddField(conc)
 	m.AddEquation("dconc/dt = LAP conc")
+	m.Summarize()
 	m.Init()
+	m.Summarize()
 
 	if len(m.RHS[0].Terms) != 0 {
 		t.Errorf("Unexpected number of terms")
