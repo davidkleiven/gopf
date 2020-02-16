@@ -22,3 +22,6 @@ echo "Running Kardar-Parisi-Zhang example"
 go run examples/kardar_parisi_zhang/main.go -prefix="kpz"
 rm *.bin
 rm *.xdmf
+
+echo "Running stepper stability"
+go run examples/solverStability/main.go
