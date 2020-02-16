@@ -38,6 +38,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	var solver Solver
 	m.Init()
 	solver.Model = m
+	solver.Dt = dt
 	solver.Callbacks = []SolverCB{}
 	solver.Monitors = []PointMonitor{}
 
@@ -50,7 +51,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	}
 
 	solver.Stepper = &Euler{
-		Dt: dt,
+		Dt: solver.Dt,
 		FT: solver.FT,
 	}
 
