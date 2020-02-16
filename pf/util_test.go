@@ -137,3 +137,27 @@ func TestNode2PosRoundTrip(t *testing.T) {
 		}
 	}
 }
+
+type DummyFilter struct{}
+
+func (df *DummyFilter) Eval(x float64) float64 {
+	return 0.5
+}
+
+func TestApplyModalFilter(t *testing.T) {
+	data := make([]complex128, 10)
+	for i := range data {
+		data[i] = complex(float64(i), 0.0)
+	}
+
+	ApplyModalFilter(&DummyFilter{}, func(i int) []float64 { return []float64{0.0} }, data)
+
+	tol := 1e-10
+	for i := range data {
+		re := real(data[i])
+		im := imag(data[i])
+		if math.Abs(re-0.5*float64(i)) > tol || math.Abs(im) > 0.0 {
+			t.Errorf("Expected 0.5 got (%f, %f)\n", re, im)
+		}
+	}
+}

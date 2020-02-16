@@ -238,3 +238,18 @@ func Clear(data []complex128) {
 		data[i] = complex(0.0, 0.0)
 	}
 }
+
+// ModalFilter is a generic interface for modal filters
+type ModalFilter interface {
+	Eval(x float64) float64
+}
+
+// ApplyModalFilter applies the filter f in-place to data
+func ApplyModalFilter(filter ModalFilter, freq Frequency, data []complex128) {
+	for i := range data {
+		f := freq(i)
+		fRad := math.Sqrt(Dot(f, f))
+		value := fRad * 2.0 / math.Pi
+		data[i] *= complex(filter.Eval(value), 0.0)
+	}
+}
