@@ -11,6 +11,11 @@ import (
 // iteration
 type SolverCB func(s *Solver, epoch int)
 
+// TimeStepper is a generic interface for a the time stepper types
+type TimeStepper interface {
+	Step(m *Model)
+}
+
 // FourierTransform is a type used to represent fourier transforms
 type FourierTransform interface {
 	FFT(data []complex128) []complex128
@@ -21,8 +26,9 @@ type FourierTransform interface {
 // Solver is a type used to solve phase field equations
 type Solver struct {
 	Model     *Model
-	FT        FourierTransform
 	Dt        float64
+	FT        FourierTransform
+	Stepper   TimeStepper
 	Callbacks []SolverCB
 	Monitors  []PointMonitor
 }
@@ -32,7 +38,6 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	var solver Solver
 	m.Init()
 	solver.Model = m
-	solver.Dt = dt
 	solver.Callbacks = []SolverCB{}
 	solver.Monitors = []PointMonitor{}
 
@@ -42,6 +47,11 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 		solver.FT = sfft.NewFFT3(domainSize[0], domainSize[1], domainSize[2])
 	} else {
 		panic("solver: Domain size has to be an array of length 2 (2D calculation) or 3 (3D calculation)")
+	}
+
+	solver.Stepper = &Euler{
+		Dt: dt,
+		FT: solver.FT,
 	}
 
 	// Sanity check for fields
@@ -61,35 +71,31 @@ func (s *Solver) AddCallback(cb SolverCB) {
 
 // Propagate evolves the equation a fixed number of steps
 func (s *Solver) Propagate(nsteps int) {
-	cDt := complex(s.Dt, 0.0)
 	for i := 0; i < nsteps; i++ {
-		s.Model.SyncDerivedFields()
-		for _, f := range s.Model.Fields {
-			s.FT.FFT(f.Data)
-		}
-		for _, f := range s.Model.DerivedFields {
-			s.FT.FFT(f.Data)
-		}
-
-		for i := range s.Model.Fields {
-			rhs := s.Model.GetRHS(i, s.FT.Freq, 0.0)
-			denum := s.Model.GetDenum(i, s.FT.Freq, 0.0)
-			d := s.Model.Fields[i].Data
-			// Apply semi implicit scheme
-			for j := range d {
-				d[j] = (d[j] + cDt*rhs[j]) / (complex(1.0, 0.0) - cDt*denum[j])
-			}
-		}
-
-		// Inverse FFT
-		for _, f := range s.Model.Fields {
-			s.FT.IFFT(f.Data)
-			DivRealScalar(f.Data, float64(len(f.Data)))
-		}
+		s.Stepper.Step(s.Model)
 
 		for i := range s.Model.UserDef {
 			s.Model.UserDef[i].OnStepFinished(0.0, s.Model.Bricks)
 		}
+	}
+}
+
+// SetStepper updates the stepper method based on a string.
+// name has to be one of ["euler", "rk4"]
+func (s *Solver) SetStepper(name string) {
+	switch name {
+	case "euler":
+		s.Stepper = &Euler{
+			Dt: s.Dt,
+			FT: s.FT,
+		}
+	case "rk4":
+		s.Stepper = &RK4{
+			Dt: s.Dt,
+			FT: s.FT,
+		}
+	default:
+		panic("Unknown stepper scheme")
 	}
 }
 
