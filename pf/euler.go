@@ -2,8 +2,9 @@ package pf
 
 // Euler performs semi-implicit euler method
 type Euler struct {
-	Dt float64
-	FT FourierTransform
+	Dt     float64
+	FT     FourierTransform
+	Filter ModalFilter
 }
 
 // Step performs one euler step. If the equation is given by
@@ -27,6 +28,10 @@ func (eu *Euler) Step(m *Model) {
 		for j := range d {
 			d[j] = (d[j] + cDt*rhs[j]) / (complex(1.0, 0.0) - cDt*denum[j])
 		}
+
+		if eu.Filter != nil {
+			ApplyModalFilter(eu.Filter, eu.FT.Freq, d)
+		}
 	}
 
 	// Inverse FFT
@@ -41,4 +46,9 @@ func (eu *Euler) Propagate(nsteps int, m *Model) {
 	for i := 0; i < nsteps; i++ {
 		eu.Step(m)
 	}
+}
+
+// SetFilter set a new modal filter
+func (eu *Euler) SetFilter(filter ModalFilter) {
+	eu.Filter = filter
 }

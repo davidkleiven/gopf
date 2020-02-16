@@ -4,8 +4,9 @@ package pf
 // FT is a fourier transform object used to translate back-and fourth between
 // fourier domain.
 type RK4 struct {
-	Dt float64
-	FT FourierTransform
+	Dt     float64
+	FT     FourierTransform
+	Filter ModalFilter
 }
 
 // Step performs one RK4 time step. If the equation is given by
@@ -56,6 +57,10 @@ func (rk *RK4) Step(m *Model) {
 			final[i].Data[j] /= (complex(1.0, 0.0) - cDt*denum[j])
 		}
 		copy(m.Fields[i].Data, final[i].Data)
+
+		if rk.Filter != nil {
+			ApplyModalFilter(rk.Filter, rk.FT.Freq, m.Fields[i].Data)
+		}
 	}
 
 	for _, f := range m.Fields {
@@ -120,4 +125,9 @@ func (rk *RK4) Propagate(nsteps int, m *Model) {
 	for i := 0; i < nsteps; i++ {
 		rk.Step(m)
 	}
+}
+
+// SetFilter sets a new modal filter
+func (rk *RK4) SetFilter(filter ModalFilter) {
+	rk.Filter = filter
 }

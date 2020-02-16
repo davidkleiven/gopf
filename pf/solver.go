@@ -14,6 +14,7 @@ type SolverCB func(s *Solver, epoch int)
 // TimeStepper is a generic interface for a the time stepper types
 type TimeStepper interface {
 	Step(m *Model)
+	SetFilter(filter ModalFilter)
 }
 
 // FourierTransform is a type used to represent fourier transforms
