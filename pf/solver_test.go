@@ -53,3 +53,13 @@ func TestJSONifyMonitors(t *testing.T) {
 		t.Errorf("Expected\n%s\nGot\n%s\n", expect, strRes)
 	}
 }
+
+func TestSetStepperWorks(t *testing.T) {
+	steppers := []string{"euler", "rk4"}
+	model := NewModel()
+	solver := NewSolver(&model, []int{4, 4}, 0.1)
+	for _, stepper := range steppers {
+		solver.SetStepper(stepper)
+	}
+
+}
