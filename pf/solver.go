@@ -3,6 +3,7 @@ package pf
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // SolverCB is function type that can be added to the solver it is executed after each
@@ -95,7 +96,8 @@ func (s *Solver) SetStepper(name string) {
 // Solve solves the equation
 func (s *Solver) Solve(nepochs int, nsteps int) {
 	for i := 0; i < nepochs; i++ {
-		fmt.Printf("Epoch %5d of %5d\n", i, nepochs)
+		now := time.Now()
+		fmt.Printf("%02d:%02d:%02d - Epoch %5d of %5d\n", now.Hour(), now.Minute(), now.Second(), i, nepochs)
 		s.Propagate(nsteps)
 
 		for _, cb := range s.Callbacks {
