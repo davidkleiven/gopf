@@ -3,8 +3,6 @@ package pf
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/davidkleiven/gosfft/sfft"
 )
 
 // SolverCB is function type that can be added to the solver it is executed after each
@@ -42,14 +40,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	solver.Dt = dt
 	solver.Callbacks = []SolverCB{}
 	solver.Monitors = []PointMonitor{}
-
-	if len(domainSize) == 2 {
-		solver.FT = sfft.NewFFT2(domainSize[0], domainSize[1])
-	} else if len(domainSize) == 3 {
-		solver.FT = sfft.NewFFT3(domainSize[0], domainSize[1], domainSize[2])
-	} else {
-		panic("solver: Domain size has to be an array of length 2 (2D calculation) or 3 (3D calculation)")
-	}
+	solver.FT = NewFFTW(domainSize)
 
 	solver.Stepper = &Euler{
 		Dt: solver.Dt,
