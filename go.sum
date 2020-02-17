@@ -1,4 +1,8 @@
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
+github.com/barnex/fftw v0.0.0-20181125072904-b800f77a10de h1:IUKWQeq/KJwcblO3mKiyeT6iz6DDYVVIoDiG+4GnTjM=
+github.com/barnex/fftw v0.0.0-20181125072904-b800f77a10de/go.mod h1:18E8YpOFQFEoG+0SwUnE01ow15ccx/DV3TgCZeLWHrg=
+github.com/barnex/matrix v0.0.0-20141117141426-1090b02beddd h1:2KyoPxOLR6RyUASLBz085pBMQYSjU6Ialr9LY1ywP4c=
+github.com/barnex/matrix v0.0.0-20141117141426-1090b02beddd/go.mod h1:rRLfitTolJsbIHu1MTwoiWow1R+PsD+Xy8prWIDml4Y=
 github.com/davidkleiven/gosfft v1.0.0 h1:IlcmEGLJ5mnwW6yGvgLAxZ1dUEaUSCzKy/Ts3jpxKuE=
 github.com/davidkleiven/gosfft v1.0.0/go.mod h1:ua+fX/98IO86brh/5uphDbVwJpefWsLL/QDl00piW/Q=
 github.com/davidkleiven/gosfft v1.0.1 h1:mmhZfLlLvojUzjmplozDov74PiItR9xUpX7e5HDBNqk=
