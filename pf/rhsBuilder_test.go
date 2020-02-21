@@ -127,3 +127,50 @@ func TestConcreteTerm(t *testing.T) {
 		}
 	}
 }
+
+func TestPanicOnUnknownName(t *testing.T) {
+	model := NewModel()
+	field := NewField("conc", 8, nil)
+	model.AddField(field)
+
+	for i, test := range []struct {
+		expr        string
+		shouldPanic bool
+	}{
+		{
+			expr:        "LAP conc",
+			shouldPanic: false,
+		},
+		{
+			expr:        "conc",
+			shouldPanic: false,
+		},
+		{
+			expr:        "m1*conc",
+			shouldPanic: true,
+		},
+		{
+			expr:        "m1*LAP conc",
+			shouldPanic: true,
+		},
+		{
+			expr:        "LAP otherField",
+			shouldPanic: true,
+		},
+	} {
+		func() {
+			defer func() {
+				if test.shouldPanic {
+					if recover() == nil {
+						t.Errorf("Test %d should have panicked\n", i)
+					}
+				} else {
+					if recover() != nil {
+						t.Errorf("Unexpected panic in test %d\n", i)
+					}
+				}
+			}()
+			ConcreteTerm(test.expr, &model)
+		}()
+	}
+}
