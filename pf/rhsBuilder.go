@@ -1,6 +1,7 @@
 package pf
 
 import (
+	"fmt"
 	"math"
 	"math/cmplx"
 	"regexp"
@@ -79,6 +80,22 @@ func isBilinear(term string, field string) bool {
 	return false
 }
 
+// ValidName returns true if the parser knows how to parse it
+func ValidName(name string, model *Model) bool {
+	nameStripped := strings.ReplaceAll(name, " ", "")
+	specialNames := []string{"", "LAP"}
+	for _, n := range specialNames {
+		if nameStripped == n {
+			return true
+		}
+	}
+
+	if nameStripped[:3] == "LAP" {
+		nameStripped = nameStripped[3:]
+	}
+	return model.IsBrickName(nameStripped) || model.IsFieldName(nameStripped)
+}
+
 // ConcreteTerm returns a function representing the passed term
 func ConcreteTerm(term string, m *Model) Term {
 	if m.IsUserDefinedTerm(term) {
@@ -97,6 +114,9 @@ func ConcreteTerm(term string, m *Model) Term {
 		if !m.IsFieldName(name) && m.IsBrickName(name) {
 			brickNames = append(brickNames, name)
 			powers = append(powers, GetPower(res[i][0]))
+		} else if !ValidName(name, m) {
+			msg := fmt.Sprintf("rhsBuilder: Name %s is not defined!", name)
+			panic(msg)
 		}
 	}
 
