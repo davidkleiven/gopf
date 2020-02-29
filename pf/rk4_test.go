@@ -47,6 +47,10 @@ func TestSimpleModel(t *testing.T) {
 			t.Errorf("Node: %d: Expected %f, got (%f, %f)\n", i, expect, re, im)
 		}
 	}
+
+	if math.Abs(finalTime-stepper.GetTime()) > 1e-10 {
+		t.Errorf("Expected time: %f got %f\n", finalTime, stepper.GetTime())
+	}
 }
 
 func AnalyticalImplicit(t float64, c0 float64) float64 {

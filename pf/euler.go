@@ -2,9 +2,10 @@ package pf
 
 // Euler performs semi-implicit euler method
 type Euler struct {
-	Dt     float64
-	FT     FourierTransform
-	Filter ModalFilter
+	Dt          float64
+	FT          FourierTransform
+	Filter      ModalFilter
+	CurrentStep int
 }
 
 // Step performs one euler step. If the equation is given by
@@ -20,9 +21,10 @@ func (eu *Euler) Step(m *Model) {
 		eu.FT.FFT(f.Data)
 	}
 
+	t := eu.GetTime()
 	for i := range m.Fields {
-		rhs := m.GetRHS(i, eu.FT.Freq, 0.0)
-		denum := m.GetDenum(i, eu.FT.Freq, 0.0)
+		rhs := m.GetRHS(i, eu.FT.Freq, t)
+		denum := m.GetDenum(i, eu.FT.Freq, t)
 		d := m.Fields[i].Data
 		// Apply semi implicit scheme
 		for j := range d {
@@ -39,6 +41,12 @@ func (eu *Euler) Step(m *Model) {
 		eu.FT.IFFT(f.Data)
 		DivRealScalar(f.Data, float64(len(f.Data)))
 	}
+	eu.CurrentStep++
+}
+
+// GetTime returns the current time
+func (eu *Euler) GetTime() float64 {
+	return float64(eu.CurrentStep) * eu.Dt
 }
 
 // Propagate performs nsteps timesteps
