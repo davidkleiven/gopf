@@ -4,9 +4,10 @@ package pf
 // FT is a fourier transform object used to translate back-and fourth between
 // fourier domain.
 type RK4 struct {
-	Dt     float64
-	FT     FourierTransform
-	Filter ModalFilter
+	Dt          float64
+	FT          FourierTransform
+	Filter      ModalFilter
+	CurrentStep int
 }
 
 // Step performs one RK4 time step. If the equation is given by
@@ -51,8 +52,9 @@ func (rk *RK4) Step(m *Model) {
 	// NOTE: If there are implicit terms, the scheme is only accurate to
 	// first order. But the stability of RK4 should be better than the Euler
 	// scheme
+	t := rk.GetTime()
 	for i := range m.Fields {
-		denum := m.GetDenum(i, rk.FT.Freq, 0.0)
+		denum := m.GetDenum(i, rk.FT.Freq, t)
 		for j := range final[i].Data {
 			final[i].Data[j] /= (complex(1.0, 0.0) - cDt*denum[j])
 		}
@@ -85,8 +87,9 @@ func (rk *RK4) firstCorrection(m *Model, kFactor []Field) {
 		rk.FT.FFT(f.Data)
 	}
 
+	t := rk.GetTime()
 	for i := range m.Fields {
-		kFactor[i].Data = m.GetRHS(i, rk.FT.Freq, 0.0)
+		kFactor[i].Data = m.GetRHS(i, rk.FT.Freq, t)
 	}
 }
 
@@ -94,8 +97,9 @@ func (rk *RK4) firstCorrection(m *Model, kFactor []Field) {
 // dy/dt = A*y + N(t, y), this function returns N(t + factor*dt, (y + factor*kFactor)/(1 - factor*dt*A)).
 // In RK4 factor=0.5 for the middle steps and 1 for the last
 func (rk *RK4) correction(m *Model, kFactor []Field, factor float64) {
+	t := rk.GetTime()
 	for i, f := range m.Fields {
-		denum := m.GetDenum(i, rk.FT.Freq, 0.0)
+		denum := m.GetDenum(i, rk.FT.Freq, t)
 		for j := range f.Data {
 			f.Data[j] += complex(factor*rk.Dt, 0.0) * kFactor[i].Data[j]
 
@@ -116,7 +120,7 @@ func (rk *RK4) correction(m *Model, kFactor []Field, factor float64) {
 	}
 
 	for i := range m.Fields {
-		kFactor[i].Data = m.GetRHS(i, rk.FT.Freq, 0.0)
+		kFactor[i].Data = m.GetRHS(i, rk.FT.Freq, t)
 	}
 }
 
@@ -124,10 +128,16 @@ func (rk *RK4) correction(m *Model, kFactor []Field, factor float64) {
 func (rk *RK4) Propagate(nsteps int, m *Model) {
 	for i := 0; i < nsteps; i++ {
 		rk.Step(m)
+		rk.CurrentStep++
 	}
 }
 
 // SetFilter sets a new modal filter
 func (rk *RK4) SetFilter(filter ModalFilter) {
 	rk.Filter = filter
+}
+
+// GetTime returns the current time
+func (rk *RK4) GetTime() float64 {
+	return float64(rk.CurrentStep) * rk.Dt
 }

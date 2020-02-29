@@ -41,6 +41,11 @@ func TestExponentialDecay(t *testing.T) {
 			t.Errorf("Node %d: Expected %f got (%f, %f)\n", i, expect, re, im)
 		}
 	}
+
+	expectTime := float64(nsteps) * stepper.Dt
+	if math.Abs(stepper.GetTime()-expectTime) > 1e-10 {
+		t.Errorf("Expected time: %f. Got %f", expectTime, stepper.GetTime())
+	}
 }
 
 func TestEulerSquareDecary(t *testing.T) {

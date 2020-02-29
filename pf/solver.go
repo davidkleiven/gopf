@@ -14,6 +14,7 @@ type SolverCB func(s *Solver, epoch int)
 type TimeStepper interface {
 	Step(m *Model)
 	SetFilter(filter ModalFilter)
+	GetTime() float64
 }
 
 // FourierTransform is a type used to represent fourier transforms
@@ -67,9 +68,9 @@ func (s *Solver) AddCallback(cb SolverCB) {
 func (s *Solver) Propagate(nsteps int) {
 	for i := 0; i < nsteps; i++ {
 		s.Stepper.Step(s.Model)
-
-		for i := range s.Model.UserDef {
-			s.Model.UserDef[i].OnStepFinished(0.0, s.Model.Bricks)
+		t := s.Stepper.GetTime()
+		for j := range s.Model.UserDef {
+			s.Model.UserDef[j].OnStepFinished(t, s.Model.Bricks)
 		}
 	}
 }
