@@ -17,11 +17,10 @@ type VolumeConservingLP struct {
 
 // Construct build the function needed to evaluate the term
 func (v *VolumeConservingLP) Construct(bricks map[string]Brick) Term {
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		for i := range field {
 			field[i] = bricks[v.Indicator].Get(i) * complex(v.Multiplier, 0.0)
 		}
-		return field
 	}
 }
 

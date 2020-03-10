@@ -90,7 +90,7 @@ func (dg *DivGrad) PrepareModel(N int, m *Model, FT FourierTransform) {
 
 // Construct builds the right hand side term
 func (dg *DivGrad) Construct(bricks map[string]Brick) Term {
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		Clear(field)
 		dim := len(freq(0))
 		for d := 0; d < dim; d++ {
@@ -100,7 +100,6 @@ func (dg *DivGrad) Construct(bricks map[string]Brick) Term {
 				field[i] += complex(0.0, 2.0*math.Pi*f) * brick.Get(i)
 			}
 		}
-		return field
 	}
 }
 

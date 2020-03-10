@@ -82,12 +82,11 @@ func (ad *Advection) PrepareModel(N int, m *Model, FT FourierTransform) {
 
 // Construct builds the right hand side function
 func (ad *Advection) Construct(bricks map[string]Brick) Term {
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		brick := bricks[ad.GetName()]
 		for i := range field {
 			field[i] = -brick.Get(i)
 		}
-		return field
 	}
 }
 

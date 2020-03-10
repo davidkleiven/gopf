@@ -25,7 +25,7 @@ type GenericFunctionTerm struct {
 // Construct creates the proper RHS function
 func (g *GenericFunctionTerm) Construct(bricks map[string]Brick) Term {
 	lap := LaplacianN{Power: 1}
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		for i := range field {
 			field[i] = bricks[g.Name].Get(i)
 		}
@@ -33,7 +33,6 @@ func (g *GenericFunctionTerm) Construct(bricks map[string]Brick) Term {
 		if g.Name[:3] == "LAP" {
 			lap.Eval(freq, field)
 		}
-		return field
 	}
 }
 

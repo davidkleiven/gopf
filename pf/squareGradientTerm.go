@@ -35,7 +35,7 @@ func NewSquareGradient(field string, domainSize []int) SquaredGradient {
 
 // Construct return a function the calculates the squared of the gradient of
 func (s *SquaredGradient) Construct(bricks map[string]Brick) Term {
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		Clear(field)
 		work := make([]complex128, len(field))
 		k := freq(0)
@@ -60,7 +60,6 @@ func (s *SquaredGradient) Construct(bricks map[string]Brick) Term {
 				field[i] += work[i] * complex(s.Factor, 0.0)
 			}
 		}
-		return field
 	}
 }
 
