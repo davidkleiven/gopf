@@ -10,8 +10,9 @@ import (
 )
 
 // Term is generic function type that evaluates the right hand side of a set of
-// ODE used to evolve the phase fields
-type Term func(freq Frequency, t float64, field []complex128) []complex128
+// ODE used to evolve the phase fields. The function should place the values into
+// the field array
+type Term func(freq Frequency, t float64, field []complex128)
 
 // RHS is a struct used to represent the "right-hand-side" of a set of ODE
 type RHS struct {
@@ -127,7 +128,7 @@ func ConcreteTerm(term string, m *Model) Term {
 		lapWithPowReg := regexp.MustCompile("LAP*[^a-zA-Z]*")
 		res := lapWithPowReg.FindString(term)
 		lap := LaplacianN{Power: int(GetPower(res))}
-		return func(freq Frequency, t float64, field []complex128) []complex128 {
+		return func(freq Frequency, t float64, field []complex128) {
 			for i := range field {
 				field[i] = complex(1.0, 0.0)
 				for j := range brickNames {
@@ -141,12 +142,11 @@ func ConcreteTerm(term string, m *Model) Term {
 				}
 			}
 			lap.Eval(freq, field)
-			return field
 		}
 	}
 
 	// Term with out laplacian operators
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		for i := range field {
 			field[i] = complex(1.0, 0.0)
 			for j := range brickNames {
@@ -159,6 +159,5 @@ func ConcreteTerm(term string, m *Model) Term {
 				field[i] *= m.Bricks[fieldName].Get(i)
 			}
 		}
-		return field
 	}
 }

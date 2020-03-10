@@ -72,7 +72,7 @@ func TestHomogeneousRHS(t *testing.T) {
 
 	function := homogenous.Construct(bricks)
 	res := make([]complex128, N*N)
-	res = function(homogenous.FT.Freq, 0.0, res)
+	function(homogenous.FT.Freq, 0.0, res)
 	homogenous.FT.IFFT(res)
 	DivRealScalar(res, float64(len(res)))
 

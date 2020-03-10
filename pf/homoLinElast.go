@@ -45,7 +45,7 @@ type HomogeneousModulusLinElast struct {
 // Construct returns the function needed to build the term on the
 // right hand side
 func (h *HomogeneousModulusLinElast) Construct(bricks map[string]Brick) Term {
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		for i := range field {
 			field[i] = complex(0.0, 0.0)
 		}
@@ -95,7 +95,6 @@ func (h *HomogeneousModulusLinElast) Construct(bricks map[string]Brick) Term {
 		for k := range field {
 			field[k] -= complex(2.0*eDensity, 0.0) * work[k]
 		}
-		return field
 	}
 }
 

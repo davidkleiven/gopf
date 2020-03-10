@@ -11,7 +11,7 @@ type TensorialHessian struct {
 
 // Construct builds the correct RHS term
 func (th *TensorialHessian) Construct(bricks map[string]Brick) Term {
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		Clear(field)
 		brick := bricks[th.Field]
 		for i := range field {
@@ -23,18 +23,17 @@ func (th *TensorialHessian) Construct(bricks map[string]Brick) Term {
 			// Diagonal terms
 			for j := 0; j < dim; j++ {
 				preFactor := -4.0 * math.Pi * math.Pi * f[j] * f[j] * th.GetCoeff(j, j)
-				field[i] += complex(preFactor, 0.0)*value
+				field[i] += complex(preFactor, 0.0) * value
 			}
 
 			// Off-diagonal terms
-			for j := 0;j<dim;j++ {
-				for k := j+1;k<dim;k++ {
+			for j := 0; j < dim; j++ {
+				for k := j + 1; k < dim; k++ {
 					preFactor := -8.0 * math.Pi * math.Pi * f[j] * f[k] * th.GetCoeff(j, k)
-					field[i] += complex(preFactor, 0.0)*value
+					field[i] += complex(preFactor, 0.0) * value
 				}
 			}
 		}
-		return field
 	}
 }
 
@@ -44,5 +43,5 @@ func (th *TensorialHessian) GetCoeff(i, j int) float64 {
 	if len(th.K) == 9 {
 		d = 3
 	}
-	return th.K[i*d + j]
+	return th.K[i*d+j]
 }

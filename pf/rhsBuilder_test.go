@@ -119,8 +119,8 @@ func TestConcreteTerm(t *testing.T) {
 		},
 	} {
 		term := ConcreteTerm(test.expr, &model)
-		res := make([]complex128, len(test.expect))
-		got := term(Freq, 0.0, res)
+		got := make([]complex128, len(test.expect))
+		term(Freq, 0.0, got)
 
 		if !CmplxEqualApprox(got, test.expect, 1e-10) {
 			t.Errorf("Test #%d: Expected\n%v\nGot\n%v\n", i, test.expect, got)

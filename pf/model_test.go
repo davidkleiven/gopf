@@ -119,12 +119,11 @@ type LapDensitySquared struct {
 func (l *LapDensitySquared) Construct(bricks map[string]Brick) Term {
 	l.numCallConstruct++
 	lap := LaplacianN{Power: 1}
-	return func(freq Frequency, t float64, field []complex128) []complex128 {
+	return func(freq Frequency, t float64, field []complex128) {
 		for i := range field {
 			field[i] = bricks["density^2"].Get(i)
 		}
 		lap.Eval(freq, field)
-		return field
 	}
 }
 
