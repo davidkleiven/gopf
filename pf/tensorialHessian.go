@@ -45,3 +45,6 @@ func (th *TensorialHessian) GetCoeff(i, j int) float64 {
 	}
 	return th.K[i*d+j]
 }
+
+// OnStepFinished does nothing as there is no need for updates for this term
+func (th *TensorialHessian) OnStepFinished(t float64, bricks map[string]Brick) {}
