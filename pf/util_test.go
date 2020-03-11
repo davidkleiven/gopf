@@ -2,6 +2,7 @@ package pf
 
 import (
 	"math"
+	"sort"
 	"testing"
 )
 
@@ -158,6 +159,48 @@ func TestApplyModalFilter(t *testing.T) {
 		im := imag(data[i])
 		if math.Abs(re-0.5*float64(i)) > tol || math.Abs(im) > 0.0 {
 			t.Errorf("Expected 0.5 got (%f, %f)\n", re, im)
+		}
+	}
+}
+
+func TestSplitOnMany(t *testing.T) {
+	for i, test := range []struct {
+		Value  string
+		Expect []string
+		Delims []string
+	}{
+		{
+			Value:  "a+b",
+			Delims: []string{"+"},
+			Expect: []string{"a", "b"},
+		},
+		{
+			Value:  "a+b+cd",
+			Delims: []string{"+"},
+			Expect: []string{"a", "b", "cd"},
+		},
+		{
+			Value:  "a+b-cd",
+			Delims: []string{"+", "-"},
+			Expect: []string{"a", "b", "cd"},
+		},
+		{
+			Value:  "cdb-the+two",
+			Delims: []string{"+", "-", "7"},
+			Expect: []string{"cdb", "the", "two"},
+		},
+	} {
+		res := SplitOnMany(test.Value, test.Delims)
+		substr := make([]string, len(res))
+		for i := range res {
+			substr[i] = res[i].SubString
+		}
+		sort.Strings(substr)
+
+		for j := range substr {
+			if substr[j] != test.Expect[j] {
+				t.Errorf("Test #%d: Expected %s got %s\n", i, test.Expect[j], substr[j])
+			}
 		}
 	}
 }

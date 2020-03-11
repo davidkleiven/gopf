@@ -253,3 +253,58 @@ func ApplyModalFilter(filter ModalFilter, freq Frequency, data []complex128) {
 		data[i] *= complex(filter.Eval(value), 0.0)
 	}
 }
+
+// SubStringDelimiter is a type that represents a substring as well as
+// the delimiter preceeding it in the string it was extracted from
+type SubStringDelimiter struct {
+	SubString           string
+	PreceedingDelimiter string
+}
+
+// SplitOnMany splits a string on several delimiters. The resulted split is
+// returned together with the delimiter preceeding it
+func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
+	substrings := []SubStringDelimiter{}
+
+	queue := []SubStringDelimiter{SubStringDelimiter{
+		SubString:           value,
+		PreceedingDelimiter: "",
+	}}
+
+	allDelims := ""
+	for _, delim := range delimiters {
+		allDelims += delim
+	}
+
+	for len(queue) > 0 {
+		currentSubString := queue[0]
+		queue = queue[1:]
+
+		if !strings.ContainsAny(currentSubString.SubString, allDelims) {
+			substrings = append(substrings, currentSubString)
+			continue
+		}
+
+		delim := delimiters[0]
+		for i := range delimiters {
+			if strings.Contains(currentSubString.SubString, delimiters[i]) {
+				delim = delimiters[i]
+				break
+			}
+		}
+
+		splits := strings.Split(currentSubString.SubString, delim)
+		queue = append(queue, SubStringDelimiter{
+			SubString:           splits[0],
+			PreceedingDelimiter: currentSubString.PreceedingDelimiter,
+		})
+
+		for i := 1; i < len(splits); i++ {
+			queue = append(queue, SubStringDelimiter{
+				SubString:           splits[i],
+				PreceedingDelimiter: delim,
+			})
+		}
+	}
+	return substrings
+}

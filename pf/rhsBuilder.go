@@ -29,12 +29,13 @@ func Build(eq string, m *Model) RHS {
 	}
 
 	field := fieldNameFromLeibniz(sides[0])
-	termsStr := strings.Split(sides[1], "+")
+	//termsStr := strings.Split(sides[1], "+")
+	termsStr := SplitOnMany(sides[1], []string{"+", "-"})
 	var rhs RHS
 	for _, t := range termsStr {
-		if isBilinear(t, field) {
-			strRep := strings.Replace(t, field, "", -1)
-			rhs.Denum = append(rhs.Denum, ConcreteTerm(strRep, m))
+		if isBilinear(t.SubString, field) {
+			t.SubString = strings.Replace(t.SubString, field, "", -1)
+			rhs.Denum = append(rhs.Denum, ConcreteTerm(t, m))
 		} else {
 			rhs.Terms = append(rhs.Terms, ConcreteTerm(t, m))
 		}
@@ -98,8 +99,17 @@ func ValidName(name string, model *Model) bool {
 }
 
 // ConcreteTerm returns a function representing the passed term
-func ConcreteTerm(term string, m *Model) Term {
+func ConcreteTerm(termDelim SubStringDelimiter, m *Model) Term {
+	term := termDelim.SubString
+	sign := 1.0
+	if termDelim.PreceedingDelimiter == "-" {
+		sign = -1.0
+	}
+
 	if m.IsUserDefinedTerm(term) {
+		if termDelim.PreceedingDelimiter == "-" {
+			panic("rhsbuilder: Incorporate the negative sign in the definition of the term and use + as a delimiter")
+		}
 		return m.UserDef[term].Construct(m.Bricks)
 	}
 	fieldReg := regexp.MustCompile("[^\\*]*")
@@ -130,7 +140,7 @@ func ConcreteTerm(term string, m *Model) Term {
 		lap := LaplacianN{Power: int(GetPower(res))}
 		return func(freq Frequency, t float64, field []complex128) {
 			for i := range field {
-				field[i] = complex(1.0, 0.0)
+				field[i] = complex(sign, 0.0)
 				for j := range brickNames {
 					field[i] *= cmplx.Pow(m.Bricks[brickNames[j]].Get(i), complex(powers[j], 0.0))
 				}
@@ -148,7 +158,7 @@ func ConcreteTerm(term string, m *Model) Term {
 	// Term with out laplacian operators
 	return func(freq Frequency, t float64, field []complex128) {
 		for i := range field {
-			field[i] = complex(1.0, 0.0)
+			field[i] = complex(sign, 0.0)
 			for j := range brickNames {
 				field[i] *= cmplx.Pow(m.Bricks[brickNames[j]].Get(i), complex(powers[j], 0.0))
 			}

@@ -106,19 +106,36 @@ func TestConcreteTerm(t *testing.T) {
 
 	for i, test := range []struct {
 		expr   string
+		sign   string
 		values []complex128
 		expect []complex128
 	}{
 		{
 			expr:   "resistance*current^2",
 			expect: []complex128{complex(8.0, 0.0)},
+			sign:   "+",
 		},
 		{
 			expr:   "voltage^2",
 			expect: []complex128{complex(16.0, 0.0)},
+			sign:   "+",
+		},
+		{
+			expr:   "resistance*current^2",
+			expect: []complex128{complex(-8.0, 0.0)},
+			sign:   "-",
+		},
+		{
+			expr:   "voltage^2",
+			expect: []complex128{complex(-16.0, 0.0)},
+			sign:   "-",
 		},
 	} {
-		term := ConcreteTerm(test.expr, &model)
+		substring := SubStringDelimiter{
+			SubString:           test.expr,
+			PreceedingDelimiter: test.sign,
+		}
+		term := ConcreteTerm(substring, &model)
 		got := make([]complex128, len(test.expect))
 		term(Freq, 0.0, got)
 
@@ -170,7 +187,10 @@ func TestPanicOnUnknownName(t *testing.T) {
 					}
 				}
 			}()
-			ConcreteTerm(test.expr, &model)
+			substring := SubStringDelimiter{
+				SubString: test.expr,
+			}
+			ConcreteTerm(substring, &model)
 		}()
 	}
 }
