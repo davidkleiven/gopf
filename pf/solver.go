@@ -26,12 +26,13 @@ type FourierTransform interface {
 
 // Solver is a type used to solve phase field equations
 type Solver struct {
-	Model     *Model
-	Dt        float64
-	FT        FourierTransform
-	Stepper   TimeStepper
-	Callbacks []SolverCB
-	Monitors  []PointMonitor
+	Model      *Model
+	Dt         float64
+	FT         FourierTransform
+	Stepper    TimeStepper
+	Callbacks  []SolverCB
+	Monitors   []PointMonitor
+	StartEpoch int
 }
 
 // NewSolver initializes a new solver
@@ -98,11 +99,11 @@ func (s *Solver) SetStepper(name string) {
 func (s *Solver) Solve(nepochs int, nsteps int) {
 	for i := 0; i < nepochs; i++ {
 		now := time.Now()
-		fmt.Printf("%02d:%02d:%02d - Epoch %5d of %5d\n", now.Hour(), now.Minute(), now.Second(), i, nepochs)
+		fmt.Printf("%02d:%02d:%02d - Epoch %5d of %5d\n", now.Hour(), now.Minute(), now.Second(), i+s.StartEpoch, nepochs+s.StartEpoch)
 		s.Propagate(nsteps)
 
 		for _, cb := range s.Callbacks {
-			cb(s, i)
+			cb(s, i+s.StartEpoch)
 		}
 
 		// Update monitors
