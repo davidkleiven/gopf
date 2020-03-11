@@ -1,6 +1,7 @@
 package pf
 
 import (
+	"math"
 	"testing"
 )
 
@@ -192,5 +193,46 @@ func TestPanicOnUnknownName(t *testing.T) {
 			}
 			ConcreteTerm(substring, &model)
 		}()
+	}
+}
+
+func TestLapUserDefined(t *testing.T) {
+	function := func(i int, bricks map[string]Brick) complex128 {
+		return bricks["conc"].Get(i)
+	}
+
+	model := NewModel()
+	N := 16
+	field := NewField("conc", N*N, nil)
+
+	// Set fourier transformed field values
+	for i := range field.Data {
+		field.Data[i] = complex(0.1*float64(i), 0.0)
+	}
+
+	model.AddField(field)
+	model.RegisterFunction("myfunc", function)
+	model.AddEquation("dconc/dt = LAP myfunc")
+	model.Init()
+	terms := model.RHS[0].Terms
+
+	if len(terms) != 1 {
+		t.Errorf("Expected 1 term got %d\n", len(terms))
+	}
+
+	freq := NewFFTW([]int{N, N}).Freq
+
+	termEval := make([]complex128, N*N)
+	terms[0](freq, 0.0, termEval)
+
+	for i := range termEval {
+		f := freq(i)
+		fRadSq := f[0]*f[0] + f[1]*f[1]
+		expect := -4.0 * math.Pi * math.Pi * fRadSq * real(field.Data[i])
+		re := real(termEval[i])
+
+		if math.Abs(expect-re) > 1e-10 {
+			t.Errorf("Expected %f got %f\n", expect, re)
+		}
 	}
 }
