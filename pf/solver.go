@@ -31,7 +31,7 @@ type Solver struct {
 	FT         FourierTransform
 	Stepper    TimeStepper
 	Callbacks  []SolverCB
-	Monitors   []PointMonitor
+	Monitors   []Monitor
 	StartEpoch int
 }
 
@@ -42,7 +42,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	solver.Model = m
 	solver.Dt = dt
 	solver.Callbacks = []SolverCB{}
-	solver.Monitors = []PointMonitor{}
+	solver.Monitors = []Monitor{}
 	solver.FT = NewFFTW(domainSize)
 
 	solver.Stepper = &Euler{
@@ -107,14 +107,14 @@ func (s *Solver) Solve(nepochs int, nsteps int) {
 		}
 
 		// Update monitors
-		for i, m := range s.Monitors {
-			s.Monitors[i].Add(real(s.Model.Bricks[m.Field].Get(m.Site)))
+		for i := range s.Monitors {
+			s.Monitors[i].Add(s.Model.Bricks)
 		}
 	}
 }
 
 // AddMonitor adds a new monitor to the solver
-func (s *Solver) AddMonitor(m PointMonitor) {
+func (s *Solver) AddMonitor(m Monitor) {
 	s.Monitors = append(s.Monitors, m)
 }
 
