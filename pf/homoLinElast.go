@@ -2,7 +2,6 @@ package pf
 
 import (
 	"github.com/davidkleiven/gopf/elasticity"
-	"github.com/davidkleiven/gosfft/sfft"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -144,14 +143,7 @@ func NewHomogeneousModolus(fieldName string, domainSize []int, matProp elasticit
 		EffForce:  elasticity.NewEffectiveForceFromMisfit(matProp, misfit),
 		Field:     make([]float64, ProdInt(domainSize)),
 		Disps:     elasticity.Displacements,
-	}
-	dim := len(domainSize)
-	if dim == 2 {
-		linElast.FT = sfft.NewFFT2(domainSize[0], domainSize[1])
-	} else if dim == 3 {
-		linElast.FT = sfft.NewFFT3(domainSize[0], domainSize[1], domainSize[2])
-	} else {
-		panic("pf: Domain size has to be either of length 2 or length 3")
+		FT:        NewFFTW(domainSize),
 	}
 	return &linElast
 }
