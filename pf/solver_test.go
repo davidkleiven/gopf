@@ -35,20 +35,31 @@ func TestSolverDiffusion(t *testing.T) {
 
 func TestJSONifyMonitors(t *testing.T) {
 	m := NewModel()
-	solver := NewSolver(&m, []int{16, 16}, 0.1)
+	N := 16
+	f1 := NewField("field1", N*N, nil)
+	f2 := NewField("field2", N*N, nil)
+	m.AddField(f1)
+	m.AddField(f2)
+
+	solver := NewSolver(&m, []int{N, N}, 0.1)
 	m1 := NewPointMonitor(0, "field1")
 	m2 := NewPointMonitor(1, "field2")
 	m3 := NewPointMonitor(0, "field2")
-	m1.Add(1.0)
-	m2.Add(2.0)
-	m3.Add(3.0)
-	solver.AddMonitor(m1)
-	solver.AddMonitor(m2)
-	solver.AddMonitor(m3)
+	f1.Data[0] = complex(1.0, 0.0)
+	m1.Add(m.Bricks)
+	f2.Data[1] = complex(2.0, 0.0)
+	m2.Add(m.Bricks)
+	f2.Data[0] = complex(3.0, 0.0)
+	m3.Add(m.Bricks)
+
+	solver.AddMonitor(&m1)
+	solver.AddMonitor(&m2)
+	solver.AddMonitor(&m3)
 
 	res := solver.JSONifyMonitors()
 	strRes := fmt.Sprintf("%s", res)
-	expect := "[{\"Data\":[1],\"Site\":0,\"Field\":\"field1\"},{\"Data\":[2],\"Site\":1,\"Field\":\"field2\"},{\"Data\":[3],\"Site\":0,\"Field\":\"field2\"}]"
+	fmt.Printf(strRes)
+	expect := "[{\"Data\":[1],\"Site\":0,\"Field\":\"field1\",\"Name\":\"PointMonitor\"},{\"Data\":[2],\"Site\":1,\"Field\":\"field2\",\"Name\":\"PointMonitor\"},{\"Data\":[3],\"Site\":0,\"Field\":\"field2\",\"Name\":\"PointMonitor\"}]"
 	if strRes != expect {
 		t.Errorf("Expected\n%s\nGot\n%s\n", expect, strRes)
 	}

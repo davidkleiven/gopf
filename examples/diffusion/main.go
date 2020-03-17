@@ -26,7 +26,7 @@ func main() {
 
 	// Add a monitor at the center
 	monitor := pf.NewPointMonitor(center, "conc")
-	solver.AddMonitor(monitor)
+	solver.AddMonitor(&monitor)
 
 	// Initialize uint8 IO
 	out := pf.NewFloat64IO("diffusion2D")
