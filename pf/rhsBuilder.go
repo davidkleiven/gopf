@@ -106,11 +106,13 @@ func ConcreteTerm(termDelim SubStringDelimiter, m *Model) Term {
 		sign = -1.0
 	}
 
-	if m.IsUserDefinedTerm(term) {
+	// Remove eventual * signs
+	termStripped := strings.ReplaceAll(term, "*", "")
+	if m.IsUserDefinedTerm(termStripped) {
 		if termDelim.PreceedingDelimiter == "-" {
 			panic("rhsbuilder: Incorporate the negative sign in the definition of the term and use + as a delimiter")
 		}
-		return m.UserDef[term].Construct(m.Bricks)
+		return m.UserDef[termStripped].Construct(m.Bricks)
 	}
 	fieldReg := regexp.MustCompile("[^\\*]*")
 	res := fieldReg.FindAllStringSubmatch(term, -1)
