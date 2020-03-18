@@ -64,8 +64,11 @@ func (cn *ConservativeNoise) Construct(bricks map[string]Brick) Term {
 		for comp := 0; comp < cn.Dim; comp++ {
 			brick := bricks[cn.GetCurrentName(comp)]
 			for i := range field {
-				f := 2.0 * math.Pi * freq(i)[comp]
-				field[i] += complex(0.0, 2.0*math.Sin(f)) * brick.Get(i)
+				f := freq(i)[comp]
+				if math.Abs(math.Abs(f)-0.5) > 1e-6 {
+					omegaHalf := math.Pi * f
+					field[i] += complex(0.0, 2.0*math.Sin(omegaHalf)) * brick.Get(i)
+				}
 			}
 		}
 	}
