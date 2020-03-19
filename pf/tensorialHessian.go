@@ -2,8 +2,37 @@ package pf
 
 import "math"
 
+// BrickPlaceholder is struct that is used as a brick, in case no brick is specified
+type BrickPlaceholder struct{}
+
+// Get return 1.0
+func (bp *BrickPlaceholder) Get(i int) complex128 {
+	return complex(1.0, 0.0)
+}
+
 // TensorialHessian is a type used to represent the term
-// K_ij d^2c/dx_idx_j (sum of i and j)
+// K_ij d^2c/dx_idx_j (sum of i and j). The tensial hessian brick
+// can be added to an equation in two ways as it can be treated both
+// explicitly and implicitly (in some cases). If the term can be
+// treated implicitly, is recommended that one specify it such that the
+// equation parser understands that it should be dealt with implicitly.
+// Cases where it can be treated implicitly is if the hessian should be
+// applied to the same field as located on the left hand side
+//
+// d<field>/dt = K_ij d^2<field>/dx_idx_j
+//
+// if it should be applied to a different field (e.g. a field B), it has to
+// be treated explicitly. In order to treat the term implicitly, the Field
+// attribute should left empty (e.g. an empty string) and it should appear
+// in the equation as
+// model.AddEquation("dfield/dt = HESSIAN*field")
+//                                          ^
+//                    the field name is specified in the equation
+// if it should be treated explicitly, the Field attribute should be set to the
+// field on which the hessian should operate and passed to the equation as
+// model.AddEquation("dfield/dt = HESSIAN")
+//                                  ^
+//              the field name is NOT specified in the equation
 type TensorialHessian struct {
 	Field string
 	K     []float64
@@ -13,7 +42,13 @@ type TensorialHessian struct {
 func (th *TensorialHessian) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, field []complex128) {
 		Clear(field)
-		brick := bricks[th.Field]
+		var brick Brick
+		if th.Field == "" {
+			brick = &BrickPlaceholder{}
+		} else {
+			brick = bricks[th.Field]
+		}
+
 		for i := range field {
 			f := freq(i)
 			value := brick.Get(i)
