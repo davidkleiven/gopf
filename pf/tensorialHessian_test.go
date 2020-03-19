@@ -77,13 +77,15 @@ func TestTensorialHessian(t *testing.T) {
 		},
 	} {
 		hessian := TensorialHessian{
-			K:     test.K,
-			Field: "myfield",
+			K: test.K,
 		}
 
 		function := hessian.Construct(bricks)
 		res := make([]complex128, N*N)
 		function(ft.Freq, 0.0, res)
+		for i := range field.Data {
+			res[i] *= field.Data[i]
+		}
 		ft.IFFT(res)
 		DivRealScalar(res, float64(len(res)))
 
@@ -95,6 +97,55 @@ func TestTensorialHessian(t *testing.T) {
 			if math.Abs(re-want) > test.tol || math.Abs(im) > test.tol {
 				t.Errorf("Test #%d: Want (%f, 0) got (%f, %f)\n", i, want, re, im)
 			}
+		}
+	}
+}
+
+func TestHessianWithModel(t *testing.T) {
+	N := 16
+	field1 := NewField("conc1", N*N, nil)
+	field2 := NewField("conc2", N*N, nil)
+
+	// Populate the fields
+	for i := range field1.Data {
+		field1.Data[i] = complex(float64(i), 0.0)
+		field2.Data[i] = complex(float64(i), 0.0)
+	}
+
+	for i, test := range []struct {
+		Eqns      []string
+		HessField string
+		NumImp    int
+		NumExp    int
+	}{
+		{
+			Eqns:      []string{"dconc1/dt = HESSIAN", "dconc2/dt = -conc2"},
+			NumImp:    0,
+			NumExp:    1,
+			HessField: "conc2",
+		},
+		{
+			Eqns:      []string{"dconc1/dt = HESSIAN*conc1", "dconc2/dt = -conc2"},
+			NumImp:    1,
+			NumExp:    0,
+			HessField: "",
+		},
+	} {
+		hessian := TensorialHessian{
+			K:     []float64{1.0, 2.0, 2.0, 2.0},
+			Field: test.HessField,
+		}
+		model := NewModel()
+		model.AddField(field1)
+		model.AddField(field2)
+		model.RegisterUserDefinedTerm("HESSIAN", &hessian, nil)
+		model.AddEquation(test.Eqns[0])
+		model.AddEquation(test.Eqns[1])
+		model.Init()
+
+		numExp := len(model.RHS[0].Terms)
+		if numExp != test.NumExp {
+			t.Errorf("Test #%d: Expected %d explicit terms got %d\n", i, test.NumExp, numExp)
 		}
 	}
 }
