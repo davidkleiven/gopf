@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOPF</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <body>
+        <div class="main">
+            <div class="title">
+                <h1>GOPF: Phase Field Modeling In Go!</h1>
+            </div>
+            <div class="sidebar">
+                <div class="title under">
+                    <h2>Examples</h2>
+                </div>
+                <ul>
+                    <li><a href="ch.html">Cahn-Hilliard</a></li>
+                    <li><a href="#">Kardar-Parisi-Zhang</a></li>
+                </ul>
+                <div class="bottom">
+                    <img src="assets/gopher.svg"/>
+                </div>
+            </div>
+            <div class="slideshow">
+                <div class="slide fade">
+                    <img src="assets/ch.svg"/>
+                    <div class="captiontext">Cahn-Hilliard</div>
+                </div>
+                <div class="slide fade">
+                    <img src="assets/kpz.svg"/>
+                    <div class="captiontext">Kardar-Parisi-Zhang</div>
+                </div>
+
+                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1)">&#10095;</a>
+            </div>
+            <div class="sidebar">
+                <div class="bottom">
+                    <blockquote>
+                        <p>GOPF is not the fastest and not the most scalable softwere. However, it is
+                            a customizable, easy-to-use tool for analysing phase field
+                            models.
+                        </p>
+                    </blockquote>
+                </div>
+            </div>
+
+            <script>
+                var slideIndex = 1;
+                showSlides(slideIndex);
+        
+                // Next/previous controls
+                function plusSlides(n) {
+                    showSlides(slideIndex += n);
+                }
+        
+                // Thumbnail image controls
+                function currentSlide(n) {
+                    showSlides(slideIndex = n);
+                }
+        
+                function showSlides(n) {
+                    var i;
+                    var slides = document.getElementsByClassName("slide");
+                    if (n > slides.length) {slideIndex = 1}
+                    if (n < 1) {slideIndex = slides.length}
+                    for (i = 0; i < slides.length; i++) {
+                        slides[i].style.display = "none";
+                    }
+                    slides[slideIndex-1].style.display = "block";
+                }
+            </script>
+    </body>
+</html>
