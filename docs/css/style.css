@@ -1,0 +1,188 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+ul{
+    float: left;
+    list-style-type: none;
+    margin-top: 25px;
+    margin-left: 25px;
+}
+
+ul li {
+    display: flex;
+    padding-top: 2px;
+}
+
+ul li a{
+    text-decoration: none;
+    color: #333;
+    padding: 5px 20px;
+    transition: 0.6s;
+
+}
+
+ul li a:hover{
+    background-color: #333;
+    color: #fff;
+}
+
+.main {
+    max-width: 1200px;
+    margin: auto;
+    font-family: Helvetica;
+}
+
+.title h1{
+    color: #333;
+    font-size: 68px;
+    margin-top: 25px;
+    text-align: center;
+}
+
+.title h2{
+    color: #333;
+    font-size: 32px;
+    margin-left: 25px;
+    margin-top: 50px;
+}
+
+.under {
+    width: 98%;
+    display:block;
+    position: relative;
+    border-bottom: 5px solid #742D18;
+  }
+
+.main .sidebar{
+    float: left;
+    width: 30%;
+    height: 90%;
+}
+
+.main .slideshow{
+    float: left;
+    width: 40%;
+    height: 90%;
+    position: relative;
+    margin: auto;
+}
+
+.main .sidebar .bottom {
+    bottom: 1cm;
+    position: absolute;
+}
+
+blockquote{
+    border: 0;
+    margin: 0;
+    padding: 0;
+
+    background: none;
+    color: #666;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 1.5em;
+    font-style: italic;
+    line-height: 1.4 !important;
+    margin: 0;
+    position: relative;
+    text-shadow: 0 1px white;
+    z-index: 600;
+}
+
+.slide {
+    display: none;
+}
+
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 45%;
+    width: auto;
+    margin-top: -22px;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+}
+  
+  /* Position the "next button" to the right */
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.prev:hover, .next:hover {
+    background-color: rgba(0,0,0,0.8);
+}
+
+.fade {
+    -webkit-animation-name: fade;
+    -webkit-animation-duration: 1.0s;
+    animation-name: fade;
+    animation-duration: 1.0s;
+  }
+
+@-webkit-keyframes fade {
+    from {opacity: .4} 
+    to {opacity: 1}
+}
+  
+@keyframes fade {
+    from {opacity: .4} 
+    to {opacity: 1}
+}
+
+.captiontext{
+    color: #666;
+    font-size: 24px;
+}
+
+.exampletext{
+    float: left;
+    color: #333;
+    width: 55%;
+    height: 100%;
+}
+
+.examplefig{
+    margin-top: 25px;
+    float: right;
+    color: #333;
+    width: 30%;
+    height: 100%;
+}
+
+.paragraph{
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.button{
+    position: absolute;
+    left: 80%;
+    top: 7%;
+}
+
+.btn{
+    padding: 10px 30px;
+    color: #333;
+    text-decoration: none;
+}
+
+.btn:hover{
+    background-color: #333;
+    color: #fff;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
+    margin: auto;
+}

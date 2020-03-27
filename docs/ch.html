@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOPF</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <div class="main">
+        <div class="title under">
+            <h2>Cahn-Hilliard Equation</h2>
+        </div>
+        <div class="button">
+            <a href="index.html" class="btn">Back</a>
+        </div>
+        <div style="width: 100%; float: left;">
+            <div style="width: 30%; float: left;">
+                <a href="https://github.com/davidkleiven/gopf/blob/master/examples/cahnHilliard/main.go">
+                <img src="assets/github.svg" height=48px style="float: left;">
+            </a>
+            </div>
+        </div>
+        
+        
+        <div class="exampletext">
+            <p class="paragraph">The Cahn-Hilliard equation models phase separation between two phases.
+                The free energy density of a two phase mixture is modelled by double-well plus
+                an energy cost for high concentration gradients.
+            </p>
+            <img src="assets/ch/ch_free_eng.png" height=48px/>
+            <p class="paragraph">
+                The equation to be solved, is obtained by taking the functional derivative of
+                <i>F</i> with respect to the function <i>c</i>.
+            </p>
+            <img src="assets/ch/func_deriv.png" height=48px/>
+            <p class="paragraph">
+                The derivative of the free energy with respect to the concentration can be
+                thought of as a chemical potentia. The current <b>j</b> of species is propertional
+                to the gradient of the local chemical potential <i>&mu;</i>.
+            </p>
+            <img src="assets/ch/current.png" height=24px/>
+            <p class="paragraph">
+                where <i>M</i> is the mobility. Since the overall concentration is conserved, we 
+                require
+            </p>
+            <img src="assets/ch/continuity.png" height=48px/>
+            <p class="paragraph">
+                By inserting the expression for the currend we finally arrive at the Cahn-Hilliard equation
+            </p>
+            <img src="assets/ch/ch_eq.png" height=48px/>
+            <p class="paragraph">
+                An example of a solution starting from a random concentration distribution is 
+                shown to the right. Formation of odd shaped domains (spinodal decomposition) is
+                a characteristic feature of the solution.
+            </p>
+        </div>
+        <div class="examplefig">
+            <img src="assets/ch.svg"/>
+            <div class="bottom">
+                <img src="assets/gopher.svg"/>
+            </div>
+        </div>
+    </div>
+</html>
