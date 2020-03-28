@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOPF</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <div class="main">
+        <div class="title under">
+            <h2>Kardar-Parisi-Zhang Equation</h2>
+        </div>
+        <div class="button">
+            <a href="index.html" class="btn">Back</a>
+        </div>
+        <div style="width: 100%; float: left;">
+            <div style="width: 30%; float: left;">
+                <a href="https://github.com/davidkleiven/gopf/blob/master/examples/kardar_parisi_zhang/main.go">
+                <img src="assets/github.svg" height=48px style="float: left;">
+            </a>
+            </div>
+        </div>
+        
+        
+        <div class="exampletext">
+            <p class="paragraph">The Kardar-Parisi-Zhang (KPZ) equation describes the evolution of a
+                height field <i>h</i>. The rate of change of the height of a surface consists of three
+                terms. First, a surface tension term that tries to create a flat surface. Secondly,
+                that makes the surface grow along the local normal vector. Finally, there is a random
+                source term. Here, white gaussian noise is used.
+            </p>
+            <img src="assets/kpz/kpz_eq.svg" height=96px>
+            <p class="paragraph">
+                The time evolution of the average width <i>W</i> defined via
+            </p>
+            <img src="assets/kpz/avg_width.png" height=48px>
+            <p class="paragraph">
+            where <i style="text-decoration: overline;">h(t)</i> denotes the average height. The 
+            angular brackets denotes averaging over several runs.
+            </p>
+            <img src="assets/kpz/average_width.png" width=60%/>
+            <p class="paragraph">
+                Based on this small simulation, we find that the average with grows as <i>W(t)&prop;t<sup>0.235</sup></i>.
+                The value of the exponent is very close  0.2415 &plusmn; 0.0015, which is found by state-of-the-art methods [1].
+            </p>
+            <p class="paragraph">
+                [1] <a href=https://doi.org/10.1103/PhysRevE.84.061150>J. Kelling, and O. Geza. "Extremely large-scale simulation of a Kardar-Parisi-Zhang model using graphics cards." Physical Review E 84.6 (2011)</a>
+            </p>
+        </div>
+        <div class="examplefig">
+            <img src="assets/kpz.svg"/>
+            <div class="bottom">
+                <img src="assets/gopher.svg"/>
+            </div>
+        </div>
+    </div>
+</html>
