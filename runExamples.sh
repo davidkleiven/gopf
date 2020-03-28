@@ -25,3 +25,8 @@ rm *.xdmf
 
 echo "Running stepper stability"
 go run examples/solverStability/main.go
+
+echo "Running KKS example"
+go run examples/kks/main.go
+rm *.bin
+rm *.xdmf
