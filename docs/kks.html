@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOPF</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <div class="main">
+        <div class="title under">
+            <h2>Kim-Kim-Suzuki Model</h2>
+        </div>
+        <div class="button">
+            <a href="index.html" class="btn">Back</a>
+        </div>
+        <div style="width: 100%; float: left;">
+            <div style="width: 30%; float: left;">
+                <a href="https://github.com/davidkleiven/gopf/blob/master/examples/kks/main.go">
+                <img src="assets/github.svg" height=48px style="float: left;">
+            </a>
+            </div>
+        </div>
+        
+        
+        <div class="exampletext">
+            <p class="paragraph">The Kim-Kim-Suzuki model is a method for modeling multiphase
+                systems. A defining feature of the model is that the free energies are described
+                by individual concentrations <strong>in each phase</strong> and order parameters.
+                The different phases co-exist on each "pixel" of the domain, and thus the chemical
+                potential in each co-existing phase is equal. Here, we will go through the theory
+                for two phases, labeled <i>&alpha;</i> and <i>&beta;</i>. A schematical illustration
+                of the free energies is shown below.
+            </p>
+            <img src="assets/kks/free_energy_kks.svg" width=60%>
+            <p class="paragraph">
+                In the following we denote the concentration in the <i>&alpha;</i>-phase <i>c<sub>&alpha;</sub></i> and 
+                the concentration in the <i>&beta;</i>-phase <i>c<sub>&beta;</sub></i>. The total free energy
+                is given by
+            </p>
+            <img src="assets/kks/free_energy_eq.svg" height=48px>
+            <p class="paragraph">
+                <i>&phi;</i> is a field variable that goes from 0 to 1. If it is 0, there is only 
+                <i>&alpha;</i> phase and if it is 1 there is only <i>&beta;</i>. 
+                The function <i>h(&phi;)</i> is an interpolating function given by
+            </p>
+            <img src="assets/kks/interpolant.svg" height=72px>
+            <p class="paragraph">
+                <i>g(&phi;)</i> is a function that creates a barrier between the two basins of 
+                attraction <i>&phi; = 0</i> and <i>&phi; = 1</i>
+            </p>
+            <img src="assets/kks/gfunc.svg" height=24px>
+            <p class="paragraph">
+                Since the two phases co-exist, the chemical potential has to be equal in both 
+                phases. This is expressed via the constraint
+            </p>
+            <img src="assets/kks/coexist_eq.svg" height=48px>
+            <p class="paragraph">
+                Furthermore, the concentration at a point in space is given by the weighted
+                average of the concentrations in the individual phases
+            </p>
+            <img src="assets/kks/concentration.svg" height=24px>
+            <p class="paragraph">
+                We want to know the time evolution of the total concentration <i>c</i> and the field <i>&phi;</i>
+                The total concentration is conserved, while the field <i>&phi;</i> is not a conserved quantity
+            </p>
+            <img src="assets/kks/field_equations.svg" height=148px>
+            <p class="paragraph">
+                We therefore need partial derivatives of <i>f</i> with respect to the total concentraion <i>c</i>
+                and <i>&phi;</i>. Thus, <i>c<sub>&alpha;</sub></i> and <i>c<sub>&beta;</sub></i> are functions
+                of the variables <i>c</i> and <i>&phi;</i>. To evaluate the functional derivatives, the partial
+                derivatives of <i>c<sub>&alpha;</sub></i> and <i>c<sub>&beta;</sub></i> with respect to <i>c</i>,
+                when <i>&phi;</i> and with respect to <i>&phi;</i> when <i>c</i> is fixed, are needed. When the
+                concentration in the two phases changes by a small amount (<i>c<sub>&alpha;</sub></i>&#8594;
+                <i>c<sub>&alpha;</sub></i> + <i>&Delta;c<sub>&alpha;</sub></i> and 
+                <i>c<sub>&beta;</sub></i>&#8594;
+                <i>c<sub>&beta;</sub></i> + <i>&Delta;c<sub>&beta;</sub></i>), the equation relating the 
+                the chemical potentials in the two phases can be expanded to first order in the changes
+            </p>
+            <img src="assets/kks/chem_pot_expanded.svg" height=96px>
+            <p class="paragraph">
+                Moreover, from the equation defining the total concentration we find
+            </p>
+            <img src="assets/kks/deltaC.svg" height=48px>
+            <p class="paragraph">
+                The partial derivatives of <i>c<sub>&alpha;</sub></i> and <i>c<sub>&beta;</sub></i> with 
+                respect to <i>c</i> (at fixed <i>&phi;</i>) can now be found from the ratios
+                <i>&Delta;c<sub>&alpha;</sub>/&Delta; c</i> and <i>&Delta;c<sub>&beta;</sub>/&Delta; c</i>.
+                Combining the results yields the following relations
+            </p>
+            <img src="assets/kks/kernel_rule_c.svg" height=120px>
+            <p class="paragraph">
+                We proceed in a similar manner to find the partial derivatives with respect to <i>&phi;</i>,
+                when <i>c</i> is fixed. The strategy is to find how the individual concentrations in the two
+                phases when <i>&phi;</i> changes by a small amount, such that <i>c</i> remains unchanged.
+            </p>
+            <img src="assets/kks/change_phi.svg" height=24px>
+            <p class="paragraph">
+                By expanding <i>h</i> to first order in <i>&phi;</i> and neglecting terms of order <i>&Delta: &phi;&Delta; c<sub>&alpha;</sub></i>,
+                we arrive at
+            </p>
+            <img src="assets/kks/change_phi2.svg" height=72px>
+            <p class="paragraph">
+                After collecting the results we find the following relations
+            </p>
+            <img src="assets/kks/kernel_ruls_phi.svg" height=120px>
+            <h3>Interface Profile</h3>
+            <p class="paragraph">
+                In this section we explore the interface profile of the KKS model. A sketch 
+                of how the volume fraction <i>&phi;</i> changes across an interface is shown 
+                below
+            </p>
+            <img src="assets/kks/interface_sketch.svg" width=60%>
+            <p class="paragraph">
+                An important feature of the KKS is model is that the concentrations in the 
+                to phases does not change across an interface. However, the total concentration 
+                <i>c</i> can change because the volume fraction of phase <i>&alpha;</i> and 
+                <i>&beta;</i> changes. Consequently, the excess energy associated with an interface
+                is independendent of <i>f<sub>&alpha;</sub></i> and <i>f<sub>&beta;</sub></i>. The only
+                remaining part of the overall free energy density is
+            </p>
+            <img src="assets/kks/excess_free.svg" height=32px>
+            <p class="paragraph">
+                We can now match the interface energy <i>&sigma;</i> of a sharp interface with the 
+                energy of a diffuse interface via
+            </p>
+            <img src="assets/kks/interface_energy.svg" height=48px>
+            <p class="paragraph">
+                where the dependence on <i>&phi;'</i> has explicitly been included in the integrand.
+                To solve the integral, we need to know the profile <i>&phi;(x)</i>. This is done 
+                be seeking a stationary profile (e.g. <i>&delta;&sigma; = 0</i>).
+            </p>
+            <img src="assets/kks/stationary.svg" height=96px>
+            <p class="paragraph">
+                which we recognize as the Euler-Lagrange equation. By substituting 
+                <i>d/d&phi; = dx/d&phi; d/dx</i> and multiplying both sides with <i>dx/d&phi;</i> we 
+                arrive at
+            </p>
+            <img src="assets/kks/gphi_relation.svg" height=144px>
+            <p class="paragraph">
+                as <i>&phi; &#8594;, 1</i> <i>g &#8594; 0 </i> and <i>&phi;' &#8594; 0</i>. Thus,
+                the integration constant above has to be zero. By replacing <i>&phi;'</i> in the integral 
+                and introducing the substitution <i>dx = d&phi;dx/d&phi;</i> we finally arrive at
+            </p>
+            <img src="assets/kks/final_surface_integral.svg" height=48px>
+            <p class="paragraph">
+                The next (and very important) step is to determine how the width of the diffuse interface 
+                depends on the parameters <i>W</i> and <i>&gamma;</i>. In other words, we need to solve the
+                first order differential equation
+            </p>
+            <img src="assets/kks/ode.svg" height=48px>
+            <p class="paragraph">
+                We skip the details on how to solve the equation, but the solution is
+            </p>
+            <img src="assets/kks/phi_profile.svg" hright=48px>
+            <p class="paragraph">
+                From the solution, we find that the width <i>l</i> of the interface is approximately
+            </p>
+            <img src="assets/kks/interface_thickness.svg" height=48px>
+            <h3>Specializing The Model</h3>
+            <p class="paragraph">
+                In this section we introduce concrete expressions for the free energies and finally end up
+                with a closed form system of equations that can be solved numerically. We will use two 
+                parabolic functions for the free energies
+            </p>
+            <img src="assets/kks/free_eng_special.svg" height=48px>
+            <p class="paragraph">
+                where <i>f<sub>0</sub></i> is a constant. By inserting the explicit free energy
+                forms into the general relations above, we end up with the following system of
+                equations
+            </p>
+            <img src="assets/kks/final_eqns.svg" height=96px>
+            <p class="paragraph">
+                In the upper figure in the right column, the concentration was randomized on the 
+                interval <i>[0, 1)</i> and <i>&phi;</i> was set equal to the concentration.
+            </p>
+        </div>
+        <div class="examplefig">
+            <img src="assets/kks.svg"/>
+            <img src="assets/gopher.svg" class="bottom"/>
+        </div>
+    </div>
+</html>
