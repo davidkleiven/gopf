@@ -49,18 +49,9 @@ func NewFloat64IO(prefix string) Float64IO {
 // SaveFields stores all fields as raw binary files. It can be passed as a callback to the
 // solver
 func (fl *Float64IO) SaveFields(s *Solver, epoch int) {
-	realPart := make([]float64, len(s.Model.Fields[0].Data))
 	for _, f := range s.Model.Fields {
 		fname := fmt.Sprintf("%s_%s_%d.bin", fl.Prefix, f.Name, epoch)
-		out, err := os.Create(fname)
-		if err != nil {
-			panic(err)
-		}
-
-		for j := range f.Data {
-			realPart[j] = real(f.Data[j])
-		}
-		binary.Write(out, binary.BigEndian, realPart)
+		f.SaveReal(fname)
 	}
 }
 

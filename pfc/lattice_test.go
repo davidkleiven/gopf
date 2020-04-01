@@ -85,3 +85,34 @@ func TestHKLVector(t *testing.T) {
 		t.Errorf("Expected length of hkl vector %f got %f\n", expect, length)
 	}
 }
+
+func TestChangeHKLVector(t *testing.T) {
+	a := 4.0
+	delta := 0.01
+	cell := SC3D(a)
+	rec := cell.Reciprocal()
+	change := mat.NewDense(3, 3, []float64{delta * a, 0.0, 0.0,
+		0.0, delta * a, 0.0,
+		0.0, 0.0, delta * a})
+
+	// The real-space cell is expanded
+	expectedChange := -2.0 * math.Pi * delta / a
+	tol := 1e-10
+	for i, miller := range []Miller{
+		Miller{H: 1, K: 0, L: 0},
+		Miller{H: 0, K: 1, L: 0},
+		Miller{H: 0, K: 0, L: 1},
+	} {
+		dk := rec.ChangeHKLVector(miller, change)
+		value := dk[0]
+		if miller.K == 1 {
+			value = dk[1]
+		} else if miller.L == 1 {
+			value = dk[2]
+		}
+
+		if math.Abs(value-expectedChange) > tol {
+			t.Errorf("Test #%d: Expected change %f. Got %f\n", i, expectedChange, value)
+		}
+	}
+}

@@ -24,5 +24,27 @@ type IdealMix struct {
 
 // Eval evaluates the mixing entropy at a given dimensionless density
 func (im *IdealMix) Eval(n float64) float64 {
-	return 0.5*n*n - im.C3*n*n*n/6.0 + im.C4*n*n*n*n/12.0
+	return im.QuadraticPrefactor()*n*n + im.ThirdOrderPrefactor()*n*n*n + im.FourthOrderPrefactor()*n*n*n*n
+}
+
+// Deriv returns the derivative with respect to the density
+func (im *IdealMix) Deriv(n float64) float64 {
+	return 2.0*im.QuadraticPrefactor()*n + 3.0*im.ThirdOrderPrefactor()*n*n + 4.0*im.FourthOrderPrefactor()*n*n*n
+}
+
+// QuadraticPrefactor returns the prefactor in front of the quadratic term
+func (im *IdealMix) QuadraticPrefactor() float64 {
+	return 0.5
+}
+
+// ThirdOrderPrefactor returns the prefactor in front of the third
+// order term
+func (im *IdealMix) ThirdOrderPrefactor() float64 {
+	return -im.C3 / 6.0
+}
+
+// FourthOrderPrefactor returns the prefactor in front of the fourth
+// order term
+func (im *IdealMix) FourthOrderPrefactor() float64 {
+	return im.C4 / 12.0
 }

@@ -28,7 +28,40 @@ func TestNumEquiv(t *testing.T) {
 			expect: 1,
 		},
 	} {
-		num := NumEquivalent(test.Miller)
+		num := NumEquivalent3D(test.Miller)
+		if num != test.expect {
+			t.Errorf("Test #%d: Expected %d got %d\n", i, test.expect, num)
+		}
+	}
+}
+
+func TestNumEquiv2D(t *testing.T) {
+	for i, test := range []struct {
+		Miller Miller
+		expect int
+	}{
+		{
+			Miller: Miller{H: 1, K: 1, L: 0},
+			expect: 4,
+		},
+		{
+			Miller: Miller{H: 2, K: 0, L: 0},
+			expect: 4,
+		},
+		{
+			Miller: Miller{H: 1, K: -1, L: 0},
+			expect: 4,
+		},
+		{
+			Miller: Miller{H: 1, K: 3, L: 0},
+			expect: 8,
+		},
+		{
+			Miller: Miller{H: 0, K: 0, L: 0},
+			expect: 1,
+		},
+	} {
+		num := NumEquivalent2D(test.Miller)
 		if num != test.expect {
 			t.Errorf("Test #%d: Expected %d got %d\n", i, test.expect, num)
 		}

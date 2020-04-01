@@ -10,6 +10,17 @@ func (m *Miller) Equal(m2 Miller) bool {
 	return m.H == m2.H && m.K == m2.K && m.L == m2.L
 }
 
+// Return the Miller index as if it was an array. H is the zeroth element
+// K is the first element and L is the last element
+func (m *Miller) At(i int) int {
+	if i == 0 {
+		return m.H
+	} else if i == 1 {
+		return m.K
+	}
+	return m.L
+}
+
 // factorial is a helper that calculates the factorial of n
 func factorial(n int) int {
 	f := 1
@@ -27,8 +38,8 @@ func abs(x int) int {
 	return x
 }
 
-// NumEquivalent returns the number of equivalent planes
-func NumEquivalent(miller Miller) int {
+// NumEquivalent3D returns the number of equivalent planes
+func NumEquivalent3D(miller Miller) int {
 	numEq := 1
 
 	// Take into account the different combinations of +- the index
@@ -55,6 +66,29 @@ func NumEquivalent(miller Miller) int {
 
 	numPerm := factorial(3) / factorial(numEqual)
 	return numEq * numPerm
+}
+
+// NumEquivalent2D returns the number of equivalent miller indices in 2D
+func NumEquivalent2D(miller Miller) int {
+	num := 0
+	for _, equiv := range EquivalentMiller(miller) {
+		if equiv.L == 0 {
+			num++
+		}
+	}
+	return num
+}
+
+// NumEquivalent returns the number of equivalent indices
+func NumEquivalent(miller Miller, dim int) int {
+	switch dim {
+	case 2:
+		return NumEquivalent2D(miller)
+	case 3:
+		return NumEquivalent3D(miller)
+	default:
+		panic("Dimension has to be either 2 or 3")
+	}
 }
 
 // EquivalentMiller returns a array with all miller indices that

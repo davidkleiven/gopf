@@ -38,8 +38,41 @@ func (rc *ReciprocalCell) HKLVector(miller Miller) []float64 {
 	return res
 }
 
-// Reciprocal returns a cell object representing the
-// reciprocal cell
+// CellChange returns the change in the reciprocal lattice resulting from a
+// given change in the real space lattice. It is assumed that the change is small
+// and the function relies on a first order series expansion of the inverse real
+// space cell
+func (rc *ReciprocalCell) CellChange(realSpaceChange *mat.Dense) *mat.Dense {
+	r, c := realSpaceChange.Dims()
+	change := mat.NewDense(r, c, nil)
+	change.Product(rc.CellVec, realSpaceChange, rc.CellVec)
+	change.Scale(-1.0/(2.0*math.Pi), change)
+	return change
+}
+
+// ChangeHKLVector returns the change in the HKL vector originating from a
+// change in the real space lattice
+func (rc *ReciprocalCell) ChangeHKLVector(miller Miller, realSpaceChange *mat.Dense) []float64 {
+	change := rc.CellChange(realSpaceChange)
+	_, col := change.Dims()
+
+	res := make([]float64, col)
+	for i := 0; i < col; i++ {
+		res[i] = float64(miller.H)*change.At(i, 0) + float64(miller.K)*change.At(i, 1)
+		if col == 3 {
+			res[i] += float64(miller.L) * change.At(i, 2)
+		}
+	}
+	return res
+}
+
+// Reciprocal returns a cell object representing the reciprocal cell
+// The underlying matrix of the reciprocal lattice is given by
+//
+// M^T = 2*pi*C^{-1}
+//
+// where each column of M is a reciprocal lattice vector and each column
+// if C is a real lattice vector
 func (c *Cell) Reciprocal() ReciprocalCell {
 	row, col := c.CellVec.Dims()
 	rCell := ReciprocalCell{
