@@ -1,6 +1,8 @@
 package pfc
 
-import "math"
+import (
+	"math"
+)
 
 // Peak represent one peak in the reciprocal space pair correlation function
 type Peak struct {

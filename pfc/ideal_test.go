@@ -35,3 +35,34 @@ func TestIdeal(t *testing.T) {
 		}
 	}
 }
+
+func TestDeriv(t *testing.T) {
+	tol := 1e-10
+	for i, test := range []struct {
+		IdealMix IdealMix
+		n        float64
+		expect   float64
+	}{
+		{
+			IdealMix: IdealMix{
+				C3: 0.0,
+				C4: 0.0,
+			},
+			n:      0.5,
+			expect: 0.5,
+		},
+		{
+			IdealMix: IdealMix{
+				C3: 1.0,
+				C4: 1.0,
+			},
+			n:      0.5,
+			expect: 0.41666666666,
+		},
+	} {
+		res := test.IdealMix.Deriv(test.n)
+		if math.Abs(res-test.expect) > tol {
+			t.Errorf("Test #%d: Expected %f got %f\n", i, test.expect, res)
+		}
+	}
+}

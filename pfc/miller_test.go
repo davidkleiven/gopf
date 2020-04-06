@@ -28,9 +28,52 @@ func TestNumEquiv(t *testing.T) {
 			expect: 1,
 		},
 	} {
-		num := NumEquivalent(test.Miller)
+		num := NumEquivalent3D(test.Miller)
 		if num != test.expect {
 			t.Errorf("Test #%d: Expected %d got %d\n", i, test.expect, num)
+		}
+
+		// Try also the wrapper method
+		if num != NumEquivalent(test.Miller, 3) {
+			t.Errorf("Convenience wrapper returns a different result than explicit call")
+		}
+	}
+}
+
+func TestNumEquiv2D(t *testing.T) {
+	for i, test := range []struct {
+		Miller Miller
+		expect int
+	}{
+		{
+			Miller: Miller{H: 1, K: 1, L: 0},
+			expect: 4,
+		},
+		{
+			Miller: Miller{H: 2, K: 0, L: 0},
+			expect: 4,
+		},
+		{
+			Miller: Miller{H: 1, K: -1, L: 0},
+			expect: 4,
+		},
+		{
+			Miller: Miller{H: 1, K: 3, L: 0},
+			expect: 8,
+		},
+		{
+			Miller: Miller{H: 0, K: 0, L: 0},
+			expect: 1,
+		},
+	} {
+		num := NumEquivalent2D(test.Miller)
+		if num != test.expect {
+			t.Errorf("Test #%d: Expected %d got %d\n", i, test.expect, num)
+		}
+
+		// Try also the wrapper method
+		if num != NumEquivalent(test.Miller, 2) {
+			t.Errorf("Convenience wrapper returns a different result than explicit call")
 		}
 	}
 }
@@ -201,5 +244,21 @@ func TestEquivalentMiller(t *testing.T) {
 				break
 			}
 		}
+	}
+}
+
+func TestInvalidDimension(t *testing.T) {
+	miller := Miller{}
+	for dim := 1; dim < 5; dim++ {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					if dim == 2 || dim == 3 {
+						t.Errorf("Should panic for 2 and 3 dimensions")
+					}
+				}
+			}()
+			NumEquivalent(miller, dim)
+		}()
 	}
 }
