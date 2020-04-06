@@ -246,3 +246,19 @@ func TestEquivalentMiller(t *testing.T) {
 		}
 	}
 }
+
+func TestInvalidDimension(t *testing.T) {
+	miller := Miller{}
+	for dim := 1; dim < 5; dim++ {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					if dim == 2 || dim == 3 {
+						t.Errorf("Should panic for 2 and 3 dimensions")
+					}
+				}
+			}()
+			NumEquivalent(miller, dim)
+		}()
+	}
+}
