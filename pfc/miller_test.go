@@ -32,6 +32,11 @@ func TestNumEquiv(t *testing.T) {
 		if num != test.expect {
 			t.Errorf("Test #%d: Expected %d got %d\n", i, test.expect, num)
 		}
+
+		// Try also the wrapper method
+		if num != NumEquivalent(test.Miller, 3) {
+			t.Errorf("Convenience wrapper returns a different result than explicit call")
+		}
 	}
 }
 
@@ -64,6 +69,11 @@ func TestNumEquiv2D(t *testing.T) {
 		num := NumEquivalent2D(test.Miller)
 		if num != test.expect {
 			t.Errorf("Test #%d: Expected %d got %d\n", i, test.expect, num)
+		}
+
+		// Try also the wrapper method
+		if num != NumEquivalent(test.Miller, 2) {
+			t.Errorf("Convenience wrapper returns a different result than explicit call")
 		}
 	}
 }
