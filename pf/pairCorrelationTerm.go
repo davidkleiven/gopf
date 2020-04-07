@@ -7,18 +7,22 @@ import (
 )
 
 // PairCorrlationTerm implements the functional deriviative with respect to Q of the functional
+//                  **        **
+//             A   *         *
+//  g[Q] = -  ---  * dr Q(r) * dr' C(|r - r'|)Q(r')
+//             2   *         *
 //               **        **
-//          A   *         *
-//  g[Q] = ---  * dr Q(r) * dr' C(|r - r'|)Q(r')
-//          2   *         *
-//            **        **
 // where C(|r-r'|) is a pair correlation function. PairCorrFunc is the fourier transform of the
 // pair correlation function and Field is the name of the field (e.g. name of Q in the equation above).
-// Prefactor is a constant factor that is multiplied with the integral (A in the equation above)
+// Prefactor is a constant factor that is multiplied with the integral (A in the equation above).
+// The attribute Laplacian determines whether the the laplacian should be applied to the functional
+// derivative or not. If true, then this term represents nabla^2 dg/dQ, otherwise it simply represents
+// dg/dQ
 type PairCorrlationTerm struct {
 	PairCorrFunc pfc.ReciprocalSpacePairCorrelation
 	Field        string
 	Prefactor    float64
+	Laplacian    bool
 }
 
 // Construct builds the rhs required to represent the term
@@ -28,10 +32,18 @@ func (pct *PairCorrlationTerm) Construct(bricks map[string]Brick) Term {
 		for i := range out {
 			f := freq(i)
 			fRad := math.Sqrt(Dot(f, f))
-			out[i] = complex(pct.Prefactor*pct.PairCorrFunc.Eval(2.0*math.Pi*fRad), 0.0) * brick.Get(i)
+			out[i] = -complex(pct.Prefactor*pct.PairCorrFunc.Eval(2.0*math.Pi*fRad), 0.0) * brick.Get(i)
+		}
+
+		if pct.Laplacian {
+			lap := LaplacianN{Power: 1}
+			lap.Eval(freq, out)
 		}
 	}
 }
+
+// OnStepFinished is simply included to satisfy the UserDefinedTerm interface
+func (pct *PairCorrlationTerm) OnStepFinished(t float64, bricks map[string]Brick) {}
 
 // GetEnergy evaluates the energy contribution from this term. The fields
 // in bricks should be the real space representation. The number of nodes
@@ -69,10 +81,10 @@ type IdealMixtureTerm struct {
 	Prefactor float64
 }
 
-// Eval returns the negative derivative of the underlying ideal mixture term
+// Eval returns the derivative of the underlying ideal mixture term
 func (idt *IdealMixtureTerm) Eval(i int, bricks map[string]Brick) complex128 {
 	value := real(bricks[idt.Field].Get(i))
-	return complex(-idt.Prefactor*idt.IdealMix.Deriv(value), 0.0)
+	return complex(idt.Prefactor*idt.IdealMix.Deriv(value), 0.0)
 }
 
 // GetEnergy evaluates the energy contribution from this term. The fields

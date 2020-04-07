@@ -9,7 +9,7 @@ package pfc
 //
 // An expansion of this around the reference state (n = 0) yields
 //
-// F_id = -(n^2/2 - C3*n^3/6 + C4*n^4/12)
+// F_id = (n^2/2 - C3*n^3/6 + C4*n^4/12)
 //
 // where C3 and C4 are treated as free parameters that can be used to stabilize particular
 // structures of interest. Reference
