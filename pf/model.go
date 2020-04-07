@@ -111,7 +111,9 @@ type Model struct {
 	Fields        []Field
 	DerivedFields []DerivedField
 	Bricks        map[string]Brick
-	UserDef       map[string]UserDefinedTerm
+	ImplicitTerms map[string]PureTerm
+	ExplicitTerms map[string]PureTerm
+	MixedTerms    map[string]MixedTerm
 	Equations     []string
 	RHS           []RHS
 	AllSources    []Sources
@@ -120,8 +122,10 @@ type Model struct {
 // NewModel returns a new model
 func NewModel() Model {
 	return Model{
-		Bricks:  make(map[string]Brick),
-		UserDef: make(map[string]UserDefinedTerm),
+		Bricks:        make(map[string]Brick),
+		ImplicitTerms: make(map[string]PureTerm),
+		ExplicitTerms: make(map[string]PureTerm),
+		MixedTerms:    make(map[string]MixedTerm),
 	}
 }
 
@@ -270,18 +274,26 @@ func (m *Model) GetDenum(fieldNo int, freq Frequency, t float64) []complex128 {
 	return data
 }
 
-// RegisterUserDefinedTerm defines a new term. To add the term to an equation add the
-// name as one of the terms.
-//
-// Example:
-// If there is a user defined term called LINEAR_ELASTICITY, and we have a PDE where
-// the term is present on the right hand side, the equation would look like
-// dx/dt = LINEAR_ELASTICITY
-// where x is the name of the field. The additional derived fields (which are fields that are
-// contructed from the original fields) is specified via dFields
-func (m *Model) RegisterUserDefinedTerm(name string, t UserDefinedTerm, dFields []DerivedField) {
-	m.UserDef[name] = t
+const (
+	ImplicitTerm = iota
+	ExplicitTerm
+)
 
+// registerTerm defines a new pure term (linear og non linear)
+func (m *Model) registerTerm(name string, t PureTerm, dFields []DerivedField, termType int) {
+	switch termType {
+	case ImplicitTerm:
+		m.ImplicitTerms[name] = t
+	case ExplicitTerm:
+		m.ExplicitTerms[name] = t
+	default:
+		panic("Has to be either linear or a non-linear term")
+	}
+	m.registerDerivedFields(dFields)
+}
+
+// RegisterDerivedFields adds a new set of derived fields to the model
+func (m *Model) registerDerivedFields(dFields []DerivedField) {
 	if dFields != nil {
 		for _, f := range dFields {
 			if !m.IsFieldName(f.Name) {
@@ -292,34 +304,70 @@ func (m *Model) RegisterUserDefinedTerm(name string, t UserDefinedTerm, dFields 
 	}
 }
 
-// IsUserDefinedTerm checks if the given term is a user defined term
+// RegisterImplicitTerm can be used to register terms if the form
+// f({otherfields])*field
+func (m *Model) RegisterImplicitTerm(name string, t PureTerm, dFields []DerivedField) {
+	m.registerTerm(name, t, dFields, ImplicitTerm)
+}
+
+// RegisterExplicitTerm defines a new term. To add the term to an equation add the
+// name as one of the terms.
+//
+// Example:
+// If there is a user defined term called LINEAR_ELASTICITY, and we have a PDE where
+// the term is present on the right hand side, the equation would look like
+// dx/dt = LINEAR_ELASTICITY
+// where x is the name of the field. The additional derived fields (which are fields that are
+// contructed from the original fields) is specified via dFields
+func (m *Model) RegisterExplicitTerm(name string, t PureTerm, dFields []DerivedField) {
+	m.registerTerm(name, t, dFields, ExplicitTerm)
+}
+
+// RegisterMixedTerm is used to register terms that contains a linear part and a
+// non-linear part. The linear part will be treated implicitly during time evolution,
+// while the non-linear part is treated explicitly
+func (m *Model) RegisterMixedTerm(name string, t MixedTerm, dFields []DerivedField) {
+	m.MixedTerms[name] = t
+	m.registerDerivedFields(dFields)
+}
+
+// IsImplicitTerm checks if the given term is a linear term
+func (m *Model) IsImplicitTerm(desc string) bool {
+	_, ok := m.ImplicitTerms[desc]
+	return ok
+}
+
+// IsExplicitTerm returns true if the passed string is a non-linear term
+func (m *Model) IsExplicitTerm(desc string) bool {
+	_, ok := m.ExplicitTerms[desc]
+	return ok
+}
+
+// IsMixedTerm returns true if the passed string is a mixed term
+func (m *Model) IsMixedTerm(desc string) bool {
+	_, ok := m.MixedTerms[desc]
+	return ok
+}
+
+// IsUserDefinedTerm returns true if desc matches either one of the linear terms,
+// non-linear terms or mixed terms
 func (m *Model) IsUserDefinedTerm(desc string) bool {
-	for k := range m.UserDef {
-		if k == desc {
-			return true
-		}
-	}
-	return false
+	return m.IsImplicitTerm(desc) || m.IsExplicitTerm(desc) || m.IsMixedTerm(desc)
 }
 
 // RegisterFunction registers a function that may be used in the equations
 func (m *Model) RegisterFunction(name string, F GenericFunction) {
-	term := GenericFunctionTerm{
-		Name: name,
-	}
 
-	dFields := []DerivedField{
-		DerivedField{
-			Data: make([]complex128, len(m.Fields[0].Data)),
-			Name: name,
-			Calc: func(out []complex128) {
-				for i := range out {
-					out[i] = F(i, m.Bricks)
-				}
-			},
+	dField := DerivedField{
+		Data: make([]complex128, len(m.Fields[0].Data)),
+		Name: name,
+		Calc: func(out []complex128) {
+			for i := range out {
+				out[i] = F(i, m.Bricks)
+			}
 		},
 	}
-	m.RegisterUserDefinedTerm(term.Name, &term, dFields)
+	m.RegisterDerivedField(dField)
 }
 
 // RegisterDerivedField registers a new derived field

@@ -157,7 +157,7 @@ func TestUserDefinedTerms(t *testing.T) {
 		Calc: GetUsquared(model.Fields),
 		Data: make([]complex128, N*N),
 	}
-	model.RegisterUserDefinedTerm("LAP_DENSITY_SQUARED", &lapUsq, []DerivedField{dField})
+	model.RegisterExplicitTerm("LAP_DENSITY_SQUARED", &lapUsq, []DerivedField{dField})
 	model.AddEquation("ddensity/dt = LAP_DENSITY_SQUARED")
 	model.Init()
 
@@ -178,8 +178,8 @@ func TestUserDefinedTerms(t *testing.T) {
 		t.Errorf("Expected first derived field to be called density^2. Got %s", model.DerivedFields[0].Name)
 	}
 
-	if len(model.UserDef) != 1 {
-		t.Errorf("Expected 1 user defined field. Got %d", len(model.UserDef))
+	if len(model.ExplicitTerms) != 1 {
+		t.Errorf("Expected 1 user defined field. Got %d", len(model.ExplicitTerms))
 	}
 
 	if lapUsq.numCallConstruct != 1 {
@@ -209,10 +209,9 @@ func TestFunction(t *testing.T) {
 		return bricks["myfield"].Get(i)
 	})
 
-	function := model.UserDef["myfunc"].Construct(model.Bricks)
 	model.SyncDerivedFields()
 	res := make([]complex128, N)
-	function(func(i int) []float64 { return []float64{} }, 0.0, res)
+	copy(res, model.DerivedFields[0].Data)
 
 	tol := 1e-10
 	for i := 0; i < N; i++ {

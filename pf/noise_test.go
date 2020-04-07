@@ -56,7 +56,7 @@ func TestConservativeNoise(t *testing.T) {
 	noise := NewConservativeNoise(1.0, 2)
 	dfields := noise.RequiredDerivedFields(N * N)
 
-	model.RegisterUserDefinedTerm("CONSERVATIVE_NOISE", &noise, dfields)
+	model.RegisterExplicitTerm("CONSERVATIVE_NOISE", &noise, dfields)
 	model.AddEquation("dmyfield/dt = CONSERVATIVE_NOISE")
 
 	// Initialize a solver

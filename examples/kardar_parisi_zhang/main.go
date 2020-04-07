@@ -31,7 +31,7 @@ func main() {
 	gradSq.Factor = lamb
 
 	model.RegisterFunction("WHITE_NOISE", noise.Generate)
-	model.RegisterUserDefinedTerm("GRAD_SQ", &gradSq, nil)
+	model.RegisterExplicitTerm("GRAD_SQ", &gradSq, nil)
 
 	model.AddEquation("dheight/dt = LAP height + GRAD_SQ + WHITE_NOISE")
 

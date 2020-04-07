@@ -21,18 +21,10 @@ func (bp *BrickPlaceholder) Get(i int) complex128 {
 //
 // d<field>/dt = K_ij d^2<field>/dx_idx_j
 //
-// if it should be applied to a different field (e.g. a field B), it has to
-// be treated explicitly. In order to treat the term implicitly, the Field
-// attribute should left empty (e.g. an empty string) and it should appear
-// in the equation as
-// model.AddEquation("dfield/dt = HESSIAN*field")
-//                                          ^
-//                    the field name is specified in the equation
-// if it should be treated explicitly, the Field attribute should be set to the
-// field on which the hessian should operate and passed to the equation as
-// model.AddEquation("dfield/dt = HESSIAN")
-//                                  ^
-//              the field name is NOT specified in the equation
+// Note that this term can only be applied to the field that is also on the
+// left hand side of the equation. The following will not work
+//
+// d<fieldA>/dt = K_ij d^2<fieldB>/dx_idx_j
 type TensorialHessian struct {
 	Field string
 	K     []float64
@@ -42,30 +34,23 @@ type TensorialHessian struct {
 func (th *TensorialHessian) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, field []complex128) {
 		Clear(field)
-		var brick Brick
-		if th.Field == "" {
-			brick = &BrickPlaceholder{}
-		} else {
-			brick = bricks[th.Field]
-		}
 
 		for i := range field {
 			f := freq(i)
-			value := brick.Get(i)
 
 			dim := len(f)
 
 			// Diagonal terms
 			for j := 0; j < dim; j++ {
 				preFactor := -4.0 * math.Pi * math.Pi * f[j] * f[j] * th.GetCoeff(j, j)
-				field[i] += complex(preFactor, 0.0) * value
+				field[i] += complex(preFactor, 0.0)
 			}
 
 			// Off-diagonal terms
 			for j := 0; j < dim; j++ {
 				for k := j + 1; k < dim; k++ {
 					preFactor := -8.0 * math.Pi * math.Pi * f[j] * f[k] * th.GetCoeff(j, k)
-					field[i] += complex(preFactor, 0.0) * value
+					field[i] += complex(preFactor, 0.0)
 				}
 			}
 		}

@@ -98,13 +98,13 @@ func main() {
 
 	// Add volume conserving constraint
 	volPhase := pf.NewVolumeConservingLP("phase", "SMEARING_DERIV", dt, N)
-	model.RegisterUserDefinedTerm("CONSERVE_PREC_VOL", &volPhase, nil)
+	model.RegisterExplicitTerm("CONSERVE_PREC_VOL", &volPhase, nil)
 
 	// Register the linear elasticity term
 	misfit := mat.NewDense(3, 3, []float64{0.05, 0.0, 0.0, 0.0, -0.01, 0.0, 0.0, 0.0, 0.0})
 	matProp := elasticity.CubicMaterial(110.0, 60.0, 30.0)
 	linelast := pf.NewHomogeneousModolus("phase", domainSize, matProp, misfit)
-	model.RegisterUserDefinedTerm("LIN_ELAST", linelast, nil)
+	model.RegisterExplicitTerm("LIN_ELAST", linelast, nil)
 
 	model.AddEquation("dconc/dt = CHEMICALPOT + kappa*LAP conc")
 	model.AddEquation("dphase/dt = DERIV_PHASE_ORDER + LIN_ELAST + kappa*LAP phase + CONSERVE_PREC_VOL")

@@ -20,6 +20,12 @@ type RHS struct {
 	Denum []Term
 }
 
+func panicOnMinus(delim string) {
+	if delim == "-" {
+		panic("Incorprate eventual minus signs inside the term itself and use + as delimiter")
+	}
+}
+
 // Build constructs the right-hand-side of an equation based on a string
 // representation
 func Build(eq string, m *Model) RHS {
@@ -33,7 +39,18 @@ func Build(eq string, m *Model) RHS {
 	termsStr := SplitOnMany(sides[1], []string{"+", "-"})
 	var rhs RHS
 	for _, t := range termsStr {
-		if isBilinear(t.SubString, field) {
+		name := t.SubString
+		if m.IsImplicitTerm(name) {
+			panicOnMinus(t.PreceedingDelimiter)
+			rhs.Denum = append(rhs.Denum, m.ImplicitTerms[name].Construct(m.Bricks))
+		} else if m.IsExplicitTerm(name) {
+			panicOnMinus(t.PreceedingDelimiter)
+			rhs.Terms = append(rhs.Terms, m.ExplicitTerms[name].Construct(m.Bricks))
+		} else if m.IsMixedTerm(name) {
+			panicOnMinus(t.PreceedingDelimiter)
+			rhs.Denum = append(rhs.Denum, m.MixedTerms[name].ConstructLinear(m.Bricks))
+			rhs.Terms = append(rhs.Terms, m.MixedTerms[name].ConstructNonLinear(m.Bricks))
+		} else if isBilinear(t.SubString, field) {
 			t.SubString = strings.Replace(t.SubString, field, "", -1)
 			rhs.Denum = append(rhs.Denum, ConcreteTerm(t, m))
 		} else {
@@ -106,14 +123,6 @@ func ConcreteTerm(termDelim SubStringDelimiter, m *Model) Term {
 		sign = -1.0
 	}
 
-	// Remove eventual * signs
-	termStripped := strings.ReplaceAll(term, "*", "")
-	if m.IsUserDefinedTerm(termStripped) {
-		if termDelim.PreceedingDelimiter == "-" {
-			panic("rhsbuilder: Incorporate the negative sign in the definition of the term and use + as a delimiter")
-		}
-		return m.UserDef[termStripped].Construct(m.Bricks)
-	}
 	fieldReg := regexp.MustCompile("[^\\*]*")
 	res := fieldReg.FindAllStringSubmatch(term, -1)
 

@@ -70,8 +70,14 @@ func (s *Solver) Propagate(nsteps int) {
 	for i := 0; i < nsteps; i++ {
 		s.Stepper.Step(s.Model)
 		t := s.Stepper.GetTime()
-		for j := range s.Model.UserDef {
-			s.Model.UserDef[j].OnStepFinished(t, s.Model.Bricks)
+		for j := range s.Model.ImplicitTerms {
+			s.Model.ImplicitTerms[j].OnStepFinished(t, s.Model.Bricks)
+		}
+		for j := range s.Model.ExplicitTerms {
+			s.Model.ExplicitTerms[j].OnStepFinished(t, s.Model.Bricks)
+		}
+		for j := range s.Model.MixedTerms {
+			s.Model.MixedTerms[j].OnStepFinished(t, s.Model.Bricks)
 		}
 	}
 }

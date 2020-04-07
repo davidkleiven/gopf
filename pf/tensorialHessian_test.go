@@ -120,12 +120,6 @@ func TestHessianWithModel(t *testing.T) {
 	}{
 		{
 			Eqns:      []string{"dconc1/dt = HESSIAN", "dconc2/dt = -conc2"},
-			NumImp:    0,
-			NumExp:    1,
-			HessField: "conc2",
-		},
-		{
-			Eqns:      []string{"dconc1/dt = HESSIAN*conc1", "dconc2/dt = -conc2"},
 			NumImp:    1,
 			NumExp:    0,
 			HessField: "",
@@ -138,7 +132,7 @@ func TestHessianWithModel(t *testing.T) {
 		model := NewModel()
 		model.AddField(field1)
 		model.AddField(field2)
-		model.RegisterUserDefinedTerm("HESSIAN", &hessian, nil)
+		model.RegisterImplicitTerm("HESSIAN", &hessian, nil)
 		model.AddEquation(test.Eqns[0])
 		model.AddEquation(test.Eqns[1])
 		model.Init()
