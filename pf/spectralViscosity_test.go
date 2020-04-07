@@ -43,8 +43,8 @@ func TestSpectralViscosityTerm(t *testing.T) {
 	N := 16
 	field := NewField("conc", N*N, nil)
 	model.AddField(field)
-	model.RegisterUserDefinedTerm("SPECTRAL_VISC", &spectral, nil)
-	model.AddEquation("dconc/dt = SPECTRAL_VISC*conc")
+	model.RegisterImplicitTerm("SPECTRAL_VISC", &spectral, nil)
+	model.AddEquation("dconc/dt = SPECTRAL_VISC")
 	model.Init()
 
 	rhs := model.RHS[0]

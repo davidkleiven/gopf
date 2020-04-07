@@ -96,7 +96,7 @@ func TestSquareGradWithSolver(t *testing.T) {
 	model.AddField(field1)
 	model.AddField(field2)
 	model.AddScalar(zero)
-	model.RegisterUserDefinedTerm("GRAD_SQ_f2", &grad, nil)
+	model.RegisterExplicitTerm("GRAD_SQ_f2", &grad, nil)
 
 	model.AddEquation("dfield1/dt = GRAD_SQ_f2")
 	model.AddEquation("dfield2/dt = ZERO*field1")
