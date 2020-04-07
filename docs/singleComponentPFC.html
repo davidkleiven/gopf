@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOPF</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <div class="main">
+        <div class="title under">
+            <h2>Single Component Phase Field Crystal</h2>
+        </div>
+        <div class="button">
+            <a href="index.html" class="btn">Back</a>
+        </div>
+        <div style="width: 100%; float: left;">
+            <div style="width: 30%; float: left;">
+                <a href="https://github.com/davidkleiven/gopf/blob/master/examples/pfcPhases/main.go">
+                <img src="assets/github.svg" height=48px style="float: left;">
+            </a>
+            </div>
+        </div>
+        
+        
+        <div class="exampletext">
+            <p class="paragraph">Phase Field Crystal (PFC) methods have emerged as a popular tool for 
+                studying crystalline systems. Here, we use a formulation originally proposed by Greenwood <emph>et al.</emph> [1].
+                The essense of the model is to consider the free energy of system as a mixture of an ideal part and an
+                interaction part. The ideal part of the free energy is given by
+            </p>
+            <img src="assets/singleCompPFC/ideal.svg"/>
+            <p class="paragraph">
+                where <i>n</i> is a spatially varying field. It is related to the density <i>&rho;</i> via
+                <i>n = &rho;/&rho;<sub>0</sub> - 1</i>, where <i>&rho;<sub>0</sub></i> is a reference density.
+                The ideal part of the free energy is responsible for driving the field <i>n</i> towards a uniform
+                field (<i>n = 0</i> everywhere). To facilitate the formation of a particular structure, there is
+                an excess energy term
+            </p>
+            <img src="assets/singleCompPFC/excess.svg"/>
+            <p class="paragraph">
+                where <i>C<sub>2</sub></i> is a pair correlation function defined via its fourier transform.
+                The fourier transformed pair correlation function is given by the numerical envelope of the 
+                a set of Gaussian peaks (<i>i = 0, 1, 2...</i>)
+            </p>
+            <img src="assets/singleCompPFC/peak.svg"/>
+            <p class="paragraph">
+                <i>k<sub>i</sub></i> controls the location of the peaks and <i>&alpha;<sub>i</sub></i> defines the
+                width of the individual peaks. Furthermore, <i>&alpha;<sub>i</sub></i> can be fitted to elastic
+                properties [1]. The effect of temperature, is mainly to excite vibrations. Thus, temperature is
+                incorporated by multiplying the fourier transformed pair correlation functions by
+                 a prefactor to each peak. The functional form of the prefactor is the same as 
+                the Debye-Waller factor
+            </p>
+            <img src="assets/singleCompPFC/temperature.svg"/>
+            <p class="paragraph">
+                <i>&sigma;</i> demotes an effective temperature, <i>&beta;<sub>i</sub></i> is the number
+                of equivalent planes and <i>&rho;<sub>i</sub></i> is the atomic density in the plane.
+                We now show an example where we include two peaks in the correlation function (10) plane
+                and the the (11) plane. There are 4 (10) planes and 4 (11) plane. In a square crystal the
+                atomic density in the (10) plane is 1 and in the (11) the density is <i>0.707</i> (one divided
+                by the square root of 2). The fourier transformed pair correlation function is shown at different
+                temperatures below
+            </p>
+            <img src="assets/singleCompPFC/corrfunc.svg" width="60%"/>
+            <p class="paragraph">
+                By starting at a random concentration and solving the field <i>n</i> using conservative
+                dynamics
+            </p>
+            <img src="assets/singleCompPFC/conservative.svg"/>
+            <p class="paragraph">
+                where <i>F = F<sub>id</sub> + F<sub>ex</sub></i>. Depending on the average density and the 
+                temperature different crystal structures will emerge.
+            </p>
+            <div class="paragraph">
+                <table style="width:100%">
+                    <tr>
+                        <th>
+                            <img src="assets/singleCompPFC/square.png"/>
+                            Square lattice
+                        </th>
+                        <th>
+                            <img src="assets/singleCompPFC/triangle.png"/>
+                            Triangular lattice
+                        </th>
+                    </tr>
+                </table>
+            </div>
+            <p class="paragraph">
+                By varying the effective temperature and the mean density, we can map out which the regions
+                where the different phases are stable.
+            </p>
+            <img src="assets/singleCompPFC/phaseDiagram.svg" width="60%"/>
+            <p class="paragraph">
+                Combinations of <i>&sigma;</i> and the mean density that led to a square lattice, are marked
+                with a square symbol. Points leading to a triangular crystal structure are marked with a triangle.
+                Finally, if no crystal structure emerged, the point is marked by a circle.
+            </p>
+            <p class="paragraph">
+                [1] <a href=https://doi.org/10.1103/PhysRevE.83.031601>Greenwood, M., Rottler, J. and Provatas, N., 2011. Phase-field-crystal methodology for modeling of structural transformations. Physical review e, 83(3), p.031601.</a>
+            </p>
+        </div>
+        <div class="examplefig">
+            <img src="assets/singlePFC.svg"/>
+            <div class="bottom">
+                <img src="assets/gopher.svg"/>
+            </div>
+        </div>
+    </div>
+</html>
