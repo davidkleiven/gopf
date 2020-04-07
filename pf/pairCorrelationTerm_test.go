@@ -47,7 +47,7 @@ func TestPairCorrelationTerm(t *testing.T) {
 		fRad := 2.0 * math.Pi * math.Sqrt(Dot(f, f))
 		wSq := math.Pow(pair.PairCorrFunc.Peaks[0].Width, 2)
 		factor := math.Exp(-0.5 * (fRad - 1.0) * (fRad - 1.0) / wSq)
-		expect := -factor * real(field.Data[i])
+		expect := -factor
 		re := real(res[i])
 
 		if math.Abs(re-expect) > 1e-10 {
@@ -233,4 +233,78 @@ func TestPeakWidthConsistency(t *testing.T) {
 	if math.Abs(expect-dE) > rtol*expect {
 		t.Errorf("Expected increase: %f. Got %f\n", expect, dE)
 	}
+}
+
+func TestIdealMixTermWithModel(t *testing.T) {
+	N := 16
+	field := NewField("density", N*N, nil)
+
+	for i := range field.Data {
+		field.Data[i] = complex(0.5, 0.0)
+	}
+
+	term := IdealMixtureTerm{
+		IdealMix:  pfc.IdealMix{C3: 1.0, C4: 1.0},
+		Field:     "density",
+		Prefactor: 1.0,
+		Laplacian: false,
+	}
+
+	for _, lap := range []bool{false, true} {
+		term.Laplacian = lap
+
+		model := NewModel()
+		model.AddField(field)
+
+		// Case 1: Do not register the derived field
+		model.RegisterMixedTerm("IDEAL_MIX", &term, nil)
+		model.AddEquation("ddensity/dt = IDEAL_MIX")
+		model.Init()
+		freq := func(i int) []float64 {
+			return []float64{0.0, 0.6}
+		}
+
+		func() {
+			defer func() {
+				if r := recover(); r == nil {
+					t.Errorf("Should have panicked bacuse of missing field!")
+				}
+			}()
+			model.GetRHS(0, freq, 0.0)
+		}()
+
+		// Case 2: Register the missing field
+		model.RegisterDerivedField(term.DerivedField(N*N, model.Bricks))
+		model.Init()
+
+		// Evaluate the implicit part
+		tol := 1e-10
+		denum := model.GetDenum(0, freq, 0.0)
+		for i := range denum {
+			re := real(denum[i])
+			im := imag(denum[i])
+			expect := 1.0
+
+			if lap {
+				expect *= -4.0 * math.Pi * math.Pi * 0.6 * 0.6
+			}
+			if math.Abs(re-expect) > tol || math.Abs(im) > tol {
+				t.Errorf("Expected %f got %f\n", re, expect)
+			}
+		}
+
+		rhs := model.GetRHS(0, freq, 0.0)
+		expect := -0.5*math.Pow(0.5, 2.0) + math.Pow(0.5, 3.0)/3.0
+		if lap {
+			expect *= -4.0 * math.Pi * math.Pi * 0.6 * 0.6
+		}
+		for i := range rhs {
+			re := real(rhs[i])
+			im := imag(rhs[i])
+			if math.Abs(re-expect) > tol || math.Abs(im) > tol {
+				t.Errorf("Expected %f. Got %f\n", expect, re)
+			}
+		}
+	}
+
 }
