@@ -60,25 +60,3 @@ type MixedTerm interface {
 // GenericFunction is a generic function that may depend
 // on any of the fields
 type GenericFunction func(i int, bricks map[string]Brick) complex128
-
-// GenericFunctionTerm is a small struct used to represent user defined functions
-type GenericFunctionTerm struct {
-	Name string
-}
-
-// Construct creates the proper RHS function
-func (g *GenericFunctionTerm) Construct(bricks map[string]Brick) Term {
-	lap := LaplacianN{Power: 1}
-	return func(freq Frequency, t float64, field []complex128) {
-		for i := range field {
-			field[i] = bricks[g.Name].Get(i)
-		}
-
-		if g.Name[:3] == "LAP" {
-			lap.Eval(freq, field)
-		}
-	}
-}
-
-// OnStepFinished does nothing
-func (g *GenericFunctionTerm) OnStepFinished(t float64, bricks map[string]Brick) {}
