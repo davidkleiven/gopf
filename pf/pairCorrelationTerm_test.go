@@ -47,7 +47,7 @@ func TestPairCorrelationTerm(t *testing.T) {
 		fRad := 2.0 * math.Pi * math.Sqrt(Dot(f, f))
 		wSq := math.Pow(pair.PairCorrFunc.Peaks[0].Width, 2)
 		factor := math.Exp(-0.5 * (fRad - 1.0) * (fRad - 1.0) / wSq)
-		expect := factor * real(field.Data[i])
+		expect := -factor * real(field.Data[i])
 		re := real(res[i])
 
 		if math.Abs(re-expect) > 1e-10 {
@@ -114,7 +114,7 @@ func TestIdealMixTerm(t *testing.T) {
 
 	for i := range data {
 		val := term.Eval(i, bricks)
-		expect := -term.IdealMix.Deriv(real(data[i]))
+		expect := term.IdealMix.Deriv(real(data[i]))
 		re := real(val)
 		if math.Abs(re-expect) > tol {
 			t.Errorf("Expected %f. Got %f\n", expect, re)
