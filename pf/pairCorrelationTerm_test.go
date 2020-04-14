@@ -308,3 +308,48 @@ func TestIdealMixTermWithModel(t *testing.T) {
 	}
 
 }
+
+func TestExplicitPairCorrTerm(t *testing.T) {
+	term := ExplicitPairCorrelationTerm{
+		PairCorrlationTerm: PairCorrlationTerm{
+			PairCorrFunc: pfc.ReciprocalSpacePairCorrelation{
+				EffTemp: 0.0,
+				Peaks: []pfc.Peak{
+					pfc.Peak{
+						PlaneDensity: 1,
+						Location:     1.0,
+						Width:        100.0,
+						NumPlanes:    1,
+					},
+				},
+			},
+			Field:     "myfield",
+			Prefactor: 1.0,
+		},
+	}
+
+	N := 4
+	field := NewField("myfield", N*N, nil)
+	for i := range field.Data {
+		field.Data[i] = complex(2.5, 0.0)
+	}
+
+	bricks := make(map[string]Brick)
+	bricks["myfield"] = field
+	freq := func(i int) []float64 {
+		return []float64{1.0 / (2.0 * math.Pi), 0.0}
+	}
+
+	rhs := term.Construct(bricks)
+	result := make([]complex128, N*N)
+	rhs(freq, 0.0, result)
+	tol := 1e-10
+	for i := 0; i < N*N; i++ {
+		re := real(result[i])
+		im := imag(result[i])
+
+		if math.Abs(re+2.5) > tol || math.Abs(im) > 0.0 {
+			t.Errorf("Expected 1.0 got (%f, %f)\n", re, im)
+		}
+	}
+}

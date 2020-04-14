@@ -26,13 +26,19 @@ type PairCorrlationTerm struct {
 	Laplacian    bool
 }
 
+// evaluate returns the prefactor times the correlation function evaluated
+// at the passed frequency
+func (pct *PairCorrlationTerm) evaluate(f float64) float64 {
+	return pct.Prefactor * pct.PairCorrFunc.Eval(2.0*math.Pi*f)
+}
+
 // Construct builds the rhs required to represent the term
 func (pct *PairCorrlationTerm) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, out []complex128) {
 		for i := range out {
 			f := freq(i)
 			fRad := math.Sqrt(Dot(f, f))
-			out[i] = -complex(pct.Prefactor*pct.PairCorrFunc.Eval(2.0*math.Pi*fRad), 0.0)
+			out[i] = -complex(pct.evaluate(fRad), 0.0)
 		}
 
 		if pct.Laplacian {
@@ -70,6 +76,31 @@ func (pct *PairCorrlationTerm) GetEnergy(bricks map[string]Brick, ft FourierTran
 		integral += value
 	}
 	return -0.5 * integral
+}
+
+// ExplicitPairCorrelationTerm implement the pair correlation function, but the construct method
+// returns the expression corresponding to an explicit treatment of the term in the PDE.
+// The only difference between ExplicitPairCorrelationTerm and PairCorrelationTerm is that the
+// Construct method returns the explicit and implicit variant, respectively.
+type ExplicitPairCorrelationTerm struct {
+	PairCorrlationTerm
+}
+
+// Construct returns a function that evaluates the RHS of the PDE
+func (epct *ExplicitPairCorrelationTerm) Construct(bricks map[string]Brick) Term {
+	return func(freq Frequency, t float64, out []complex128) {
+		brick := bricks[epct.Field]
+		for i := range out {
+			f := freq(i)
+			fRad := math.Sqrt(Dot(f, f))
+			out[i] = -complex(epct.evaluate(fRad), 0.0) * brick.Get(i)
+		}
+
+		if epct.Laplacian {
+			lap := LaplacianN{Power: 1}
+			lap.Eval(freq, out)
+		}
+	}
 }
 
 // IdealMixtureTerm implements the ideal mixture model used in the paper by Greenwood et al.
