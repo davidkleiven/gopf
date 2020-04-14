@@ -116,3 +116,37 @@ func TestChangeHKLVector(t *testing.T) {
 		}
 	}
 }
+
+func TestCubicDensity(t *testing.T) {
+	for i, test := range []struct {
+		Miller Miller
+		Expect float64
+	}{
+		{
+			Miller: Miller{H: 1, K: 0, L: 0},
+			Expect: 1.0,
+		},
+		{
+			Miller: Miller{H: 0, K: 0, L: 1},
+			Expect: 1.0,
+		},
+		{
+			Miller: Miller{H: 1, K: 1, L: 0},
+			Expect: 1.0 / math.Sqrt(2.0),
+		},
+		{
+			Miller: Miller{H: 0, K: 1, L: 1},
+			Expect: 1.0 / math.Sqrt(2.0),
+		},
+		{
+			Miller: Miller{H: 1, K: 1, L: 1},
+			Expect: 1.0 / math.Sqrt(3.0),
+		},
+	} {
+		density := CubicUnitCellDensity(test.Miller)
+		tol := 1e-10
+		if math.Abs(density-test.Expect) > tol {
+			t.Errorf("Test #%d: Expected %f, got %f\n", i, test.Expect, density)
+		}
+	}
+}
