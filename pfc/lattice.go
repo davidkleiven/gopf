@@ -2,8 +2,10 @@ package pfc
 
 import (
 	"math"
+	"sort"
 
 	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/spatial/r3"
 )
 
 // Cell is a type used to represent a unit cell. In the underlying CellVec
@@ -156,4 +158,48 @@ func Triangular2D(a float64) Cell {
 	cell.CellVec.Set(0, 1, a/2.0)
 	cell.CellVec.Set(1, 1, a/2.0)
 	return cell
+}
+
+// CubicUnitCellDensity returns the density of a plane when the underlying
+// Bravais lattice is cubic.
+func CubicUnitCellDensity(miller Miller) float64 {
+	millerArray := make([]int, 3)
+	millerArray[0] = miller.At(0)
+	millerArray[1] = miller.At(1)
+	millerArray[2] = miller.At(2)
+	sort.Ints(millerArray)
+
+	if millerArray[0] == 0 && millerArray[1] == 0 {
+		return 1.0
+	}
+	v1 := r3.Vec{}
+	v2 := r3.Vec{}
+	v3 := r3.Vec{}
+
+	if millerArray[0] == 1 {
+		v1.X = 1.0
+		v2.Y = 1.0 / float64(millerArray[1])
+		v3.Z = 1.0 / float64(millerArray[2])
+		v3 = v3.Sub(v1) // v3 --> v3 - v1
+		v2 = v2.Sub(v1) // v2 --> v2 - v1
+	} else if millerArray[0] == 0 {
+		v2.Y = 1.0 / float64(millerArray[1])
+		v3.Z = 1.0 / float64(millerArray[2])
+		v3 = v3.Sub(v2)
+		v2.Y = 0.0
+		v2.X = 1.0
+	} else {
+		panic("The smallest Miller index has to be 0 or 1")
+	}
+
+	// TODO: v0.7 of gonum does not include Cross, but it is included in development version
+	// Use the line below after next release of gonum
+	// cross := v1.Cross(v2)
+	cross := r3.Vec{
+		X: v3.Y*v2.Z - v3.Z*v2.Y,
+		Y: v3.Z*v2.X - v3.X*v2.Z,
+		Z: v3.X*v2.Y - v3.Y*v2.X,
+	}
+	area := math.Sqrt(cross.X*cross.X + cross.Y*cross.Y + cross.Z*cross.Z)
+	return 1.0 / area
 }
