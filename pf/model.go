@@ -275,16 +275,16 @@ func (m *Model) GetDenum(fieldNo int, freq Frequency, t float64) []complex128 {
 }
 
 const (
-	ImplicitTerm = iota
-	ExplicitTerm
+	implicitTerm = iota
+	explicitTerm
 )
 
 // registerTerm defines a new pure term (linear og non linear)
 func (m *Model) registerTerm(name string, t PureTerm, dFields []DerivedField, termType int) {
 	switch termType {
-	case ImplicitTerm:
+	case implicitTerm:
 		m.ImplicitTerms[name] = t
-	case ExplicitTerm:
+	case explicitTerm:
 		m.ExplicitTerms[name] = t
 	default:
 		panic("Has to be either linear or a non-linear term")
@@ -307,7 +307,7 @@ func (m *Model) registerDerivedFields(dFields []DerivedField) {
 // RegisterImplicitTerm can be used to register terms if the form
 // f({otherfields])*field
 func (m *Model) RegisterImplicitTerm(name string, t PureTerm, dFields []DerivedField) {
-	m.registerTerm(name, t, dFields, ImplicitTerm)
+	m.registerTerm(name, t, dFields, implicitTerm)
 }
 
 // RegisterExplicitTerm defines a new term. To add the term to an equation add the
@@ -320,7 +320,7 @@ func (m *Model) RegisterImplicitTerm(name string, t PureTerm, dFields []DerivedF
 // where x is the name of the field. The additional derived fields (which are fields that are
 // contructed from the original fields) is specified via dFields
 func (m *Model) RegisterExplicitTerm(name string, t PureTerm, dFields []DerivedField) {
-	m.registerTerm(name, t, dFields, ExplicitTerm)
+	m.registerTerm(name, t, dFields, explicitTerm)
 }
 
 // RegisterMixedTerm is used to register terms that contains a linear part and a

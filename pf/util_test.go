@@ -21,12 +21,12 @@ func TestGetNonLinearFieldExp(t *testing.T) {
 		{
 			expr:   "conc1^2*eta1*factor",
 			field:  "eta1",
-			expect: "conc1^2",
+			expect: "conc1^2*eta1",
 		},
 		{
 			expr:   "conc2*conc1",
 			field:  "conc2",
-			expect: "conc1",
+			expect: "conc1*conc2",
 		},
 		{
 			expr:   "LAPconc2^2*eta2^3",
@@ -201,6 +201,113 @@ func TestSplitOnMany(t *testing.T) {
 			if substr[j] != test.Expect[j] {
 				t.Errorf("Test #%d: Expected %s got %s\n", i, test.Expect[j], substr[j])
 			}
+		}
+	}
+}
+
+func TestUniqueFreqIterator(t *testing.T) {
+	N := 16
+	for i, test := range []struct {
+		DomainSize       []int
+		ExpectNum        int
+		ExpectNumNyquist int
+	}{
+		{
+			DomainSize: []int{N, N},
+
+			// ExpectNum = N*N/2 + 2 because we have inversion symmetry, thus
+			// we can restrict ourselves to the case when fy >= 0.0. If a grid
+			// has N*N grid points, there should N*N independent fourier coefficients.
+			// Since we have both real and imaginary parts, the total number of "unknowns"
+			// is 2*(N*N/2 + 2) = N*N + 4. Furthermore, we know that the fourier amplitudes
+			// at the frequencies (0, 0), (0, 0.5), (0.5, 0) and (0.5, 0.5) are real. Thus,
+			// the 4 imaginary parts of these amplitudes are not unknown. Consequently, there
+			// are only N*N independent "unknowns"
+			ExpectNum:        N*N/2 + 2,
+			ExpectNumNyquist: 1,
+		},
+		{
+			DomainSize: []int{N, N, N},
+
+			// Same reasoning as in the 2D case. But frequencies
+			// (0, 0, 0), (0, 0, 0.5), (0, 0.5, 0), (0.5, 0, 0), (0.5, 0.5, 0)
+			// (0.5, 0, 0.5), (0, 0.5, 0.5) and (0.5, 0.5, 0.5) are real.
+			// This removes 8 imaginary parts
+			ExpectNum:        N*N*N/2 + 4,
+			ExpectNumNyquist: 1,
+		},
+	} {
+		ft := NewFFTW(test.DomainSize)
+		num := 0
+		iterator := UniqueFreqIterator{
+			Freq: ft.Freq,
+			End:  ProdInt(test.DomainSize),
+		}
+		zeroFound := false
+		numNyquist := 0
+		for i := iterator.Next(); i != -1; i = iterator.Next() {
+			num++
+			f := ft.Freq(i)
+
+			if !zeroFound {
+				zeroFound = true
+				for j := range f {
+					if math.Abs(f[j]) > 1e-10 {
+						zeroFound = false
+						break
+					}
+				}
+			}
+
+			allCloseToHalf := true
+			for j := range f {
+				if math.Abs(math.Abs(f[j])-0.5) > 1e-10 {
+					allCloseToHalf = false
+					break
+				}
+			}
+
+			if allCloseToHalf {
+				numNyquist++
+			}
+		}
+
+		if num != test.ExpectNum {
+			t.Errorf("Test #%d: Expected %d items got %d\n", i, test.ExpectNum, num)
+		}
+
+		if !zeroFound {
+			t.Errorf("Test #%d: Zero frequency not found\n", i)
+		}
+
+		if numNyquist != test.ExpectNumNyquist {
+			t.Errorf("Test #%d: Expected %d nyquist frequencies got %d\n", i, test.ExpectNumNyquist, numNyquist)
+		}
+	}
+}
+
+func TestRealAmplitudeIterator(t *testing.T) {
+	for i, test := range []struct {
+		DomainSize []int
+		ExpectNum  int
+	}{
+		{
+			DomainSize: []int{8, 8},
+			ExpectNum:  4,
+		},
+	} {
+		iterator := RealAmplitudeIterator{
+			Freq: NewFFTW(test.DomainSize).Freq,
+			End:  ProdInt(test.DomainSize),
+		}
+
+		num := 0
+		for j := iterator.Next(); j != -1; j = iterator.Next() {
+			num++
+		}
+
+		if num != test.ExpectNum {
+			t.Errorf("Test #%d: Expected %d items got %d\n", i, test.ExpectNum, num)
 		}
 	}
 }
