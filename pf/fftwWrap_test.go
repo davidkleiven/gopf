@@ -55,3 +55,36 @@ func TestFFTWWrapConsistency(t *testing.T) {
 		}
 	}
 }
+
+func TestConjugateNode(t *testing.T) {
+	for i, test := range []struct {
+		Dim []int
+	}{
+		{
+			Dim: []int{8, 8},
+		},
+		{
+			Dim: []int{9, 9},
+		},
+		{
+			Dim: []int{8, 8, 8},
+		},
+		{
+			Dim: []int{9, 9, 9},
+		},
+	} {
+		ft := NewFFTW(test.Dim)
+		for j := 0; j < ProdInt(test.Dim); j++ {
+			f1 := ft.Freq(j)
+			nodeIdx := ft.ConjugateNode(j)
+			f2 := ft.Freq(nodeIdx)
+
+			tol := 1e-10
+			for k := range f1 {
+				if math.Abs(f1[k]+f2[k]) > tol && math.Abs(f1[k]) < 0.5-tol {
+					t.Errorf("Test #%d: %v and %v are not conjugate pairs\n", i, f1, f2)
+				}
+			}
+		}
+	}
+}

@@ -41,42 +41,49 @@ func TestNameFromLeibniz(t *testing.T) {
 
 func TestIsBilinear(t *testing.T) {
 	for i, test := range []struct {
-		field  string
-		expr   string
-		expect bool
+		field     string
+		expr      string
+		expect    bool
+		allFields []string
 	}{
 		{
-			field:  "c",
-			expr:   "2*c",
-			expect: true,
+			field:     "c",
+			expr:      "2*c",
+			expect:    true,
+			allFields: []string{"c"},
 		},
 		{
-			field:  "conc",
-			expr:   "conc^2",
-			expect: false,
+			field:     "conc",
+			expr:      "conc^2",
+			expect:    false,
+			allFields: []string{"conc"},
 		},
 		{
-			field:  "c",
-			expr:   "c*n*r",
-			expect: true,
+			field:     "c",
+			expr:      "c*n*r",
+			expect:    false,
+			allFields: []string{"c", "n", "r"},
 		},
 		{
-			field:  "voltage",
-			expr:   "voltage^1.62",
-			expect: false,
+			field:     "voltage",
+			expr:      "voltage^1.62",
+			expect:    false,
+			allFields: []string{"voltage"},
 		},
 		{
-			field:  "voltage",
-			expr:   "current*voltage^1.0",
-			expect: true,
+			field:     "voltage",
+			expr:      "current*voltage^1.0",
+			expect:    false,
+			allFields: []string{"voltage", "current"},
 		},
 		{
-			field:  "current",
-			expr:   "P*current^-2",
-			expect: false,
+			field:     "current",
+			expr:      "P*current^-2",
+			expect:    false,
+			allFields: []string{"current"},
 		},
 	} {
-		got := isBilinear(test.expr, test.field)
+		got := isBilinear(test.expr, test.field, test.allFields)
 		if test.expect != got {
 			t.Errorf("Test #%d: expected %v got %v", i, test.expect, got)
 		}

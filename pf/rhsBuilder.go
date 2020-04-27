@@ -50,7 +50,7 @@ func Build(eq string, m *Model) RHS {
 			panicOnMinus(t.PreceedingDelimiter)
 			rhs.Denum = append(rhs.Denum, m.MixedTerms[name].ConstructLinear(m.Bricks))
 			rhs.Terms = append(rhs.Terms, m.MixedTerms[name].ConstructNonLinear(m.Bricks))
-		} else if isBilinear(t.SubString, field) {
+		} else if isBilinear(t.SubString, field, m.AllFieldNames()) {
 			t.SubString = strings.Replace(t.SubString, field, "", -1)
 			rhs.Denum = append(rhs.Denum, ConcreteTerm(t, m))
 		} else {
@@ -73,11 +73,24 @@ func fieldNameFromLeibniz(leibniz string) string {
 }
 
 // isBilinear checks if the term given is bilinear in the passed field
-func isBilinear(term string, field string) bool {
+func isBilinear(term string, field string, fieldNames []string) bool {
 	fieldReg := regexp.MustCompile(field)
 	resCount := fieldReg.FindAllStringIndex(term, -1)
 	if len(resCount) != 1 {
 		return false
+	}
+
+	// Check if any of ther other fields are present. In that case, the term
+	// will not be linear in the fourier domain
+	for _, f := range fieldNames {
+		if f == field {
+			continue
+		}
+		r := regexp.MustCompile(f)
+		count := r.FindAllStringIndex(term, -1)
+		if len(count) > 0 {
+			return false
+		}
 	}
 
 	// Match the field name until * or / is found

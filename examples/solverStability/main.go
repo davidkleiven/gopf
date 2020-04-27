@@ -40,7 +40,15 @@ func solve(dt float64, solverName string) []complex128 {
 
 	// Initialize solver0.999506
 	solver := pf.NewSolver(&model, domainSize, dt)
-	solver.SetStepper(solverName)
+
+	if solverName == "implicitEuler" {
+		solver.Stepper = &pf.ImplicitEuler{
+			Dt: dt,
+			FT: pf.NewFFTW(domainSize),
+		}
+	} else {
+		solver.SetStepper(solverName)
+	}
 	solver.Solve(1, 100)
 	return conc.Data
 }
@@ -67,8 +75,8 @@ func maxReal(data []complex128) float64 {
 }
 
 func main() {
-	timesteps := []float64{0.1, 1.0, 1.5, 1.9, 2.0}
-	solvers := []string{"euler", "rk4"}
+	timesteps := []float64{0.1, 1.0, 1.5, 1.9, 2.1}
+	solvers := []string{"euler", "rk4", "implicitEuler"}
 
 	for _, solver := range solvers {
 		for _, dt := range timesteps {

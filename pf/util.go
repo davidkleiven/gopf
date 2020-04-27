@@ -1,6 +1,7 @@
 package pf
 
 import (
+	"fmt"
 	"math"
 	"math/cmplx"
 	"regexp"
@@ -27,7 +28,7 @@ func CmplxEqualApprox(a []complex128, b []complex128, tol float64) bool {
 func GetNonLinearFieldExpressions(pattern string, field string, fieldNames []string) string {
 	expr := ""
 	for i := range fieldNames {
-		if fieldNames[i] == field && isBilinear(pattern, field) {
+		if fieldNames[i] == field && isBilinear(pattern, field, fieldNames) {
 			continue
 		}
 		regField := regexp.MustCompile(fieldNames[i] + "[^\\*]*")
@@ -307,4 +308,83 @@ func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
 		}
 	}
 	return substrings
+}
+
+// UniqueFreqIterator is an iterator that can be used to iterate over all the unique
+// frequencies of the fourier transform of a real-valued function. This iterator can
+// be used in a for loop as follows
+// for i := iterator.Next(); i != -1; i = iterator.Next()
+type UniqueFreqIterator struct {
+	Freq Frequency
+	End  int
+	next int
+}
+
+// Next returns the index of unique site. It returns -1 when exhausted
+func (ufi *UniqueFreqIterator) Next() int {
+	for i := ufi.next; i < ufi.End; i++ {
+		f := ufi.Freq(i)
+
+		// Special case last frequency is 0 or 0.5
+		//if f[len(f)-1] > -tol {
+		if includeFreq(f, len(f)-1) {
+			ufi.next = i + 1
+			return i
+		}
+	}
+	return -1
+}
+
+func includeFreq(f []float64, split int) bool {
+	tol := 1e-10
+	if split == 0 {
+		return f[0] > -tol
+	}
+
+	if math.Abs(f[split]) < tol || math.Abs(f[split]) > 0.5-tol {
+		return includeFreq(f, split-1)
+	}
+	return f[split] > -tol
+}
+
+// firstFreqsAreNyquistOrZero returns true if all frequencies (apart from the last)
+// is either 0 or 0.5
+func (ufi *UniqueFreqIterator) firstFreqsAreNyquistOrZero(f []float64) bool {
+	tol := 1e-10
+	for j := range f {
+		if math.Abs(f[j]) > tol || math.Abs(f[j]) < 0.5-tol {
+			return false
+		}
+	}
+	return true
+}
+
+// RealAmplitudeIterator iterates over all frequencies that has a real fourier amplitude
+// when the input signal has a real amplitude
+type RealAmplitudeIterator struct {
+	Freq Frequency
+	End  int
+	next int
+}
+
+// Next returns the next index. It returns -1 when the iterator is exhausted
+func (rai *RealAmplitudeIterator) Next() int {
+	tol := 1e-10
+	for i := rai.next; i < rai.End; i++ {
+		f := rai.Freq(i)
+
+		allZeroOrNyquist := true
+		for j := range f {
+			if math.Abs(f[j]) > tol && math.Abs(f[j]) < 0.5-tol {
+				allZeroOrNyquist = false
+			}
+		}
+
+		if allZeroOrNyquist {
+			fmt.Printf("%v\n", f)
+			rai.next = i + 1
+			return i
+		}
+	}
+	return -1
 }

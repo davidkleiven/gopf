@@ -3,6 +3,10 @@ github.com/barnex/fftw v0.0.0-20181125072904-b800f77a10de h1:IUKWQeq/KJwcblO3mKi
 github.com/barnex/fftw v0.0.0-20181125072904-b800f77a10de/go.mod h1:18E8YpOFQFEoG+0SwUnE01ow15ccx/DV3TgCZeLWHrg=
 github.com/barnex/matrix v0.0.0-20141117141426-1090b02beddd h1:2KyoPxOLR6RyUASLBz085pBMQYSjU6Ialr9LY1ywP4c=
 github.com/barnex/matrix v0.0.0-20141117141426-1090b02beddd/go.mod h1:rRLfitTolJsbIHu1MTwoiWow1R+PsD+Xy8prWIDml4Y=
+github.com/davidkleiven/gononlin v0.0.0-20200420045803-2fb99e0ebe21 h1:ELkX8DTiX1qIkI/slHD0I3v/o8FxcI8WGE4Sz0syQ1g=
+github.com/davidkleiven/gononlin v0.0.0-20200420045803-2fb99e0ebe21/go.mod h1:S1PpKrPyZzeK3sA4J8D5xcmN2S+/wBu8eso+A6wijvo=
+github.com/davidkleiven/gononlin v0.0.0-20200421123722-3211d3e61662 h1:mZ94V8B1LfVGOwPdK1aMkKklxOYULM9J0zXWHfWDnLM=
+github.com/davidkleiven/gononlin v0.0.0-20200421123722-3211d3e61662/go.mod h1:S1PpKrPyZzeK3sA4J8D5xcmN2S+/wBu8eso+A6wijvo=
 github.com/davidkleiven/gosfft v1.0.0 h1:IlcmEGLJ5mnwW6yGvgLAxZ1dUEaUSCzKy/Ts3jpxKuE=
 github.com/davidkleiven/gosfft v1.0.0/go.mod h1:ua+fX/98IO86brh/5uphDbVwJpefWsLL/QDl00piW/Q=
 github.com/davidkleiven/gosfft v1.0.1 h1:mmhZfLlLvojUzjmplozDov74PiItR9xUpX7e5HDBNqk=
