@@ -131,3 +131,31 @@ func TestClear(t *testing.T) {
 		t.Errorf("Expected\n%v\nGot\n%v\n", expect, data)
 	}
 }
+
+func TestWrap(t *testing.T) {
+	domainSize := []int{7, 7}
+	for i, test := range []struct {
+		Pos    []int
+		Expect []int
+	}{
+		{
+			Pos:    []int{5, 5},
+			Expect: []int{5, 5},
+		},
+		{
+			Pos:    []int{5, 7},
+			Expect: []int{5, 0},
+		},
+		{
+			Pos:    []int{-5, 7},
+			Expect: []int{2, 0},
+		},
+	} {
+		Wrap(test.Pos, domainSize)
+		for j := range test.Pos {
+			if test.Pos[j] != test.Expect[j] {
+				t.Errorf("Test #%d: Expected\n%v\nGot\n%v\n", i, test.Expect, test.Pos)
+			}
+		}
+	}
+}

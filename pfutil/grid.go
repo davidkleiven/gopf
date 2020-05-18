@@ -1,9 +1,7 @@
-package pf
+package pfutil
 
 import (
 	"fmt"
-
-	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // Grid is a type that represents a computatoinal grid
@@ -16,7 +14,7 @@ type Grid struct {
 func NewGrid(dims []int) Grid {
 	return Grid{
 		Dims: dims,
-		Data: make([]float64, pfutil.ProdInt(dims)),
+		Data: make([]float64, ProdInt(dims)),
 	}
 }
 
