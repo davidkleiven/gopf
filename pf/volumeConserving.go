@@ -18,6 +18,9 @@ type VolumeConservingLP struct {
 // Construct build the function needed to evaluate the term
 func (v *VolumeConservingLP) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, field []complex128) {
+		if _, ok := bricks[v.Indicator]; !ok {
+			panic("VolumeConservingLP: Indicator is not a derived field")
+		}
 		for i := range field {
 			field[i] = bricks[v.Indicator].Get(i) * complex(v.Multiplier, 0.0)
 		}
