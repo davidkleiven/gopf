@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math"
 	"math/rand"
 	"os"
 
@@ -56,27 +55,12 @@ func main() {
 			field.Data[i] = complex(0.3*(2.0*rand.Float64()-1.0)+*meanDensity, 0.0)
 		}
 	}
-	wavenumber1 := 2.0 * math.Pi * math.Sqrt(2.0) / a
-	wavenumber2 := 2.0 * math.Pi / a
 
 	// Two-peak model
 	term := pf.PairCorrlationTerm{
 		PairCorrFunc: pfc.ReciprocalSpacePairCorrelation{
 			EffTemp: *effTemp,
-			Peaks: []pfc.Peak{
-				pfc.Peak{
-					PlaneDensity: 1.0 / math.Sqrt(2.0),
-					Location:     wavenumber1,
-					Width:        0.02,
-					NumPlanes:    pfc.NumEquivalent2D(pfc.Miller{H: 1, K: 1}),
-				},
-				pfc.Peak{
-					PlaneDensity: 1.0,
-					Location:     wavenumber2,
-					Width:        0.02,
-					NumPlanes:    pfc.NumEquivalent2D(pfc.Miller{H: 1, K: 0}),
-				},
-			},
+			Peaks:   pfc.SquareLattice2D(0.02, a),
 		},
 		Field:     "density",
 		Prefactor: 1.0,
