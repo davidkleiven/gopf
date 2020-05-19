@@ -5,6 +5,7 @@ import (
 	"math/cmplx"
 
 	"github.com/davidkleiven/gononlin/nonlin"
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // ImplicitEuler performs a full implicit euler method. We have a problem
@@ -138,7 +139,7 @@ func (ie *ImplicitEuler) fft(m *Model) {
 func (ie *ImplicitEuler) ifft(m *Model) {
 	for _, f := range m.Fields {
 		ie.FT.IFFT(f.Data)
-		DivRealScalar(f.Data, float64(len(f.Data)))
+		pfutil.DivRealScalar(f.Data, float64(len(f.Data)))
 	}
 }
 

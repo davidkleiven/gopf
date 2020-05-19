@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // WhiteNoise is a type that can be used to add white noise to a model
@@ -60,7 +62,7 @@ func (cn *ConservativeNoise) Construct(bricks map[string]Brick) Term {
 		panic("ConservativeCurrent: Current fields are not register. Make sure that you have registered the fields returned by RequiredDerivedFields.")
 	}
 	return func(freq Frequency, t float64, field []complex128) {
-		Clear(field)
+		pfutil.Clear(field)
 		for comp := 0; comp < cn.Dim; comp++ {
 			brick := bricks[cn.GetCurrentName(comp)]
 			for i := range field {

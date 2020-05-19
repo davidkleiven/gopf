@@ -3,6 +3,8 @@ package pf
 import (
 	"math"
 	"testing"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 func TestLaplacianN(t *testing.T) {
@@ -48,7 +50,7 @@ func TestLaplacianN(t *testing.T) {
 		lap.Eval(Freq, tmpData)
 
 		expect := test.expect()
-		if !CmplxEqualApprox(expect, tmpData, 1e-10) {
+		if !pfutil.CmplxEqualApprox(expect, tmpData, 1e-10) {
 			t.Errorf("Test #%d: Expected\n%v\nGot\n%v\n", i, expect, tmpData)
 		}
 	}

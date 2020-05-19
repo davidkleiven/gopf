@@ -3,6 +3,8 @@ package pf
 import (
 	"math"
 	"testing"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 func TestImplicitEuler(t *testing.T) {
@@ -140,7 +142,7 @@ func TestField2VecRoundTrip(t *testing.T) {
 
 	// Clear all fields
 	for i := range fields {
-		Clear(fields[i].Data)
+		pfutil.Clear(fields[i].Data)
 	}
 
 	// Confirm that all fields values are now zero
@@ -159,7 +161,7 @@ func TestField2VecRoundTrip(t *testing.T) {
 
 	// Confirm that the fields now matches
 	for i := range fields {
-		if !CmplxEqualApprox(fields[i].Data, origFields[i].Data, tol) {
+		if !pfutil.CmplxEqualApprox(fields[i].Data, origFields[i].Data, tol) {
 			t.Errorf("Expected %v\ngot\n%v\n", origFields[i].Data, fields[i].Data)
 		}
 	}

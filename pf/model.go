@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // Field is a type that is used to represent a field in the context of phase field
@@ -253,12 +255,12 @@ func (m *Model) GetRHS(fieldNo int, freq Frequency, t float64) []complex128 {
 	tmp := make([]complex128, len(m.Fields[fieldNo].Data))
 	for _, f := range m.RHS[fieldNo].Terms {
 		f(freq, t, tmp)
-		ElemwiseAdd(data, tmp)
+		pfutil.ElemwiseAdd(data, tmp)
 	}
 
 	for _, s := range m.AllSources[fieldNo] {
 		s.Eval(freq, t, tmp)
-		ElemwiseAdd(data, tmp)
+		pfutil.ElemwiseAdd(data, tmp)
 	}
 	return data
 }
@@ -269,7 +271,7 @@ func (m *Model) GetDenum(fieldNo int, freq Frequency, t float64) []complex128 {
 	tmp := make([]complex128, len(m.Fields[fieldNo].Data))
 	for _, f := range m.RHS[fieldNo].Denum {
 		f(freq, t, tmp)
-		ElemwiseAdd(data, tmp)
+		pfutil.ElemwiseAdd(data, tmp)
 	}
 	return data
 }

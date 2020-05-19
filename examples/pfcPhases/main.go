@@ -8,6 +8,7 @@ import (
 
 	"github.com/davidkleiven/gopf/pf"
 	"github.com/davidkleiven/gopf/pfc"
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // EnergyObserver is a type that calculates the free energy
@@ -20,7 +21,7 @@ type EnergyObserver struct {
 
 // Calculate calculates the energy (normalized by volume)
 func (eo *EnergyObserver) Calculate(s *pf.Solver, epoch int) {
-	N := pf.ProdInt(eo.DomainSize)
+	N := pfutil.ProdInt(eo.DomainSize)
 	idealE := eo.Ideal.GetEnergy(s.Model.Bricks, N)
 	excess := eo.Excess.GetEnergy(s.Model.Bricks, s.FT, eo.DomainSize)
 	eo.LastEnergy = (idealE + excess) / float64(N)

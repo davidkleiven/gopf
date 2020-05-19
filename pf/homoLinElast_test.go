@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/davidkleiven/gopf/elasticity"
+	"github.com/davidkleiven/gopf/pfutil"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -74,7 +75,7 @@ func TestHomogeneousRHS(t *testing.T) {
 	res := make([]complex128, N*N)
 	function(homogenous.FT.Freq, 0.0, res)
 	homogenous.FT.IFFT(res)
-	DivRealScalar(res, float64(len(res)))
+	pfutil.DivRealScalar(res, float64(len(res)))
 
 	tol := 1e-4
 	for i := range res {

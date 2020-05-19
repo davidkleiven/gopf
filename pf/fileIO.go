@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // Uint8IO is a struct used to store fields as uint8
@@ -23,8 +25,8 @@ func NewUint8IO(prefix string) Uint8IO {
 func (u *Uint8IO) SaveFields(s *Solver, epoch int) {
 	for _, f := range s.Model.Fields {
 		fname := fmt.Sprintf("%s_%s_%d.bin", u.Prefix, f.Name, epoch)
-		min := MinReal(f.Data)
-		max := MaxReal(f.Data)
+		min := pfutil.MinReal(f.Data)
+		max := pfutil.MaxReal(f.Data)
 		uint8Rep := RealPartAsUint8(f.Data, min, max)
 		out, err := os.Create(fname)
 		if err != nil {

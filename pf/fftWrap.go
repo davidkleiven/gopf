@@ -1,6 +1,9 @@
 package pf
 
-import "github.com/barnex/fftw"
+import (
+	"github.com/barnex/fftw"
+	"github.com/davidkleiven/gopf/pfutil"
+)
 
 // FFTWWrapper implemente the FourierTransform interface
 type FFTWWrapper struct {
@@ -13,7 +16,7 @@ type FFTWWrapper struct {
 // NewFFTW returns a new FFTWWrapper
 func NewFFTW(n []int) *FFTWWrapper {
 	var transform FFTWWrapper
-	transform.Data = make([]complex128, ProdInt(n))
+	transform.Data = make([]complex128, pfutil.ProdInt(n))
 	transform.PlanFFT = fftw.PlanZ2Z(n, transform.Data, transform.Data, -1, fftw.MEASURE)
 	transform.PlanIFFT = fftw.PlanZ2Z(n, transform.Data, transform.Data, 1, fftw.MEASURE)
 	transform.Dimensions = n

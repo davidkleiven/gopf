@@ -1,4 +1,4 @@
-package pfc
+package pfutil
 
 import (
 	"testing"

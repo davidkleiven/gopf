@@ -1,5 +1,7 @@
 package pf
 
+import "github.com/davidkleiven/gopf/pfutil"
+
 // Euler performs semi-implicit euler method
 type Euler struct {
 	Dt          float64
@@ -39,7 +41,7 @@ func (eu *Euler) Step(m *Model) {
 	// Inverse FFT
 	for _, f := range m.Fields {
 		eu.FT.IFFT(f.Data)
-		DivRealScalar(f.Data, float64(len(f.Data)))
+		pfutil.DivRealScalar(f.Data, float64(len(f.Data)))
 	}
 	eu.CurrentStep++
 }

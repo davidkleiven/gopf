@@ -4,6 +4,8 @@ import (
 	"math"
 	"sort"
 	"testing"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 func TestGetNonLinearFieldExp(t *testing.T) {
@@ -64,7 +66,7 @@ func TestDerivedCalcFromDesc(t *testing.T) {
 		calc := DerivedFieldCalcFromDesc(test.desc, fields)
 		array := make([]complex128, 2)
 		calc(array)
-		if !CmplxEqualApprox(test.expect, array, 1e-10) {
+		if !pfutil.CmplxEqualApprox(test.expect, array, 1e-10) {
 			t.Errorf("Test #%d: Expected\n%v\nGot\n%v\n", i, test.expect, array)
 		}
 	}
@@ -241,7 +243,7 @@ func TestUniqueFreqIterator(t *testing.T) {
 		num := 0
 		iterator := UniqueFreqIterator{
 			Freq: ft.Freq,
-			End:  ProdInt(test.DomainSize),
+			End:  pfutil.ProdInt(test.DomainSize),
 		}
 		zeroFound := false
 		numNyquist := 0
@@ -298,7 +300,7 @@ func TestRealAmplitudeIterator(t *testing.T) {
 	} {
 		iterator := RealAmplitudeIterator{
 			Freq: NewFFTW(test.DomainSize).Freq,
-			End:  ProdInt(test.DomainSize),
+			End:  pfutil.ProdInt(test.DomainSize),
 		}
 
 		num := 0

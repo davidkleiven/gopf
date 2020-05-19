@@ -3,6 +3,8 @@ package pf
 import (
 	"math"
 	"testing"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 func TestInterpolation(t *testing.T) {
@@ -62,7 +64,7 @@ func TestSpectralViscosityTerm(t *testing.T) {
 	tol := 1e-10
 	for i := 0; i < N*N; i++ {
 		fVec := freq(i)
-		f := Dot(fVec, fVec)
+		f := pfutil.Dot(fVec, fVec)
 		expect := -spectral.Eps * interpolant(math.Sqrt(f), spectral.DissipationThreshold) * f
 		re := real(res[i])
 		im := imag(res[i])

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize"
 )
@@ -139,7 +140,7 @@ func (ms *ModeSolver) build(power int, order int) map[string]freeEnergyTerm {
 	for i := range end {
 		end[i] = len(ms.Miller)
 	}
-	comb := NewProduct(end)
+	comb := pfutil.NewProduct(end)
 
 	for idx := comb.Next(); idx != nil; idx = comb.Next() {
 		powers := make([]int, len(ms.Miller))

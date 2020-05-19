@@ -4,6 +4,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	"github.com/davidkleiven/gosfft/sfft"
 )
 
@@ -103,7 +104,7 @@ func TestDivGrad(t *testing.T) {
 	res := make([]complex128, len(data))
 	rhs(ft.Freq, 0.0, res)
 	ft.IFFT(res)
-	DivRealScalar(res, float64(len(res)))
+	pfutil.DivRealScalar(res, float64(len(res)))
 
 	tol := 1e-3
 	mismatch := false
