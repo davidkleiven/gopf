@@ -1,6 +1,10 @@
 package pf
 
-import "math"
+import (
+	"math"
+
+	"github.com/davidkleiven/gopf/pfutil"
+)
 
 // SpectralViscosity implements the spectral viscosity method proposed in
 // Tadmor, E., 1989. Convergence of spectral methods for nonlinear conservation laws.
@@ -41,7 +45,7 @@ func (sv *SpectralViscosity) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, field []complex128) {
 		for i := range field {
 			f := freq(i)
-			fRad := math.Sqrt(Dot(f, f))
+			fRad := math.Sqrt(pfutil.Dot(f, f))
 			value := interpolant(fRad, sv.DissipationThreshold)
 			field[i] = complex(-sv.Eps*value*math.Pow(fRad, float64(sv.Power)), 0.0)
 		}

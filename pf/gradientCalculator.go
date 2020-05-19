@@ -3,6 +3,8 @@ package pf
 import (
 	"fmt"
 	"math"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // GradientCalculator calculates the gradient of a field
@@ -25,7 +27,7 @@ func (g *GradientCalculator) Calculate(indata []complex128, data []complex128) {
 		data[i] *= complex(0.0, 2.0*math.Pi*f)
 	}
 	g.FT.IFFT(data)
-	DivRealScalar(data, float64(len(data)))
+	pfutil.DivRealScalar(data, float64(len(data)))
 }
 
 // ToDerivedField constructs a derived field from the gradient calculator.
@@ -91,7 +93,7 @@ func (dg *DivGrad) PrepareModel(N int, m *Model, FT FourierTransform) {
 // Construct builds the right hand side term
 func (dg *DivGrad) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, field []complex128) {
-		Clear(field)
+		pfutil.Clear(field)
 		dim := len(freq(0))
 		for d := 0; d < dim; d++ {
 			brick := bricks[dg.FuncName()+dg.GradName(d)]

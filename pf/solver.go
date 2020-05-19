@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // SolverCB is function type that can be added to the solver it is executed after each
@@ -51,7 +53,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	}
 
 	// Sanity check for fields
-	N := ProdInt(domainSize)
+	N := pfutil.ProdInt(domainSize)
 	for _, f := range m.Fields {
 		if len(f.Data) != N {
 			panic("solver: Inconsistent domain size and number of grid points")

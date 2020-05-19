@@ -3,6 +3,8 @@ package pf
 import (
 	"math"
 	"testing"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 func TestNameFromLeibniz(t *testing.T) {
@@ -147,7 +149,7 @@ func TestConcreteTerm(t *testing.T) {
 		got := make([]complex128, len(test.expect))
 		term(Freq, 0.0, got)
 
-		if !CmplxEqualApprox(got, test.expect, 1e-10) {
+		if !pfutil.CmplxEqualApprox(got, test.expect, 1e-10) {
 			t.Errorf("Test #%d: Expected\n%v\nGot\n%v\n", i, test.expect, got)
 		}
 	}

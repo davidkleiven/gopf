@@ -4,6 +4,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	"github.com/davidkleiven/gosfft/sfft"
 )
 
@@ -87,7 +88,7 @@ func TestTensorialHessian(t *testing.T) {
 			res[i] *= field.Data[i]
 		}
 		ft.IFFT(res)
-		DivRealScalar(res, float64(len(res)))
+		pfutil.DivRealScalar(res, float64(len(res)))
 
 		for j := range res {
 			re := real(res[j])

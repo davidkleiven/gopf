@@ -1,5 +1,7 @@
 package pf
 
+import "github.com/davidkleiven/gopf/pfutil"
+
 // RK4 implements the fourth order Runge-Kutta scheme. Dt is the timestep
 // FT is a fourier transform object used to translate back-and fourth between
 // fourier domain.
@@ -67,7 +69,7 @@ func (rk *RK4) Step(m *Model) {
 
 	for _, f := range m.Fields {
 		rk.FT.IFFT(f.Data)
-		DivRealScalar(f.Data, float64(len(f.Data)))
+		pfutil.DivRealScalar(f.Data, float64(len(f.Data)))
 	}
 }
 
@@ -108,7 +110,7 @@ func (rk *RK4) correction(m *Model, kFactor []Field, factor float64) {
 			f.Data[j] /= (complex(1.0, 0.0) - complex(factor*rk.Dt, 0.0)*denum[j])
 		}
 		rk.FT.IFFT(f.Data)
-		DivRealScalar(f.Data, float64(len(f.Data)))
+		pfutil.DivRealScalar(f.Data, float64(len(f.Data)))
 	}
 	m.SyncDerivedFields()
 

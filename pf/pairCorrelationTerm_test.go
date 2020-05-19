@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/davidkleiven/gopf/pfc"
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 func TestPairCorrelationTerm(t *testing.T) {
@@ -44,7 +45,7 @@ func TestPairCorrelationTerm(t *testing.T) {
 
 	for i := range field.Data {
 		f := freq(i)
-		fRad := 2.0 * math.Pi * math.Sqrt(Dot(f, f))
+		fRad := 2.0 * math.Pi * math.Sqrt(pfutil.Dot(f, f))
 		wSq := math.Pow(pair.PairCorrFunc.Peaks[0].Width, 2)
 		factor := math.Exp(-0.5 * (fRad - 1.0) * (fRad - 1.0) / wSq)
 		expect := -factor

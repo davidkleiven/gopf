@@ -1,6 +1,10 @@
 package pf
 
-import "math"
+import (
+	"math"
+
+	"github.com/davidkleiven/gopf/pfutil"
+)
 
 // BrickPlaceholder is struct that is used as a brick, in case no brick is specified
 type BrickPlaceholder struct{}
@@ -33,7 +37,7 @@ type TensorialHessian struct {
 // Construct builds the correct RHS term
 func (th *TensorialHessian) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, field []complex128) {
-		Clear(field)
+		pfutil.Clear(field)
 
 		for i := range field {
 			f := freq(i)

@@ -4,6 +4,7 @@ import (
 	"math"
 	"math/cmplx"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	"github.com/davidkleiven/gosfft/sfft"
 )
 
@@ -36,7 +37,7 @@ func NewSquareGradient(field string, domainSize []int) SquaredGradient {
 // Construct return a function the calculates the squared of the gradient of
 func (s *SquaredGradient) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, field []complex128) {
-		Clear(field)
+		pfutil.Clear(field)
 		work := make([]complex128, len(field))
 		k := freq(0)
 		dim := len(k)

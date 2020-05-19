@@ -1,6 +1,9 @@
 package pfc
 
-import "gonum.org/v1/gonum/optimize"
+import (
+	"github.com/davidkleiven/gopf/pfutil"
+	"gonum.org/v1/gonum/optimize"
+)
 
 // InitialGuessExplorer is a type that is used to generate initial guesses
 // for local minimzation algorithms
@@ -21,7 +24,7 @@ type HyperOctantExplorer struct {
 	X0 []float64
 
 	// Product
-	prod Product
+	prod pfutil.Product
 }
 
 // Next returns the next hyper parameter
@@ -31,7 +34,7 @@ func (hoe *HyperOctantExplorer) Next() []float64 {
 		for i := range limit {
 			limit[i] = 2
 		}
-		hoe.prod = NewProduct(limit)
+		hoe.prod = pfutil.NewProduct(limit)
 	}
 
 	comb := hoe.prod.Next()

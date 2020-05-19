@@ -6,6 +6,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	"github.com/davidkleiven/gosfft/sfft"
 )
 
@@ -36,7 +37,7 @@ func TestTermDiffusion(t *testing.T) {
 	m.RHS[0].Denum[0](Freq, 0.0, values)
 	expect := []complex128{complex(0.0, 0.0), complex(-2.0*twoPiSq, 0.0)}
 
-	if !CmplxEqualApprox(expect, values, 1e-10) {
+	if !pfutil.CmplxEqualApprox(expect, values, 1e-10) {
 		t.Errorf("Expected\n%v\nGot\n%v\n", expect, values)
 	}
 }

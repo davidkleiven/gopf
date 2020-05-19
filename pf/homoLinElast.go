@@ -2,6 +2,7 @@ package pf
 
 import (
 	"github.com/davidkleiven/gopf/elasticity"
+	"github.com/davidkleiven/gopf/pfutil"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -69,8 +70,8 @@ func (h *HomogeneousModulusLinElast) Construct(bricks map[string]Brick) Term {
 			for j := i; j < h.Dim; j++ {
 				strains := elasticity.Strain(disp, h.Freq, i, j)
 				h.FT.IFFT(strains) // Obtain real-space strains
-				DivRealScalar(strains, float64(len(strains)))
-				ElemwiseMul(strains, work)
+				pfutil.DivRealScalar(strains, float64(len(strains)))
+				pfutil.ElemwiseMul(strains, work)
 				h.FT.FFT(strains)
 
 				factor := 1.0
@@ -137,11 +138,11 @@ func NewHomogeneousModolus(fieldName string, domainSize []int, matProp elasticit
 	linElast := HomogeneousModulusLinElast{
 		FieldName: fieldName,
 		Dim:       len(domainSize),
-		N:         ProdInt(domainSize),
+		N:         pfutil.ProdInt(domainSize),
 		MatProp:   matProp,
 		Misfit:    misfit,
 		EffForce:  elasticity.NewEffectiveForceFromMisfit(matProp, misfit),
-		Field:     make([]float64, ProdInt(domainSize)),
+		Field:     make([]float64, pfutil.ProdInt(domainSize)),
 		Disps:     elasticity.Displacements,
 		FT:        NewFFTW(domainSize),
 	}

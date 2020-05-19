@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/davidkleiven/gopf/pfc"
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // PairCorrlationTerm implements the functional deriviative with respect to Q of the functional
@@ -37,7 +38,7 @@ func (pct *PairCorrlationTerm) Construct(bricks map[string]Brick) Term {
 	return func(freq Frequency, t float64, out []complex128) {
 		for i := range out {
 			f := freq(i)
-			fRad := math.Sqrt(Dot(f, f))
+			fRad := math.Sqrt(pfutil.Dot(f, f))
 			out[i] = -complex(pct.evaluate(fRad), 0.0)
 		}
 
@@ -55,7 +56,7 @@ func (pct *PairCorrlationTerm) OnStepFinished(t float64, bricks map[string]Brick
 // in bricks should be the real space representation. The number of nodes
 // in the simulation cell is specified in the nodes argument
 func (pct *PairCorrlationTerm) GetEnergy(bricks map[string]Brick, ft FourierTransform, domainSize []int) float64 {
-	numNodes := ProdInt(domainSize)
+	numNodes := pfutil.ProdInt(domainSize)
 	b := bricks[pct.Field]
 	field := make([]complex128, numNodes)
 	for i := 0; i < numNodes; i++ {
@@ -64,11 +65,11 @@ func (pct *PairCorrlationTerm) GetEnergy(bricks map[string]Brick, ft FourierTran
 	ft.FFT(field)
 	for i := range field {
 		f := ft.Freq(i)
-		fRad := math.Sqrt(Dot(f, f))
+		fRad := math.Sqrt(pfutil.Dot(f, f))
 		field[i] *= complex(pct.Prefactor*pct.PairCorrFunc.Eval(2.0*math.Pi*fRad), 0.0)
 	}
 	ft.IFFT(field)
-	DivRealScalar(field, float64(numNodes))
+	pfutil.DivRealScalar(field, float64(numNodes))
 
 	integral := 0.0
 	for i := range field {
@@ -92,7 +93,7 @@ func (epct *ExplicitPairCorrelationTerm) Construct(bricks map[string]Brick) Term
 		brick := bricks[epct.Field]
 		for i := range out {
 			f := freq(i)
-			fRad := math.Sqrt(Dot(f, f))
+			fRad := math.Sqrt(pfutil.Dot(f, f))
 			out[i] = -complex(epct.evaluate(fRad), 0.0) * brick.Get(i)
 		}
 

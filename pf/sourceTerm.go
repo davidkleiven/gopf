@@ -3,6 +3,8 @@ package pf
 import (
 	"math"
 	"math/cmplx"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // TimeDepSource is a generic interface for functions that can be used as sources
@@ -23,7 +25,7 @@ func NewSource(pos []float64, f TimeDepSource) Source {
 func (s *Source) Eval(freq Frequency, t float64, data []complex128) {
 	for i := range data {
 		k := freq(i)
-		data[i] = complex(s.f(t), 0.0) * cmplx.Exp(-complex(0.0, 2.0*math.Pi*Dot(k, s.Pos)))
+		data[i] = complex(s.f(t), 0.0) * cmplx.Exp(-complex(0.0, 2.0*math.Pi*pfutil.Dot(k, s.Pos)))
 	}
 }
 

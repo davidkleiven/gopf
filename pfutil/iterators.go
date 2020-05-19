@@ -1,4 +1,4 @@
-package pfc
+package pfutil
 
 // Product implements a generic product. It can be used to loop over
 // all combinations

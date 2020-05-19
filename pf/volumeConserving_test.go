@@ -4,6 +4,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	"github.com/davidkleiven/gosfft/sfft"
 )
 
@@ -41,7 +42,7 @@ func TestVolConserve(t *testing.T) {
 	// the volume
 	for i := 0; i < 100; i++ {
 		ft.IFFT(indicator.Data)
-		DivRealScalar(indicator.Data, float64(len(indicator.Data)))
+		pfutil.DivRealScalar(indicator.Data, float64(len(indicator.Data)))
 		function(FreqVolConserved, 0.0, correction)
 		for j := range myfield.Data {
 			myfield.Data[j] += complex(dt, 0.0) * (complex(rate, 0.0) + correction[j])

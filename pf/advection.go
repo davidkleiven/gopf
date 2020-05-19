@@ -1,6 +1,10 @@
 package pf
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/davidkleiven/gopf/pfutil"
+)
 
 // Advection is a type that is used to build. This represents a term of the form
 // v dot grad field, where v is a velocity vector and field is the name of a field
@@ -67,7 +71,7 @@ func (ad *Advection) PrepareModel(N int, m *Model, FT FourierTransform) {
 		Data: make([]complex128, N),
 		Calc: func(data []complex128) {
 			dim := len(ad.VelocityFields)
-			Clear(data)
+			pfutil.Clear(data)
 			for d := 0; d < dim; d++ {
 				vBrick := m.Bricks[ad.VelocityFields[d]]
 				gBrick := m.Bricks[ad.GradName(d)]

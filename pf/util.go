@@ -7,21 +7,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/davidkleiven/gopf/pfutil"
 )
-
-// CmplxEqualApprox returns true if to complex arrays are equal within the passed tolerance
-func CmplxEqualApprox(a []complex128, b []complex128, tol float64) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := range a {
-		if math.Abs(real(a[i])-real(b[i])) > tol || math.Abs(imag(a[i])-imag(b[i])) > tol {
-			return false
-		}
-	}
-	return true
-}
 
 // GetNonLinearFieldExpressions returns constructions that must be FFT separateley. Note
 // that if the expression is bilinear in field, field is omitted from the returned expression
@@ -114,47 +102,6 @@ func GetFieldName(term string, fieldNames []string) string {
 	return field
 }
 
-// ElemwiseAdd adds dst and data and places the result in dst
-func ElemwiseAdd(dst []complex128, data []complex128) {
-	for i := range dst {
-		dst[i] += data[i]
-	}
-}
-
-// ElemwiseMul multiplies dst and data and places the result in dst.
-func ElemwiseMul(dst []complex128, data []complex128) {
-	for i := range dst {
-		dst[i] *= data[i]
-	}
-}
-
-// DivRealScalar divides each element in the comlex array by a real scalar
-func DivRealScalar(data []complex128, factor float64) []complex128 {
-	cfactor := complex(factor, 0.0)
-	for i := range data {
-		data[i] /= cfactor
-	}
-	return data
-}
-
-// ProdInt calculates the product of all the elements in the passed sequence
-func ProdInt(a []int) int {
-	res := 1
-	for i := range a {
-		res *= a[i]
-	}
-	return res
-}
-
-// Dot calculates the dot product between two slices
-func Dot(a []float64, b []float64) float64 {
-	res := 0.0
-	for i := range a {
-		res += a[i] * b[i]
-	}
-	return res
-}
-
 // RealPartAsUint8 return the real part of the field as uint8. The data is scaled
 // such that min --> 0 and max --> 255
 func RealPartAsUint8(data []complex128, min float64, max float64) []uint8 {
@@ -166,28 +113,6 @@ func RealPartAsUint8(data []complex128, min float64, max float64) []uint8 {
 		res[i] = uint8(255 * (real(data[i]) - min) / (max - min))
 	}
 	return res
-}
-
-// MaxReal calculates the maximum real part
-func MaxReal(data []complex128) float64 {
-	maxval := real(data[0])
-	for i := range data {
-		if real(data[i]) > maxval {
-			maxval = real(data[i])
-		}
-	}
-	return maxval
-}
-
-// MinReal returns the minimum real-part value
-func MinReal(data []complex128) float64 {
-	minval := real(data[0])
-	for i := range data {
-		if real(data[i]) < minval {
-			minval = real(data[i])
-		}
-	}
-	return minval
 }
 
 // nodeIdx2 returns the node index for 2D grid
@@ -233,13 +158,6 @@ func Pos(domainSize []int, nodeNum int) []int {
 	panic("util: Domain size has to be either 2 or 3")
 }
 
-// Clear sets all elements in the slice to zero
-func Clear(data []complex128) {
-	for i := range data {
-		data[i] = complex(0.0, 0.0)
-	}
-}
-
 // ModalFilter is a generic interface for modal filters
 type ModalFilter interface {
 	Eval(x float64) float64
@@ -249,7 +167,7 @@ type ModalFilter interface {
 func ApplyModalFilter(filter ModalFilter, freq Frequency, data []complex128) {
 	for i := range data {
 		f := freq(i)
-		fRad := math.Sqrt(Dot(f, f))
+		fRad := math.Sqrt(pfutil.Dot(f, f))
 		value := fRad * 2.0 / math.Pi
 		data[i] *= complex(filter.Eval(value), 0.0)
 	}

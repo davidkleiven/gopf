@@ -5,6 +5,7 @@ import (
 
 	"github.com/davidkleiven/gopf/elasticity"
 	"github.com/davidkleiven/gopf/pf"
+	"github.com/davidkleiven/gopf/pfutil"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -64,7 +65,7 @@ func main() {
 	dt := 0.1
 	M := 64
 	domainSize := []int{M, M}
-	N := pf.ProdInt(domainSize)
+	N := pfutil.ProdInt(domainSize)
 	model := pf.NewModel()
 	conc := pf.NewField("conc", N, nil)
 	phase := pf.NewField("phase", N, nil)
