@@ -85,3 +85,15 @@ func Clear(data []complex128) {
 		data[i] = complex(0.0, 0.0)
 	}
 }
+
+// Wrap wrap pos such that it is inside the box defined by domainsize
+func Wrap(pos []int, domainSize []int) {
+	for i := range pos {
+		if pos[i] < 0 {
+			factor := -pos[i] / domainSize[i]
+			pos[i] += (factor + 1) * domainSize[i]
+		} else if pos[i] >= domainSize[i] {
+			pos[i] = pos[i] % domainSize[i]
+		}
+	}
+}
