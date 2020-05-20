@@ -30,3 +30,8 @@ echo "Running KKS example"
 go run examples/kks/main.go
 rm *.bin
 rm *.xdmf
+
+echo "Running build crystal example"
+go run examples/buildCrystals/main.go
+rm single_crystal.csv
+rm grainBoundary.csv
