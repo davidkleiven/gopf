@@ -67,3 +67,47 @@ func TestToComplex(t *testing.T) {
 		}
 	}
 }
+
+func TestFromComplex(t *testing.T) {
+	grid := NewGrid([]int{2, 2})
+	carray := []complex128{
+		complex(1.0, 0.0), complex(2.0, 0.0),
+		complex(3.0, 0.0), complex(4.0, 0.0),
+	}
+	grid.FromComplex(carray)
+	expect := []float64{1.0, 2.0, 3.0, 4.0}
+	tol := 1e-10
+	for i := range carray {
+		if math.Abs(grid.Data[i]-expect[i]) > tol {
+			t.Errorf("Expected %f got %f\n", expect[i], grid.Data[i])
+		}
+	}
+}
+func TestRotate2D(t *testing.T) {
+	grid := NewGrid([]int{8, 8})
+	grid.Set([]int{5, 4}, 1.0)
+	grid.Rotate2D(math.Pi / 2.0)
+	expectPos := []int{4, 3}
+	if math.Abs(grid.Get(expectPos)-1.0) > 1e-10 {
+		t.Errorf("Expected 1.0 got %v\n", expectPos)
+	}
+}
+
+func TestCopy(t *testing.T) {
+	grid := NewGrid([]int{4, 4})
+	for i := range grid.Data {
+		grid.Data[i] = float64(i)
+	}
+	gridCpy := grid.Copy()
+	for i := range grid.Dims {
+		if grid.Dims[i] != gridCpy.Dims[i] {
+			t.Errorf("Expected %d got %d\n", grid.Dims[i], gridCpy.Dims[i])
+		}
+	}
+
+	for i := range grid.Data {
+		if math.Abs(grid.Data[i]-gridCpy.Data[i]) > 1e-10 {
+			t.Errorf("Expected %f got %f\n", grid.Data[i], gridCpy.Data[i])
+		}
+	}
+}

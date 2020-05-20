@@ -184,3 +184,22 @@ func BuildCrystal(ucell UnitCell, kernel AtomicKernel, grid *pfutil.Grid) {
 		}
 	}
 }
+
+// TiltGB creates a tilt grain boundary from a grid that is already initialized
+// as a single crystal. The grain boundary is centered at the computational cell
+func TiltGB(grid *pfutil.Grid, angle float64) {
+	if len(grid.Dims) != 2 {
+		panic("TiltGB: Currently only 2D grids are supported")
+	}
+
+	gridCpy := grid.Copy()
+	gridCpy.Rotate2D(angle / 2.0)
+	grid.Rotate2D(-angle / 2.0)
+
+	// Upper half space with gridCpy
+	for ix := 0; ix < grid.Dims[0]/2; ix++ {
+		for iy := 0; iy < grid.Dims[1]; iy++ {
+			grid.Set([]int{ix, iy}, gridCpy.Get([]int{ix, iy}))
+		}
+	}
+}

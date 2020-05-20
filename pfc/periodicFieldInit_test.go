@@ -1,9 +1,11 @@
 package pfc
 
 import (
+	"math"
 	"testing"
 
 	"github.com/davidkleiven/gopf/pfutil"
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -86,4 +88,34 @@ func TestBuildCrystal(t *testing.T) {
 			t.Errorf("Test #%d: Expected %d got %d\n", i, test.Want, numAtoms)
 		}
 	}
+}
+
+func TestTiltGB(t *testing.T) {
+	grid := pfutil.NewGrid([]int{8, 8})
+
+	// Fill bottom half
+	for i := 4; i < 8; i++ {
+		for j := 0; j < 8; j++ {
+			grid.Set([]int{i, j}, 1.0)
+		}
+	}
+
+	// Create 45 degree grain boundary
+	TiltGB(&grid, math.Pi)
+	expect := []float64{
+		1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+		0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+		0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+		0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+	}
+	if !floats.EqualApprox(expect, grid.Data, 1e-10) {
+		mat1 := mat.NewDense(8, 8, grid.Data)
+		mat2 := mat.NewDense(8, 8, expect)
+		t.Errorf("Grid does not match! Expected\n%v\nGot\n%v\n", mat.Formatted(mat1), mat.Formatted(mat2))
+	}
+
 }
