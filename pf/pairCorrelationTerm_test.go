@@ -13,7 +13,7 @@ func TestPairCorrelationTerm(t *testing.T) {
 		PairCorrFunc: pfc.ReciprocalSpacePairCorrelation{
 			EffTemp: 0.0,
 			Peaks: []pfc.Peak{
-				pfc.Peak{
+				{
 					PlaneDensity: 1,
 					Location:     1.0,
 					Width:        100.0,
@@ -63,7 +63,7 @@ func TestPairCorrelationGetEnergy(t *testing.T) {
 		PairCorrFunc: pfc.ReciprocalSpacePairCorrelation{
 			EffTemp: 0.0,
 			Peaks: []pfc.Peak{
-				pfc.Peak{
+				{
 					PlaneDensity: 1,
 					Location:     wavenumber,
 					Width:        100.0,
@@ -144,8 +144,8 @@ func TestPeakWidthConsistency(t *testing.T) {
 	modeSolver := pfc.ModeSolver{
 		IdealMix: pfc.IdealMix{C3: 1.0, C4: 1.0},
 		Miller: []pfc.Miller{
-			pfc.Miller{H: 1, K: 1},
-			pfc.Miller{H: 2, K: 0},
+			{H: 1, K: 1},
+			{H: 2, K: 0},
 		},
 		ReciprocalCell: reciprocal,
 	}
@@ -175,13 +175,13 @@ func TestPeakWidthConsistency(t *testing.T) {
 		PairCorrFunc: pfc.ReciprocalSpacePairCorrelation{
 			EffTemp: 0.0,
 			Peaks: []pfc.Peak{
-				pfc.Peak{
+				{
 					PlaneDensity: 1.0,
 					Location:     wavenumber1,
 					Width:        0.01,
 					NumPlanes:    pfc.NumEquivalent2D(pfc.Miller{H: 1, K: 1}),
 				},
-				pfc.Peak{
+				{
 					PlaneDensity: 1.0,
 					Location:     wavenumber2,
 					Width:        0.01,
@@ -317,7 +317,7 @@ func TestExplicitPairCorrTerm(t *testing.T) {
 				PairCorrFunc: pfc.ReciprocalSpacePairCorrelation{
 					EffTemp: 0.0,
 					Peaks: []pfc.Peak{
-						pfc.Peak{
+						{
 							PlaneDensity: 1,
 							Location:     1.0,
 							Width:        100.0,

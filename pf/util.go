@@ -185,7 +185,7 @@ type SubStringDelimiter struct {
 func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
 	substrings := []SubStringDelimiter{}
 
-	queue := []SubStringDelimiter{SubStringDelimiter{
+	queue := []SubStringDelimiter{{
 		SubString:           value,
 		PreceedingDelimiter: "",
 	}}

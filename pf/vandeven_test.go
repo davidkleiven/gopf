@@ -15,15 +15,15 @@ func TestVandeven(t *testing.T) {
 		order  int
 	}{
 		{
-			expect: []XY{XY{x: 0.0, y: 1.0}, XY{x: 0.5, y: 0.5}, XY{x: 1.0, y: 0.0}},
+			expect: []XY{{x: 0.0, y: 1.0}, {x: 0.5, y: 0.5}, {x: 1.0, y: 0.0}},
 			order:  3,
 		},
 		{
-			expect: []XY{XY{x: 0.0, y: 1.0}, XY{x: 0.5, y: 0.5}, XY{x: 1.0, y: 0.0}},
+			expect: []XY{{x: 0.0, y: 1.0}, {x: 0.5, y: 0.5}, {x: 1.0, y: 0.0}},
 			order:  5,
 		},
 		{
-			expect: []XY{XY{x: 0.0, y: 1.0}, XY{x: 0.5, y: 0.5}, XY{x: 1.0, y: 0.0}},
+			expect: []XY{{x: 0.0, y: 1.0}, {x: 0.5, y: 0.5}, {x: 1.0, y: 0.0}},
 			order:  10,
 		},
 	} {

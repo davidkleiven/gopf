@@ -35,7 +35,7 @@ func TestDataItem(t *testing.T) {
 func TestGeometry(t *testing.T) {
 	geo := XDMFGeometry{
 		Name:      "geo",
-		DataItems: []XDMFDataItem{XDMFDataItem{}, XDMFDataItem{}},
+		DataItems: []XDMFDataItem{{}, {}},
 	}
 	s := ""
 	buf := bytes.NewBufferString(s)
