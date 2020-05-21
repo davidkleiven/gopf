@@ -1,9 +1,7 @@
 package pf
 
 import (
-	"encoding/binary"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/davidkleiven/gopf/pfutil"
@@ -30,17 +28,11 @@ func (f Field) Copy() Field {
 
 // SaveReal stores the real part as a raw binary file with big endian
 func (f Field) SaveReal(fname string) {
-	out, err := os.Create(fname)
-	defer out.Close()
 	realPart := make([]float64, len(f.Data))
-	if err != nil {
-		panic(err)
-	}
-
 	for j := range f.Data {
 		realPart[j] = real(f.Data[j])
 	}
-	binary.Write(out, binary.BigEndian, realPart)
+	SaveFloat64(fname, realPart)
 }
 
 // NewField initializes a new field

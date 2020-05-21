@@ -77,3 +77,15 @@ func LoadFloat64(fname string) []float64 {
 	binary.Read(infile, binary.BigEndian, data)
 	return data
 }
+
+// SaveFloat64 writes a float sice to a binary file. BigEndian is used.
+// Files stored with this function can be read using LoadFloat64
+func SaveFloat64(fname string, data []float64) {
+	out, err := os.Create(fname)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+	defer out.Close()
+	binary.Write(out, binary.BigEndian, data)
+}
