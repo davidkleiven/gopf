@@ -103,12 +103,12 @@ func CreateXDMF(fieldNames []string, prefix string, num int, domainSize []int) X
 	xdmf.Domain.Geometry = XDMFGeometry{
 		Name: "geo",
 		Type: geoType,
-		DataItems: []XDMFDataItem{XDMFDataItem{
+		DataItems: []XDMFDataItem{{
 			Format:     "XML",
 			Dimensions: fmt.Sprintf("%d", dim),
 			Value:      "0.0 0.0 0.0",
 		},
-			XDMFDataItem{
+			{
 				Format:     "XML",
 				Dimensions: fmt.Sprintf("%d", dim),
 				Value:      "1.0 1.0 1.0",
