@@ -228,6 +228,25 @@ func (m *Model) Init() {
 		m.RHS = append(m.RHS, Build(eq, m))
 	}
 	m.SyncDerivedFields()
+
+	// Validate all implicit terms
+	for k, v := range m.ImplicitTerms {
+		if !isImplicit(v, m.Bricks, m.NumNodes(), func(i int) []float64 {
+			return []float64{0.4, 0.4}
+		}) {
+			msg := fmt.Sprintf("Model: Term %s is not implicit (e.g. it varies when the fields are varied)", k)
+			panic(msg)
+		}
+	}
+}
+
+// NumNodes returns the number of nodes in the simulation cell. It panics if no
+// fields are added
+func (m *Model) NumNodes() int {
+	if len(m.Fields) == 0 {
+		panic("Model: No fields added")
+	}
+	return len(m.Fields[0].Data)
 }
 
 // AllVariableNames return all known variable names
