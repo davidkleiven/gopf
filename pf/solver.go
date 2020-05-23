@@ -2,10 +2,10 @@ package pf
 
 import (
 	"encoding/json"
-	"fmt"
-	"time"
 
 	"github.com/davidkleiven/gopf/pfutil"
+	"github.com/vbauerster/mpb"
+	"github.com/vbauerster/mpb/decor"
 )
 
 // SolverCB is function type that can be added to the solver it is executed after each
@@ -105,9 +105,18 @@ func (s *Solver) SetStepper(name string) {
 
 // Solve solves the equation
 func (s *Solver) Solve(nepochs int, nsteps int) {
+	// Initialize a progress bar
+	progressContainer := mpb.New(mpb.WithWidth(64))
+	name := "ETA: "
+	progressBar := progressContainer.AddBar(int64(nepochs),
+		mpb.PrependDecorators(
+			decor.Name(name, decor.WC{W: len(name) + 1, C: decor.DidentRight}),
+			decor.OnComplete(decor.AverageETA(decor.ET_STYLE_GO, decor.WC{W: 4}), "done"),
+		),
+		mpb.AppendDecorators(decor.Percentage()),
+	)
+
 	for i := 0; i < nepochs; i++ {
-		now := time.Now()
-		fmt.Printf("%02d:%02d:%02d - Epoch %5d of %5d\n", now.Hour(), now.Minute(), now.Second(), i+s.StartEpoch, nepochs+s.StartEpoch)
 		s.Propagate(nsteps)
 
 		for _, cb := range s.Callbacks {
@@ -118,6 +127,7 @@ func (s *Solver) Solve(nepochs int, nsteps int) {
 		for i := range s.Monitors {
 			s.Monitors[i].Add(s.Model.Bricks)
 		}
+		progressBar.Increment()
 	}
 }
 
