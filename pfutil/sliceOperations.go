@@ -92,8 +92,7 @@ func Wrap(pos []int, domainSize []int) {
 		if pos[i] < 0 {
 			factor := -pos[i] / domainSize[i]
 			pos[i] += (factor + 1) * domainSize[i]
-		} else if pos[i] >= domainSize[i] {
-			pos[i] = pos[i] % domainSize[i]
 		}
+		pos[i] = pos[i] % domainSize[i]
 	}
 }

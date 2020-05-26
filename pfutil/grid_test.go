@@ -6,7 +6,6 @@ import (
 )
 
 func TestIndex(t *testing.T) {
-	work := make([]int, 3)
 	for i, test := range []struct {
 		Grid   Grid
 		Pos    []int
@@ -23,14 +22,14 @@ func TestIndex(t *testing.T) {
 			Expect: 12 + 2*4 + 3,
 		},
 	} {
-		idx := test.Grid.index(test.Pos)
+		idx := test.Grid.Index(test.Pos)
 		if idx != test.Expect {
 			t.Errorf("Test #%d: Expected %d got %d\n", i, test.Expect, idx)
 		}
-		test.Grid.Pos(idx, work)
+		pos := test.Grid.Pos(idx)
 		for j, p := range test.Pos {
-			if p != work[j] {
-				t.Errorf("Test #%d:\nExpected\n%v\nGot\n%v\n", i, test.Pos, work)
+			if p != pos[j] {
+				t.Errorf("Test #%d:\nExpected\n%v\nGot\n%v\n", i, test.Pos, pos)
 				break
 			}
 		}
