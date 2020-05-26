@@ -33,51 +33,24 @@ func (g Grid) Copy() Grid {
 	return newGrid
 }
 
-func (g Grid) index2d(pos []int) int {
-	return pos[0]*g.Dims[1] + pos[1]
-}
-
-func (g Grid) index3d(pos []int) int {
-	return pos[2]*g.Dims[0]*g.Dims[1] + pos[0]*g.Dims[1] + pos[1]
-}
-
-// index returnds the underlying index corresponding to the point
-func (g Grid) index(pos []int) int {
-	if len(pos) == 2 {
-		return g.index2d(pos)
-	}
-	return g.index3d(pos)
-}
-
-// pos2d returns position in 2D
-func (g Grid) pos2d(i int, pos []int) {
-	pos[0] = i / g.Dims[1]
-	pos[1] = i % g.Dims[1]
-}
-
-// pos3D returns the position i 3D
-func (g Grid) pos3d(i int, pos []int) {
-	pos[0] = (i / g.Dims[1]) % g.Dims[0]
-	pos[1] = i % g.Dims[1]
-	pos[2] = i / (g.Dims[0] * g.Dims[1])
+// Index returnds the underlying index corresponding to the point
+func (g Grid) Index(pos []int) int {
+	return NodeIdx(g.Dims, pos)
 }
 
 // Pos returns the positions that corresponds to index i
-func (g Grid) Pos(i int, pos []int) {
-	if len(g.Dims) == 2 {
-		g.pos2d(i, pos)
-	}
-	g.pos3d(i, pos)
+func (g Grid) Pos(i int) []int {
+	return Pos(g.Dims, i)
 }
 
 // Set sets a value
 func (g *Grid) Set(pos []int, value float64) {
-	g.Data[g.index(pos)] = value
+	g.Data[g.Index(pos)] = value
 }
 
 // Get gets a value at the given position
 func (g Grid) Get(pos []int) float64 {
-	return g.Data[g.index(pos)]
+	return g.Data[g.Index(pos)]
 }
 
 // ToComplex converts the underlying data array to a complex array.
@@ -117,9 +90,8 @@ func (g Grid) SaveCsv(fname string) {
 		header = "x,y,z,value\n"
 	}
 	f.WriteString(header)
-	pos := make([]int, 3)
 	for i := range g.Data {
-		g.Pos(i, pos)
+		pos := g.Pos(i)
 		posString := []string{}
 		for j := 0; j < dim; j++ {
 			posString = append(posString, strconv.Itoa(pos[j]))
@@ -141,10 +113,9 @@ func (g *Grid) Rotate2D(angle float64) {
 	// Negative angles because we loop over the destination image
 	// and fill it with a pixel in the source image
 	cosa, sina := math.Cos(-angle), math.Sin(-angle)
-	pos := make([]int, 2)
 	rotPos := make([]int, 2)
 	for i := range g.Data {
-		g.pos2d(i, pos)
+		pos := g.Pos(i)
 		pos[0] -= g.Dims[0] / 2
 		pos[1] -= g.Dims[1] / 2
 
@@ -154,6 +125,6 @@ func (g *Grid) Rotate2D(angle float64) {
 		rotPos[0] += g.Dims[0] / 2
 		rotPos[1] += g.Dims[1] / 2
 		Wrap(rotPos, g.Dims)
-		g.Data[i] = srgImg[g.index2d(rotPos)]
+		g.Data[i] = srgImg[g.Index(rotPos)]
 	}
 }

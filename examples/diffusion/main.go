@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/davidkleiven/gopf/pf"
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 	domainSize := []int{nx, ny}
 	model := pf.NewModel()
 	conc := pf.NewField("conc", nx*ny, nil)
-	center := pf.NodeIdx(domainSize, []int{nx / 2, ny / 2})
+	center := pfutil.NodeIdx(domainSize, []int{nx / 2, ny / 2})
 
 	// Initialize the center
 	conc.Data[center] = complex(1.0, 0.0)
