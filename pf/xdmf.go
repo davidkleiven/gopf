@@ -159,9 +159,10 @@ func CreateXDMF(fieldNames []string, prefix string, num int, domainSize []int) X
 	return xdmf
 }
 
-// WriteXDMF creates a xdmf file that can be used by paraview
-func WriteXDMF(fname string, fields []string, prefix string, num int, domainSize []int) {
-	writer, err := os.Create(fname)
+// WriteXDMF creates a xdmf file that can be used by paraview. prefix is the same
+// as given to the Float64IO writer that generates the field output.
+func WriteXDMF(xdmfFile string, fields []string, prefix string, num int, domainSize []int) {
+	writer, err := os.Create(xdmfFile)
 	if err != nil {
 		panic(err)
 	}
