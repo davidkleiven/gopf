@@ -9,6 +9,7 @@ require (
 	github.com/davidkleiven/gononlin v0.0.0-20200421123722-3211d3e61662
 	github.com/davidkleiven/gosfft v1.0.2
 	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/vbauerster/mpb v3.4.0+incompatible
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
 	golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2
