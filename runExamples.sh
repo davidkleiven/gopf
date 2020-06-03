@@ -35,3 +35,8 @@ echo "Running build crystal example"
 go run examples/buildCrystals/main.go
 rm single_crystal.csv
 rm grainBoundary.csv
+
+echo "Running database CLI tests"
+cd examples/database/
+bash runCmds.sh
+cd ../../
