@@ -81,43 +81,58 @@ type FieldDB struct {
 // initialize runs a set of sql statements to build the database. Note that subsequent calls
 // to this function has no effect
 func (fdb *FieldDB) initialize() {
-	statement, err := fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS positions (id INTEGER PRIMARY KEY, X INTEGER, Y INTEGER, Z INTEGER)")
+	statement, err := fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS simIDs (simID INTEGER UNIQUE, creationTime TEXT)")
 	if err != nil {
 		panic(err)
 	}
 	statement.Exec()
 
-	statement, err = fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS fields (id INTEGER PRIMARY KEY, name TEXT, value REAL, positionId INTEGER, timestep INTEGER, simID INTEGER, FOREIGN KEY(positionId) REFERENCES positions(id))")
+	statement, err = fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS positions (id INTEGER PRIMARY KEY, X INTEGER, Y INTEGER, Z INTEGER)")
 	if err != nil {
 		panic(err)
 	}
 	statement.Exec()
 
-	statement, err = fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS simAttributes (key TEXT, value REAL, simID INTEGER, FOREIGN KEY(simID) REFERENCES fields(simID))")
+	statement, err = fdb.DB.Prepare(
+		"CREATE TABLE IF NOT EXISTS fields (id INTEGER PRIMARY KEY, name TEXT, " +
+			"value REAL, positionId INTEGER, timestep INTEGER, simID INTEGER, " +
+			"FOREIGN KEY(positionId) REFERENCES positions(id), " +
+			"FOREIGN KEY(simID) REFERENCES simIDs(simID))")
+
 	if err != nil {
 		panic(err)
 	}
 	statement.Exec()
 
-	statement, err = fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS comments (simID INTEGER, value TEXT)")
+	statement, err = fdb.DB.Prepare(
+		"CREATE TABLE IF NOT EXISTS simAttributes (key TEXT, value REAL, simID INTEGER, FOREIGN KEY(simID) REFERENCES fields(simID))")
 	if err != nil {
 		panic(err)
 	}
 	statement.Exec()
 
-	statement, err = fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS simTextAttributes (key TEXT, value TEXT, simID INTEGER, FOREIGN KEY(simID) REFERENCES fields(simID))")
+	statement, err = fdb.DB.Prepare(
+		"CREATE TABLE IF NOT EXISTS comments (simID INTEGER, value TEXT, " +
+			"FOREIGN KEY(simID) REFERENCES simIds(simID))")
+
 	if err != nil {
 		panic(err)
 	}
 	statement.Exec()
 
-	statement, err = fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS timeseries (key TEXT, value REAL, timestep INTEGER, simID INTEGER)")
+	statement, err = fdb.DB.Prepare(
+		"CREATE TABLE IF NOT EXISTS simTextAttributes (key TEXT, value TEXT, " +
+			"simID INTEGER, FOREIGN KEY(simID) REFERENCES simIds(simID))")
+
 	if err != nil {
 		panic(err)
 	}
 	statement.Exec()
 
-	statement, err = fdb.DB.Prepare("CREATE TABLE IF NOT EXISTS simIDs (simID INTEGER UNIQUE, creationTime TEXT)")
+	statement, err = fdb.DB.Prepare(
+		"CREATE TABLE IF NOT EXISTS timeseries (key TEXT, value REAL, " +
+			"timestep INTEGER, simID INTEGER, FOREIGN KEY(simID) REFERENCES simIds(simID))")
+
 	if err != nil {
 		panic(err)
 	}

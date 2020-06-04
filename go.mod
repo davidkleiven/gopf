@@ -10,8 +10,11 @@ require (
 	github.com/davidkleiven/gosfft v1.0.2
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mitchellh/go-homedir v1.1.0
+	github.com/spf13/cobra v1.0.0
+	github.com/spf13/viper v1.7.0
 	github.com/vbauerster/mpb v3.4.0+incompatible
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
-	golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2
+	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136
 	gonum.org/v1/gonum v0.7.0
 )
