@@ -40,3 +40,8 @@ echo "Running database CLI tests"
 cd examples/database/
 bash runCmds.sh
 cd ../../
+
+echo "Running charge transport example"
+go run examples/electricConductivity/main.go
+rm grainBoundaryCurrent.db
+rm current.csv
