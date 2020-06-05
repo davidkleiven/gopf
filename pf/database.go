@@ -367,3 +367,62 @@ func (fdb *FieldDB) domainSizeOk() bool {
 	}
 	return true
 }
+
+// Load loads all the fields from a database and return a list of Field
+// simID is the ID of the simulation that the field should be loaded from, and
+// timestep is the timestep from which the fields should be initialized.
+func (fdb *FieldDB) Load(simID int, timestep int) []Field {
+	fieldNames := []string{}
+	rows, err := fdb.DB.Query("SELECT DISTINCT name FROM fields WHERE simID=? "+
+		"AND timestep=? ORDER BY name", simID, timestep)
+	if err != nil {
+		panic(err)
+	}
+	var name string
+	for rows.Next() {
+		rows.Scan(&name)
+		fieldNames = append(fieldNames, name)
+	}
+
+	var numNodes int
+	rows, err = fdb.DB.Query("SELECT COUNT(*) FROM positions")
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		rows.Scan(&numNodes)
+	}
+	fields := make(map[string]Field)
+	for _, key := range fieldNames {
+		fields[key] = NewField(key, numNodes, nil)
+	}
+
+	rows, err = fdb.DB.Query("SELECT name, value, positionId FROM fields "+
+		"WHERE simID=? AND timestep=?", simID, timestep)
+	var value float64
+	var positionID int
+	for rows.Next() {
+		rows.Scan(&name, &value, &positionID)
+		fields[name].Data[positionID] = complex(value, 0.0)
+	}
+
+	fieldArray := make([]Field, len(fieldNames))
+	for i, fieldName := range fieldNames {
+		fieldArray[i] = fields[fieldName]
+	}
+	return fieldArray
+}
+
+// LoadLast loads the fields from the latest timestep available for the
+// passed simulation ID
+func (fdb *FieldDB) LoadLast(simID int) []Field {
+	rows, err := fdb.DB.Query("SELECT MAX(timestep) FROM fields WHERE simID=?", simID)
+	if err != nil {
+		panic(err)
+	}
+	var maxTs int
+	for rows.Next() {
+		rows.Scan(&maxTs)
+	}
+	return fdb.Load(simID, maxTs)
+}
