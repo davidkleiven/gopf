@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -348,6 +349,77 @@ func TestTimeSeries(t *testing.T) {
 		if item.key != key || timestep != item.time || math.Abs(item.value-value) > 1e-10 {
 			t.Errorf("Expected (%s, %f, %d) got (%s, %f, %d)\n", item.key, item.value, item.time,
 				key, value, timestep)
+		}
+	}
+}
+
+type constant struct {
+	Value float64
+}
+
+func (c *constant) Eval(i int, bricks map[string]Brick) complex128 {
+	return complex(c.Value, 0.0)
+}
+
+func TestLoadFields(t *testing.T) {
+	temperature := NewField("temperature", 16, nil)
+	concentration := NewField("conc", 16, nil)
+	model := NewModel()
+	model.AddField(temperature)
+	model.AddField(concentration)
+	rateTemp := constant{
+		Value: 0.1,
+	}
+	rateConc := constant{
+		Value: -0.1,
+	}
+
+	model.RegisterFunction("RATE_TEMP", rateTemp.Eval)
+	model.RegisterFunction("RATE_CONC", rateConc.Eval)
+
+	model.AddEquation("dtemperature/dt = RATE_TEMP")
+	model.AddEquation("dconcentration/dt = RATE_CONC")
+
+	dbName := "test_load.db"
+	db, _ := sql.Open("sqlite3", dbName)
+	defer os.Remove(dbName)
+
+	fieldDB := FieldDB{
+		DB:         db,
+		DomainSize: []int{4, 4},
+	}
+
+	solver := NewSolver(&model, fieldDB.DomainSize, 1.0)
+	solver.AddCallback(fieldDB.SaveFields)
+	solver.Solve(10, 1)
+
+	// Run tests
+	for step := 0; step < 10; step++ {
+		fields := fieldDB.Load(int(fieldDB.simID), step)
+
+		// Fill temperature and concentration fields with the expected values
+		for i := range temperature.Data {
+			temperature.Data[i] = complex(0.1*float64(step+1), 0.0)
+			concentration.Data[i] = complex(-0.1*float64(step+1), 0.0)
+		}
+		expect := []Field{
+			concentration, temperature,
+		}
+		for i := range fields {
+			if !pfutil.CmplxEqualApprox(fields[i].Data, expect[i].Data, 1e-10) {
+				t.Errorf("Expected\n%v\nGot\n%v\n", expect[i].Data, fields[i].Data)
+			}
+		}
+	}
+
+	// Test load last
+	fields := fieldDB.LoadLast(int(fieldDB.simID))
+	expect := []Field{
+		concentration, temperature,
+	}
+	for i := range fields {
+		if !pfutil.CmplxEqualApprox(fields[i].Data, expect[i].Data, 1e-10) {
+			t.Errorf("Expected\n%v\nGot\n%v\n", expect[i].Data, fields[i].Data)
 		}
 	}
 }
