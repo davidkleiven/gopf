@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOPF</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <div class="main">
+        <div class="title under">
+            <h2>Electric Current In Poly Crystals</h2>
+        </div>
+        <div class="button">
+            <a href="index.html" class="btn">Back</a>
+        </div>
+        <div style="width: 100%; float: left;">
+            <div style="width: 30%; float: left;">
+                <a href="https://github.com/davidkleiven/gopf/blob/master/examples/electricConductivity/main.go">
+                <img src="assets/github.svg" height=48px style="float: left;">
+            </a>
+            </div>
+        </div>
+        
+        
+        <div class="exampletext">
+            <p class="paragraph">When an external electric field is applied to a poly crystal, 
+                a current is induced, but charge will also pile up on grain boundaries. Here,
+                we show how GOPF can be used to calcualte the charge densities and the resulting
+                current profile as well as the effective macroscopic conductivity. In this example,
+                we consider a material with conductivity tensor
+            </p>
+            <img src="assets/electricConductivity/sigma.svg" height="48px"/>
+            <p class="paragraph">The induced potential &Phi; arising from induced charges is
+                given by the Poisson equation
+            </p>
+            <img src="assets/electricConductivity/poisson.svg" height="32px"/>
+            <p class="paragraph">where <i>&rho;</i> is the charge density and
+                <i>&epsilon;<sub>0</sub></i> is the vacuum permittivity. The fourier transformed
+                potential is therefore given by
+            </p>
+            <img src="assets/electricConductivity/fourierPotential.svg" height="32px"/>
+            <p class="paragraph">By using the relation <b>E</b> = -&nabla; &Phi;, the total
+            electric field is given by
+            </p>
+            <img src="assets/electricConductivity/efield.svg" height="48px"/>
+            <p class="paragraph">where <b>E</b><sub>ext</sub> is the external electric field.
+                From Ohm's law <i>j<sub>i</sub> = &sigma;<sub>ij</sub>E<sub>j</sub></i>, and charge
+                conservation, the final equation that needs to be solve is
+            </p>
+            <img src="assets/electricConductivity/chargeEquation.svg" height="48px"/>
+
+            We solved the equation above in a system consisting of several grains that are
+            rotated with respect to each other. The initial charge density was zero everywhere.
+
+            <div>
+                <img src="https://raw.githubusercontent.com/davidkleiven/gopf/master/examples/electricConductivity/fig/chargeDensity.svg" style="float: left; width: 49%"/>
+                <img src="https://raw.githubusercontent.com/davidkleiven/gopf/master/examples/electricConductivity/fig/currentDensity.svg"  style="float: left; width: 49%;"/>
+                
+                <p class="paragraph"><i>Left:</i> Charge density. Positive and negative charges pile up on
+                grain boundaries. <i>Right:</i> Current density. The electric field is applied along the horizonal
+                axis.
+            </p>
+            </div>
+            <p class="paragraph">The effective macroscopic conductivity can be found by averaging the current
+                acros the simulation cell. <i>j<sub>avg</sub> = &sigma;<sub>eff</sub>E<sub>ext</sub></i>.
+                By carrying the averaging we find that <i>&sigma;<sub>eff</sub> = 2.6</i>.
+
+            </p>
+        </div>
+        <div class="examplefig">
+            <img src="assets/charge.svg"/>
+            <div class="bottom">
+                <img src="assets/gopher.svg"/>
+            </div>
+        </div>
+    </div>
+</html>
