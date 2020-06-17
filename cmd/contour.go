@@ -94,10 +94,10 @@ will be selected.
 		}
 		barplt.Add(&bar)
 
-		img := vgimg.New(4*vg.Inch, 3*vg.Inch)
+		img := vgimg.New(4*vg.Inch, 4*vg.Inch)
 		dc := draw.New(img)
-		top := draw.Crop(dc, 0.0, 0.0, 2.35*vg.Inch, 0.0)
-		bottom := draw.Crop(dc, 0.0, 0.0, 0.0, -0.65*vg.Inch)
+		top := draw.Crop(dc, 0.325*vg.Inch, -0.325*vg.Inch, 3.35*vg.Inch, 0.0)
+		bottom := draw.Crop(dc, 0.325*vg.Inch, -0.325*vg.Inch, 0.0, -0.65*vg.Inch)
 		barplt.HideY()
 		barplt.Title.Text = column
 
