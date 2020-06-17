@@ -107,3 +107,54 @@ func (dg *DivGrad) Construct(bricks map[string]Brick) Term {
 
 // OnStepFinished does nothing as we don't need any updates in between steps
 func (dg *DivGrad) OnStepFinished(t float64) {}
+
+// WeightedLaplacian is a type used to represent terms of the form
+// F(c) LAP <field>, where F is a function of all the fields.
+type WeightedLaplacian struct {
+	// Name of the field to the right of the laplacian (must be registered in the model)
+	Field string
+
+	// Name of the function in front of the laplacian (must be registered in the model)
+	PreFactor string
+
+	// FourierTransformer of the correct domain size. This is used to
+	// go back and fourth between the real domain and the fourier domain
+	// internally
+	FT FourierTransform
+}
+
+// Construct returns the fourier transformed representation of this term
+func (wl *WeightedLaplacian) Construct(bricks map[string]Brick) Term {
+	return func(freq Frequency, t float64, field []complex128) {
+		fieldBrick := bricks[wl.Field]
+
+		// Calcualte real space laplacian of the field
+		lap := LaplacianN{
+			Power: 1,
+		}
+
+		for i := range field {
+			field[i] = fieldBrick.Get(i)
+		}
+		lap.Eval(freq, field)
+
+		wl.FT.IFFT(field)
+		pfutil.DivRealScalar(field, float64(len(field)))
+
+		// Calculate the realspace representation of the prefactor
+		work := make([]complex128, len(field))
+		funcBrick := bricks[wl.PreFactor]
+
+		for i := range work {
+			work[i] = funcBrick.Get(i)
+		}
+		wl.FT.IFFT(work)
+		pfutil.DivRealScalar(work, float64(len(work)))
+
+		for i := range field {
+			field[i] *= work[i]
+		}
+
+		wl.FT.FFT(field)
+	}
+}

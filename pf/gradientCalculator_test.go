@@ -146,3 +146,45 @@ func TestDivGrad(t *testing.T) {
 		t.Errorf("DivGrad: Result is not real. Max. imaginary part: %e\n", maxIm)
 	}
 }
+
+func TestWeightedLaplacian(t *testing.T) {
+	N := 16
+	prefactor := NewField("prefactor", N*N, nil)
+	field := NewField("field", N*N, nil)
+	expect := make([]complex128, N*N)
+	twoPi := 2.0 * math.Pi
+	for i := range prefactor.Data {
+		pos := pfutil.Pos([]int{N, N}, i)
+		x := float64(pos[0]) / float64(N)
+		prefactor.Data[i] = complex(math.Sin(twoPi*x), 0.0)
+		field.Data[i] = complex(math.Cos(twoPi*x), 0.0)
+		expect[i] = complex(-math.Pow(twoPi, 2)*math.Sin(twoPi*x)*math.Cos(twoPi*x)/float64(N*N), 0.0)
+	}
+
+	bricks := make(map[string]Brick)
+	bricks["prefactor"] = prefactor
+	bricks["field"] = field
+
+	ft := NewFFTW([]int{N, N})
+
+	// Fourier transform the fields
+	ft.FFT(field.Data)
+	ft.FFT(prefactor.Data)
+
+	wl := WeightedLaplacian{
+		Field:     "field",
+		PreFactor: "prefactor",
+		FT:        ft,
+	}
+
+	function := wl.Construct(bricks)
+	result := make([]complex128, N*N)
+	function(ft.Freq, 0.0, result)
+
+	ft.IFFT(result)
+	pfutil.DivRealScalar(result, float64(len(result)))
+
+	if !pfutil.CmplxEqualApprox(expect, result, 1e-10) {
+		t.Errorf("Expected\n%v\nGot\n%v\n", expect, result)
+	}
+}
