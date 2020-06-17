@@ -15,7 +15,10 @@ limitations under the License.
 */
 package main
 
-import "github.com/davidkleiven/gopf/cmd"
+import (
+	"github.com/davidkleiven/gopf/cmd"
+	_ "github.com/mattn/go-sqlite3"
+)
 
 func main() {
 	cmd.Execute()
