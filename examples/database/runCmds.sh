@@ -24,6 +24,9 @@ gopf db export $DBNAME -t ts -o timeseries.csv
 # Export field data
 gopf db export $DBNAME -t fd -o concentration.csv
 
+# Create a plot with the concentration
+gopf contour -f concentration.csv -c conc -o concentration.png
+
 # Show unique attribute names
 gopf db attr $DBNAME --unique
 
@@ -37,3 +40,4 @@ gopf db attr $DBNAME -n meanConc
 rm timeseries.csv
 rm concentration.csv
 rm diffusion.db
+rm concentration.png

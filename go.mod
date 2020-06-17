@@ -17,4 +17,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136
 	gonum.org/v1/gonum v0.7.0
+	gonum.org/v1/plot v0.0.0-20190515093506-e2840ee46a6b
 )

@@ -44,6 +44,7 @@ that describes the content of each column.
 		ftype, err := cmd.Flags().GetString("type")
 		if err != nil {
 			fmt.Printf("%s\n", err)
+			return
 		}
 
 		outfile, err := cmd.Flags().GetString("out")
