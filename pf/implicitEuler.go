@@ -1,7 +1,7 @@
 package pf
 
 import (
-	"fmt"
+	"log"
 	"math/cmplx"
 
 	"github.com/davidkleiven/gononlin/nonlin"
@@ -22,10 +22,9 @@ type ImplicitEuler struct {
 	Filter      ModalFilter
 	CurrentStep int
 
-	// NonlinSolver used to solve the non-linear set of equation that emerges on
 	// each time step. If not given (or nil), a solver with sensible default values
 	// will be used
-	NonlinSolver *nonlin.NewtonBCGS
+	NonlinSolver *nonlin.NewtonKrylov
 }
 
 func (ie *ImplicitEuler) isImag(f []float64) bool {
@@ -50,45 +49,17 @@ func (ie *ImplicitEuler) fields2vec(fields []Field, out []float64) {
 }
 
 func (ie *ImplicitEuler) fieldData2vec(data []complex128, out []float64) {
-	iterator := UniqueFreqIterator{
-		Freq: ie.FT.Freq,
-		End:  len(data),
-	}
-	counter := 0
-	for j := iterator.Next(); j != -1; j = iterator.Next() {
-		freq := ie.FT.Freq(j)
-		if ie.isImag(freq) {
-			out[counter] = real(data[j])
-			out[counter+1] = imag(data[j])
-			counter += 2
-		} else {
-			out[counter] = real(data[j])
-			counter++
-		}
+	for i := range data {
+		out[i] = real(data[i])
 	}
 }
 
-// vec2fields is the inverse operation of fields2vec. The value in vec is transferred
-// into fields
 func (ie *ImplicitEuler) vec2fields(vec []float64, fields []Field) {
 	counter := 0
 	for i := range fields {
-		iterator := UniqueFreqIterator{
-			Freq: ie.FT.Freq,
-			End:  len(fields[i].Data),
-		}
-		for j := iterator.Next(); j != -1; j = iterator.Next() {
-			freq := ie.FT.Freq(j)
-			if ie.isImag(freq) {
-				fields[i].Data[j] = complex(vec[counter], vec[counter+1])
-				counter += 2
-			} else {
-				fields[i].Data[j] = complex(vec[counter], 0.0)
-				counter++
-			}
-
-			conj := ie.FT.ConjugateNode(j)
-			fields[i].Data[conj] = cmplx.Conj(fields[i].Data[j])
+		for j := 0; j < len(fields[i].Data); j++ {
+			fields[i].Data[j] = complex(vec[counter], 0.0)
+			counter++
 		}
 	}
 }
@@ -96,8 +67,8 @@ func (ie *ImplicitEuler) vec2fields(vec []float64, fields []Field) {
 func (ie *ImplicitEuler) updateEquation(newFields []float64, out []float64, rhsPrev []complex128, origFields []Field, m *Model) {
 	// Transfer the fields in the work array model
 	ie.vec2fields(newFields, m.Fields)
-	ie.ifft(m) // Inverse fourier transform the new fields
-	ie.fft(m)  // Update all derived fields and fourier transform everything
+	//ie.ifft(m) // Inverse fourier transform the new fields
+	ie.fft(m) // Update all derived fields and fourier transform everything
 
 	t := ie.GetTime()
 	cDt := complex(ie.Dt, 0.0)
@@ -115,6 +86,8 @@ func (ie *ImplicitEuler) updateEquation(newFields []float64, out []float64, rhsP
 			update := origFields[i].Data[j]*factor + integral
 			rhs[j] = m.Fields[i].Data[j] - update
 		}
+		ie.FT.IFFT(rhs)
+		pfutil.DivRealScalar(rhs, float64(N))
 		ie.fieldData2vec(rhs, out[i*N:])
 	}
 }
@@ -191,14 +164,27 @@ func (ie *ImplicitEuler) nonlinearIntegral(denum complex128, rhs complex128, rhs
 func (ie *ImplicitEuler) Step(m *Model) {
 	numNodes := len(m.Fields[0].Data)
 	t := ie.GetTime()
-	x0 := make([]float64, len(m.Fields)*len(m.Fields[0].Data))
-	rhsPrev := make([]complex128, len(x0))
+	x0 := make([]float64, len(m.Fields)*numNodes)
+
+	origFields := make([]Field, len(m.Fields)) // Fourier transformed initial fields
+
+	rhsPrev := make([]complex128, len(x0)) // Right hand side of the equations at the initial
 	ie.fft(m)
-	origFields := make([]Field, len(m.Fields))
 	for i := range m.Fields {
 		origFields[i] = m.Fields[i].Copy()
-		copy(rhsPrev[i*numNodes:], m.GetRHS(i, ie.FT.Freq, t))
+		copy(rhsPrev[i*numNodes:], m.GetRHS(i, ie.FT.Freq, t)) // Fourier transformed rhs
 	}
+	ie.ifft(m)
+
+	// Perform one explicit euler step and use that as the initial guess
+	explicitEuler := Euler{
+		Dt:          ie.Dt,
+		FT:          ie.FT,
+		Filter:      ie.Filter,
+		CurrentStep: ie.CurrentStep,
+	}
+	explicitEuler.Step(m)
+	ie.fields2vec(m.Fields, x0)
 
 	problem := nonlin.Problem{
 		F: func(out []float64, x []float64) {
@@ -207,25 +193,20 @@ func (ie *ImplicitEuler) Step(m *Model) {
 	}
 
 	if ie.NonlinSolver == nil {
-		ie.NonlinSolver = &nonlin.NewtonBCGS{
-			Maxiter:  500,
-			StepSize: 1e-3 / ie.Dt,
+		ie.NonlinSolver = &nonlin.NewtonKrylov{
+			Maxiter:  50,
+			StepSize: 1e-3,
 			Tol:      1e-7,
 			Stencil:  6,
 		}
 
 	}
 
-	// Semi-implicit step serves as our initial guess
-	ie.homotopyUpdate(origFields, rhsPrev, m, 1.0)
-	ie.fields2vec(m.Fields, x0)
-
 	res := ie.NonlinSolver.Solve(problem, x0)
 	if !res.Converged {
-		fmt.Printf("Warning: Iterative solver did not converge\n")
+		log.Printf("Warning: Iterative solver did not converge\n")
 	}
 	ie.vec2fields(res.X, m.Fields)
-	ie.ifft(m)
 	ie.CurrentStep++
 }
 

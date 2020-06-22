@@ -127,8 +127,8 @@ func TestField2VecRoundTrip(t *testing.T) {
 
 	// Fourier transform the fields
 	ft := NewFFTW([]int{N, N})
-	ft.FFT(fields[0].Data)
-	ft.FFT(fields[1].Data)
+	// ft.FFT(fields[0].Data)
+	// ft.FFT(fields[1].Data)
 
 	for i := 0; i < len(origFields); i++ {
 		origFields[i] = fields[i].Copy()
