@@ -27,7 +27,6 @@ func solve(dt float64, solverName string) []complex128 {
 	for i := range conc.Data {
 		conc.Data[i] = complex(2.0*r.Float64()-1.0, 0.0)
 	}
-	fmt.Printf("%f\n", maxReal(conc.Data))
 
 	// Add constants
 	gamma := pf.NewScalar("gamma", complex(0.02, 0.0)) // Gradient coefficient
@@ -49,7 +48,7 @@ func solve(dt float64, solverName string) []complex128 {
 	} else {
 		solver.SetStepper(solverName)
 	}
-	solver.Solve(1, 100)
+	solver.Solve(2, 50)
 	return conc.Data
 }
 
@@ -75,14 +74,15 @@ func maxReal(data []complex128) float64 {
 }
 
 func main() {
-	timesteps := []float64{0.1, 1.0, 1.5, 1.9, 2.1}
+	//timesteps := []float64{0.1, 1.0, 1.5, 1.9, 2.1, 3.4, 5.4, 10.0, 20.0} // Serious testing
+	timesteps := []float64{0.1, 1.0, 1.5} // Faster on CI runs
 	solvers := []string{"euler", "rk4", "implicitEuler"}
 
 	for _, solver := range solvers {
 		for _, dt := range timesteps {
 			res := solve(dt, solver)
 			stable := !hasNaN(res)
-			fmt.Printf("Solver: %10s. Dt: %5.5f, Stable: %t\n", solver, dt, stable)
+			fmt.Printf("Solver: %10s. Dt: %5.5f, Stable: %t\n\n", solver, dt, stable)
 		}
 	}
 }
