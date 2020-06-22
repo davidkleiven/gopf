@@ -6,6 +6,7 @@ import (
 
 	"github.com/davidkleiven/gononlin/nonlin"
 	"github.com/davidkleiven/gopf/pfutil"
+	"gonum.org/v1/exp/linsolve"
 )
 
 // ImplicitEuler performs a full implicit euler method. We have a problem
@@ -193,13 +194,8 @@ func (ie *ImplicitEuler) Step(m *Model) {
 	}
 
 	if ie.NonlinSolver == nil {
-		ie.NonlinSolver = &nonlin.NewtonKrylov{
-			Maxiter:  50,
-			StepSize: 1e-3,
-			Tol:      1e-7,
-			Stencil:  6,
-		}
-
+		nonlinSolver := DefaultNonLinSolver()
+		ie.NonlinSolver = &nonlinSolver
 	}
 
 	res := ie.NonlinSolver.Solve(problem, x0)
@@ -214,4 +210,20 @@ func (ie *ImplicitEuler) Step(m *Model) {
 // timestepper
 func (ie *ImplicitEuler) SetFilter(f ModalFilter) {
 	ie.Filter = f
+}
+
+// DefaultNonLinSolver returns the default non-linear solver used in Implicit Euler.
+// Internally, the GMRES method is used. With the default settings, this method can
+// consume a lot of memory depending on the problem. If the program uses too much memory,
+// try to use a restarted version of GMRES (e.g. InnerMethod: &linsolve.GMRES{Restart: 50})
+// See GMRES description at https://godoc.org/github.com/gonum/exp/linsolve for further
+// details
+func DefaultNonLinSolver() nonlin.NewtonKrylov {
+	return nonlin.NewtonKrylov{
+		Maxiter:     50,
+		StepSize:    1e-3,
+		Tol:         1e-7,
+		Stencil:     6,
+		InnerMethod: &linsolve.GMRES{},
+	}
 }
