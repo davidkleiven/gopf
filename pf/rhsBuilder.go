@@ -155,7 +155,7 @@ func ConcreteTerm(termDelim SubStringDelimiter, m *Model) Term {
 		}
 	}
 
-	fieldName := GetFieldName(term, m.AllFieldNames())
+	fieldName := GetFieldName(SortFactors(term), m.AllFieldNames())
 
 	if strings.Contains(term, "LAP") {
 		// Term with Laplace operator

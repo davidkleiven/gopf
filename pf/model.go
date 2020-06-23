@@ -161,7 +161,7 @@ func (m *Model) UpdateDerivedFields(eq string) {
 		if m.IsUserDefinedTerm(splitted[i]) {
 			continue
 		}
-		newFields := GetNonLinearFieldExpressions(splitted[i], field, fieldNames)
+		newFields := SortFactors(GetNonLinearFieldExpressions(splitted[i], field, fieldNames))
 
 		if newFields != "" && !m.IsFieldName(newFields) {
 			dField := DerivedField{
