@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/cmplx"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -262,4 +263,15 @@ func (rai *RealAmplitudeIterator) Next() int {
 		}
 	}
 	return -1
+}
+
+// SortFactors sorts the factors in an expression in alphabetical order
+// The passed string is splitted on * and then the resulting slice is
+// sorted. Finally, it is join together.
+// Example:
+// solute*temperature*conc is converted to conc*solute*temperature
+func SortFactors(expr string) string {
+	splitted := strings.Split(expr, "*")
+	sort.Strings(splitted)
+	return strings.Join(splitted, "*")
 }

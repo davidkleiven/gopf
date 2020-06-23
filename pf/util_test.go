@@ -291,3 +291,32 @@ func TestRealAmplitudeIterator(t *testing.T) {
 		}
 	}
 }
+
+func TestSortFactors(t *testing.T) {
+	for i, test := range []struct {
+		expr   string
+		expect string
+	}{
+		{
+			expr:   "solute*conc*temperature",
+			expect: "conc*solute*temperature",
+		},
+		{
+			expr:   "solute",
+			expect: "solute",
+		},
+		{
+			expr:   "current^2*voltage",
+			expect: "current^2*voltage",
+		},
+		{
+			expr:   "voltage*current^2",
+			expect: "current^2*voltage",
+		},
+	} {
+		res := SortFactors(test.expr)
+		if res != test.expect {
+			t.Errorf("Test #%d: Expected %s got %s\n", i, test.expect, res)
+		}
+	}
+}

@@ -245,3 +245,28 @@ func TestLapUserDefined(t *testing.T) {
 		}
 	}
 }
+
+func TestNonAlphabeticOrder(t *testing.T) {
+	model := NewModel()
+	cluster := NewField("cluster", 8, nil)
+	solute := NewField("solute", 8, nil)
+	expect := make([]complex128, 8)
+	for i := 0; i < 8; i++ {
+		cluster.Data[i] = 1.0
+		solute.Data[i] = 2.0
+		expect[i] = cluster.Data[i] * solute.Data[i]
+	}
+	model.AddField(cluster)
+	model.AddField(solute)
+	model.AddEquation("dcluster/dt = LAP cluster")
+	model.AddEquation("dsolute/dt = solute*cluster") // Alphabetic order is cluster*solute
+	model.Init()
+
+	rhs := model.GetRHS(1, func(i int) []float64 {
+		return []float64{1.0}
+	}, 0.0)
+
+	if !pfutil.CmplxEqualApprox(expect, rhs, 1e-10) {
+		t.Errorf("Expected\n%v\nGot\n%v\n", expect, rhs)
+	}
+}
