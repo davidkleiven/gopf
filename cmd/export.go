@@ -157,7 +157,17 @@ func exportTimeseries(db *sql.DB, outfile string, simid int) {
 }
 
 func exportFieldData(db *sql.DB, ts int, simid int, outfile string) {
-	rows, err := db.Query("SELECT DISTINCT name FROM fields WHERE simId=? AND timestep=?", simid, ts)
+	rows, err := db.Query("SELECT COUNT (*) FROM fields WHERE simId=? AND timestep=?", simid, ts)
+	var numRows int
+	for rows.Next() {
+		rows.Scan(&numRows)
+	}
+	if numRows == 0 {
+		fmt.Printf("No entries in DB for id: %d and timestep %d\n", simid, ts)
+		return
+	}
+
+	rows, err = db.Query("SELECT DISTINCT name FROM fields WHERE simId=? AND timestep=?", simid, ts)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
