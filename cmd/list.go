@@ -59,7 +59,7 @@ such that the newest entries appear first.
 
 func init() {
 	dbCmd.AddCommand(listCmd)
-	listCmd.Flags().StringP("content", "c", "simId", "Specify what should be listed")
+	listCmd.Flags().StringP("content", "c", "simId", "Specify what should be listed. Can be one of simId or comment.")
 	listCmd.Flags().IntP("max", "m", 20, "Maximum number of items that are listed")
 }
 

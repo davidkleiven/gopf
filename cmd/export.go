@@ -86,7 +86,7 @@ that describes the content of each column.
 
 func init() {
 	dbCmd.AddCommand(exportCmd)
-	exportCmd.Flags().StringP("type", "t", "timeseries", "If timeries or field data should be exported.")
+	exportCmd.Flags().StringP("type", "t", "timeseries", "If timeries or field data should be exported. Can be one of timeseries (ts) or field (fd, fieldData). Synonyms are shown in paranthesis.")
 	exportCmd.Flags().StringP("out", "o", "", "Name of the output file. If empty, a name will be crafted from the other arguments.")
 	exportCmd.Flags().IntP("simid", "i", -1, "Simulation ID. If negative, the newest ID will be used.")
 	exportCmd.Flags().IntP("timestep", "s", 0, "Timestep to export (only relevant if type is field).")
