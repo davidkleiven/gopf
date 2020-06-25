@@ -27,6 +27,9 @@ gopf db export $DBNAME -t fd -o concentration.csv
 # Create a plot with the concentration
 gopf contour -f concentration.csv -c conc -o concentration.png
 
+# Create a plot along lines
+gopf lineplot -f concentration.csv -o lineplot.png -y 64 -z 0
+
 # Show unique attribute names
 gopf db attr $DBNAME --unique
 
@@ -41,3 +44,4 @@ rm timeseries.csv
 rm concentration.csv
 rm diffusion.db
 rm concentration.png
+rrm lineplot.png
