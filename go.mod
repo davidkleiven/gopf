@@ -29,6 +29,7 @@ require (
 	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
 	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/tools v0.0.0-20200619210111-0f592d2728bb // indirect
+	gonum.org/v1/exp v0.0.0-20200309131419-fd4cb4db9971
 	gonum.org/v1/gonum v0.7.0
 	gonum.org/v1/plot v0.7.0
 	gopkg.in/ini.v1 v1.57.0 // indirect

@@ -134,8 +134,8 @@ func init() {
 
 // DataRow represents one row
 type DataRow struct {
-	X, Y  int
-	Value float64
+	X, Y, Z int
+	Value   float64
 }
 
 // HeatMapData implements the XYZ interface
@@ -250,6 +250,11 @@ func readData(fname string, column string) []DataRow {
 			log.Fatalf("Could not convert string to float: %s\n", err)
 		}
 
+		z, err := strconv.Atoi(record[1])
+		if err != nil {
+			log.Fatalf("Could not convert string to float: %s\n", err)
+		}
+
 		value, err := strconv.ParseFloat(record[idx], 64)
 		if err != nil {
 			log.Fatalf("Could not convert string to float: %s\n", err)
@@ -258,6 +263,7 @@ func readData(fname string, column string) []DataRow {
 		rows = append(rows, DataRow{
 			X:     x,
 			Y:     y,
+			Z:     z,
 			Value: value,
 		})
 	}
@@ -277,4 +283,19 @@ func dataRange(records []DataRow) (float64, float64) {
 		}
 	}
 	return minval, maxval
+}
+
+func readHeader(fname string) []string {
+	file, err := os.Open(fname)
+	if err != nil {
+		log.Fatalf("Could not open file: %s\n", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	header, err := reader.Read()
+	if err != nil {
+		log.Fatalf("Could not read header: %s\n", err)
+	}
+	return header
 }
