@@ -20,12 +20,6 @@ type RHS struct {
 	Denum []Term
 }
 
-func panicOnMinus(delim string) {
-	if delim == "-" {
-		panic("Incorprate eventual minus signs inside the term itself and use + as delimiter")
-	}
-}
-
 // Build constructs the right-hand-side of an equation based on a string
 // representation
 func Build(eq string, m *Model) RHS {
@@ -35,21 +29,17 @@ func Build(eq string, m *Model) RHS {
 	}
 
 	field := fieldNameFromLeibniz(sides[0])
-	//termsStr := strings.Split(sides[1], "+")
 	termsStr := SplitOnMany(sides[1], []string{"+", "-"})
 	var rhs RHS
 	for _, t := range termsStr {
 		name := t.SubString
 		if m.IsImplicitTerm(name) {
-			panicOnMinus(t.PreceedingDelimiter)
-			rhs.Denum = append(rhs.Denum, m.ImplicitTerms[name].Construct(m.Bricks))
+			rhs.Denum = append(rhs.Denum, constructFunc(t.PreceedingDelimiter, m.ImplicitTerms[name].Construct(m.Bricks)))
 		} else if m.IsExplicitTerm(name) {
-			panicOnMinus(t.PreceedingDelimiter)
-			rhs.Terms = append(rhs.Terms, m.ExplicitTerms[name].Construct(m.Bricks))
+			rhs.Terms = append(rhs.Terms, constructFunc(t.PreceedingDelimiter, m.ExplicitTerms[name].Construct(m.Bricks)))
 		} else if m.IsMixedTerm(name) {
-			panicOnMinus(t.PreceedingDelimiter)
-			rhs.Denum = append(rhs.Denum, m.MixedTerms[name].ConstructLinear(m.Bricks))
-			rhs.Terms = append(rhs.Terms, m.MixedTerms[name].ConstructNonLinear(m.Bricks))
+			rhs.Denum = append(rhs.Denum, constructFunc(t.PreceedingDelimiter, m.MixedTerms[name].ConstructLinear(m.Bricks)))
+			rhs.Terms = append(rhs.Terms, constructFunc(t.PreceedingDelimiter, m.MixedTerms[name].ConstructNonLinear(m.Bricks)))
 		} else if isBilinear(t.SubString, field, m.AllFieldNames()) {
 			t.SubString = strings.Replace(t.SubString, field, "", -1)
 			rhs.Denum = append(rhs.Denum, ConcreteTerm(t, m))
@@ -194,4 +184,21 @@ func ConcreteTerm(termDelim SubStringDelimiter, m *Model) Term {
 			}
 		}
 	}
+}
+
+// flipSign multiplies all items in the passed array by -1
+func flipSign(data []complex128) {
+	for i := range data {
+		data[i] *= -1.0
+	}
+}
+
+func constructFunc(preceedingDelim string, term Term) Term {
+	if preceedingDelim == "-" {
+		return func(freq Frequency, t float64, field []complex128) {
+			term(freq, t, field)
+			flipSign(field)
+		}
+	}
+	return term
 }

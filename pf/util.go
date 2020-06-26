@@ -138,6 +138,17 @@ type SubStringDelimiter struct {
 	PreceedingDelimiter string
 }
 
+// getFirstDelimiter returns the item in delimiters that matches the first character
+// in value. If no item in delimiters matches, an emptry string is returned
+func getFirstDelimiter(value string, delimiters []string) string {
+	for i := range delimiters {
+		if string(value[0]) == delimiters[i] {
+			return delimiters[i]
+		}
+	}
+	return ""
+}
+
 // SplitOnMany splits a string on several delimiters. The resulted split is
 // returned together with the delimiter preceeding it
 func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
@@ -145,7 +156,7 @@ func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
 
 	queue := []SubStringDelimiter{{
 		SubString:           value,
-		PreceedingDelimiter: "",
+		PreceedingDelimiter: getFirstDelimiter(value, delimiters),
 	}}
 
 	allDelims := ""
@@ -171,6 +182,9 @@ func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
 		}
 
 		splits := strings.Split(currentSubString.SubString, delim)
+		fmt.Printf("BEFORE: %s\n", splits)
+		splits = removeEmpty(splits)
+		fmt.Printf("AFTER: %s\n", splits)
 		queue = append(queue, SubStringDelimiter{
 			SubString:           splits[0],
 			PreceedingDelimiter: currentSubString.PreceedingDelimiter,
@@ -184,6 +198,17 @@ func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
 		}
 	}
 	return substrings
+}
+
+// removeEmpty strings
+func removeEmpty(str []string) []string {
+	filtered := str[:0] // filtered shares the same underlying data as str
+	for i := range str {
+		if str[i] != "" {
+			filtered = append(filtered, str[i])
+		}
+	}
+	return filtered
 }
 
 // UniqueFreqIterator is an iterator that can be used to iterate over all the unique
