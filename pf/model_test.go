@@ -47,20 +47,18 @@ func TestReactionDiffusion(t *testing.T) {
 	concA := NewField("concA", 2, []complex128{complex(1.0, 0.0), complex(2.0, 0.0)})
 	concB := NewField("concB", 2, []complex128{complex(3.0, 0.0), complex(5.0, 0.0)})
 	concC := NewField("concC", 2, []complex128{complex(-1.0, 0.0), complex(1.0, 0.0)})
-	m1 := NewScalar("m1", complex(-1.0, 0.0))
 	kf := NewScalar("kf", complex(2.0, 0.0))
 	kr := NewScalar("kr", complex(0.2, 0.0))
 	m.AddField(concA)
 	m.AddField(concB)
 	m.AddField(concC)
-	m.AddScalar(m1)
 	m.AddScalar(kf)
 	m.AddScalar(kr)
 
 	// Diffusion + the reaction 2A + 3B <> C
-	m.AddEquation("dconcA/dt = LAP concA + kf*m1*concA^2*concB^3 + kr*concC")
-	m.AddEquation("dconcB/dt = LAP concB + kf*m1*concA^2*concB^3 + kr*concC")
-	m.AddEquation("dconcC/dt = LAP concC + kr*m1*concC + kf*concA^2*concB^3")
+	m.AddEquation("dconcA/dt = LAP concA - kf*concA^2*concB^3 + kr*concC")
+	m.AddEquation("dconcB/dt = LAP concB - kf*concA^2*concB^3 + kr*concC")
+	m.AddEquation("dconcC/dt = LAP concC - kr*concC + kf*concA^2*concB^3")
 	m.Init()
 
 	expectedFields := []string{"concA", "concB", "concC", "concA^2*concB^3"}

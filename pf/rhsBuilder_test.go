@@ -270,3 +270,83 @@ func TestNonAlphabeticOrder(t *testing.T) {
 		t.Errorf("Expected\n%v\nGot\n%v\n", expect, rhs)
 	}
 }
+
+type SingleTerm struct{}
+
+func ones(freq Frequency, t float64, field []complex128) {
+	for i := range field {
+		field[i] = 1.0
+	}
+}
+
+func (s *SingleTerm) Construct(bricks map[string]Brick) Term {
+	return ones
+}
+
+func (s *SingleTerm) ConstructLinear(bricks map[string]Brick) Term {
+	return ones
+}
+
+func (s *SingleTerm) ConstructNonLinear(bricks map[string]Brick) Term {
+	return ones
+}
+
+func (s *SingleTerm) OnStepFinished(t float64, bricks map[string]Brick) {}
+
+func TestNegativeSignBeforeUserDefined(t *testing.T) {
+	model := NewModel()
+	field := NewField("conc", 8, nil)
+	model.AddField(field)
+	expect := make([]complex128, 8)
+	evaluated := make([]complex128, 8)
+	for i := range expect {
+		expect[i] = complex(-1.0, 0.0)
+	}
+
+	// 1) Test explicit term
+	model.RegisterExplicitTerm("TERM", &SingleTerm{}, nil)
+	rhs := Build("dconc/dt=-TERM", &model)
+	if len(rhs.Terms) != 1 || len(rhs.Denum) != 0 {
+		t.Errorf("Wrong length: Expected 1 got num terms: %d num denum: %d\n", len(rhs.Terms), len(rhs.Denum))
+		return
+	}
+
+	freq := func(i int) []float64 { return []float64{0.0, 0.0} }
+	rhs.Terms[0](freq, 0.0, evaluated)
+	if !pfutil.CmplxEqualApprox(evaluated, expect, 1e-10) {
+		t.Errorf("Expected\n%v\nGot\n%v\n", expect, evaluated)
+	}
+
+	// 2) Test implicit term
+	model = NewModel()
+	model.AddField(field)
+	model.RegisterImplicitTerm("TERM", &SingleTerm{}, nil)
+	rhs = Build("dconc/dt=-TERM", &model)
+	if len(rhs.Terms) != 0 || len(rhs.Denum) != 1 {
+		t.Errorf("Wrong length: Expected 1 got num terms: %d num denum: %d\n", len(rhs.Terms), len(rhs.Denum))
+		return
+	}
+	rhs.Denum[0](freq, 0.0, evaluated)
+	if !pfutil.CmplxEqualApprox(evaluated, expect, 1e-10) {
+		t.Errorf("Expected\n%v\nGot\n%v\n", expect, evaluated)
+	}
+
+	// 3) Test mixed term
+	model = NewModel()
+	model.AddField(field)
+	model.RegisterMixedTerm("TERM", &SingleTerm{}, nil)
+	rhs = Build("dconc/dt=-TERM", &model)
+	if len(rhs.Terms) != 1 || len(rhs.Denum) != 1 {
+		t.Errorf("Wrong length: Expected 1 got num terms: %d num denum: %d\n", len(rhs.Terms), len(rhs.Denum))
+		return
+	}
+	rhs.Denum[0](freq, 0.0, evaluated)
+	if !pfutil.CmplxEqualApprox(evaluated, expect, 1e-10) {
+		t.Errorf("Expected\n%v\nGot\n%v\n", expect, evaluated)
+	}
+	rhs.Terms[0](freq, 0.0, evaluated)
+	if !pfutil.CmplxEqualApprox(evaluated, expect, 1e-10) {
+		t.Errorf("Expected\n%v\nGot\n%v\n", expect, evaluated)
+	}
+
+}

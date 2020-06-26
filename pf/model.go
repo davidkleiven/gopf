@@ -150,7 +150,12 @@ func (m *Model) AddEquation(eq string) {
 // UpdateDerivedFields update fields that needs to be handle with FFT (required for non-linear equations)
 func (m *Model) UpdateDerivedFields(eq string) {
 	rhs := strings.Split(eq, "=")[1]
-	splitted := strings.Split(rhs, "+")
+	splittedDelim := SplitOnMany(rhs, []string{"+", "-"})
+	splitted := make([]string, len(splittedDelim))
+	for i := range splittedDelim {
+		splitted[i] = splittedDelim[i].SubString
+	}
+
 	field := fieldNameFromLeibniz(strings.Split(eq, "=")[0])
 	fieldNames := make([]string, len(m.Fields))
 	for i := range m.Fields {

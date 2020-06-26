@@ -21,7 +21,7 @@ func TestImplicitEuler(t *testing.T) {
 		// Test equation with only a linear term
 		{
 			Fields: []string{"conc"},
-			Eqns:   []string{"dconc/dt = m1*conc"},
+			Eqns:   []string{"dconc/dt = -conc"},
 			Init:   []float64{1.0},
 			Dt:     0.01,
 			Nsteps: 100,
@@ -33,7 +33,7 @@ func TestImplicitEuler(t *testing.T) {
 		// Test equation with only a non-linear term
 		{
 			Fields: []string{"conc"},
-			Eqns:   []string{"dconc/dt = m1*conc^2"},
+			Eqns:   []string{"dconc/dt = -conc^2"},
 			Init:   []float64{1.0},
 			Dt:     0.01,
 			Nsteps: 100,
@@ -45,7 +45,7 @@ func TestImplicitEuler(t *testing.T) {
 		// Test equation with both linear and non-linear term
 		{
 			Fields: []string{"conc"},
-			Eqns:   []string{"dconc/dt = conc+m1*conc^2"},
+			Eqns:   []string{"dconc/dt = conc - conc^2"},
 			Init:   []float64{0.5},
 			Dt:     0.01,
 			Nsteps: 100,
@@ -57,7 +57,7 @@ func TestImplicitEuler(t *testing.T) {
 		// Test equation with both linear and non-linear term and two coupled fields
 		{
 			Fields: []string{"conc1", "conc2"},
-			Eqns:   []string{"dconc1/dt = m1*conc1*conc2", "dconc2/dt = m1*conc2"},
+			Eqns:   []string{"dconc1/dt = -conc1*conc2", "dconc2/dt = -conc2"},
 			Init:   []float64{1.0, 1.0},
 			Dt:     0.01,
 			Nsteps: 100,
@@ -76,10 +76,6 @@ func TestImplicitEuler(t *testing.T) {
 			}
 			model.AddField(field)
 		}
-		model.AddScalar(Scalar{
-			Name:  "m1",
-			Value: complex(-1.0, 0.0),
-		})
 
 		for _, eq := range test.Eqns {
 			model.AddEquation(eq)
