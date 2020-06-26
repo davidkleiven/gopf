@@ -16,13 +16,13 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
 )
 
@@ -111,11 +111,12 @@ To plot data along a line, at least two of -x, -y and -z must be specified.
 			return
 		}
 
-		for _, name := range fieldArray {
+		for i, name := range fieldArray {
 			rows := readData(fname, name)
 			data := lineData(rows, x, y, z)
-			fmt.Printf("NUM DATA: %d\n", len(data))
+			log.Printf("Extracted %d points for field %s\n", len(data), name)
 			line, err := plotter.NewLine(data)
+			line.LineStyle.Color = plotutil.Color(i)
 			if err != nil {
 				log.Fatalf("Could not create line: %s\n", err)
 				continue

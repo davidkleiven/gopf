@@ -250,7 +250,7 @@ func readData(fname string, column string) []DataRow {
 			log.Fatalf("Could not convert string to float: %s\n", err)
 		}
 
-		z, err := strconv.Atoi(record[1])
+		z, err := strconv.Atoi(record[2])
 		if err != nil {
 			log.Fatalf("Could not convert string to float: %s\n", err)
 		}

@@ -47,4 +47,4 @@ rm timeseries.csv
 rm concentration.csv
 rm diffusion.db
 rm concentration.png
-rrm lineplot.png
+rm lineplot.png
