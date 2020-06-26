@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -157,6 +158,10 @@ func exportTimeseries(db *sql.DB, outfile string, simid int) {
 }
 
 func exportFieldData(db *sql.DB, ts int, simid int, outfile string) {
+	if ts < 0 {
+		ts = largestTimestep(db, simid)
+		log.Printf("Negative timestep provided. Exporting data for the largest timestep instead (=%d)\n", ts)
+	}
 	rows, err := db.Query("SELECT COUNT (*) FROM fields WHERE simId=? AND timestep=?", simid, ts)
 	var numRows int
 	for rows.Next() {
@@ -231,4 +236,18 @@ func exportFieldData(db *sql.DB, ts int, simid int, outfile string) {
 		writer.Write(record)
 	}
 	fmt.Printf("Field data written to %s\n", outfile)
+}
+
+// largestTimestep extracts the largest timestep from the fields table
+func largestTimestep(db *sql.DB, simid int) int {
+	rows, err := db.Query("SELECT MAX(timestep) FROM fields WHERE simId=?", simid)
+	if err != nil {
+		log.Fatalf("Could not determine maximum timestep: %s\n", err)
+		return 0
+	}
+	var maxts int
+	for rows.Next() {
+		rows.Scan(&maxts)
+	}
+	return maxts
 }
