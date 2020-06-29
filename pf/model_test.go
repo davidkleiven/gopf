@@ -302,3 +302,41 @@ func TestEquationNumber(t *testing.T) {
 		}
 	}
 }
+
+func TestModifier(t *testing.T) {
+	field := NewField("conc", 8, nil)
+	field2 := NewField("conc2", 8, nil)
+	expect1 := make([]complex128, 8)
+	expect2 := make([]complex128, 8)
+	for i := range field2.Data {
+		field2.Data[i] = 1.0
+		expect1[i] = 1.0
+		expect2[i] = -2.0
+	}
+	model := NewModel()
+	model.AddField(field)
+	model.AddField(field2)
+	model.RegisterRHSModifier(1, func(data []complex128) {
+		for i := range data {
+			data[i] *= 2.0
+		}
+	})
+
+	model.AddEquation("dconc/dt = conc2")
+	model.AddEquation("dconc2/dt = -conc2")
+
+	freq := func(i int) []float64 {
+		return []float64{3.0, 3.0}
+	}
+
+	model.Init()
+	for i, expect := range [][]complex128{
+		expect1, expect2,
+	} {
+		rhs := model.GetRHS(i, freq, 0.0)
+		if !pfutil.CmplxEqualApprox(rhs, expect, 1e-10) {
+			t.Errorf("Eq #%d: Expected\n%v\nGot%v\n", i, expect, rhs)
+		}
+	}
+
+}
