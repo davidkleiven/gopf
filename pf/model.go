@@ -8,6 +8,9 @@ import (
 	"github.com/davidkleiven/gopf/pfutil"
 )
 
+// RHSModifier is a function type used to modify the right hand side prior to adding it
+type RHSModifier func(data []complex128)
+
 // Field is a type that is used to represent a field in the context of phase field
 // models
 type Field struct {
@@ -101,6 +104,11 @@ func (s Scalar) Get(i int) complex128 {
 	return s.Value
 }
 
+type eqModifier struct {
+	EqNo        int
+	RHSModifier RHSModifier
+}
+
 // Model is a type used to represent a general set of equations
 type Model struct {
 	Fields        []Field
@@ -112,6 +120,7 @@ type Model struct {
 	Equations     []string
 	RHS           []RHS
 	AllSources    []Sources
+	RHSModifiers  []eqModifier
 }
 
 // NewModel returns a new model
@@ -121,6 +130,7 @@ func NewModel() Model {
 		ImplicitTerms: make(map[string]PureTerm),
 		ExplicitTerms: make(map[string]PureTerm),
 		MixedTerms:    make(map[string]MixedTerm),
+		RHSModifiers:  []eqModifier{},
 	}
 }
 
@@ -279,6 +289,13 @@ func (m *Model) GetRHS(fieldNo int, freq Frequency, t float64) []complex128 {
 		s.Eval(freq, t, tmp)
 		pfutil.ElemwiseAdd(data, tmp)
 	}
+
+	// Apply eventual modifiers
+	for i := range m.RHSModifiers {
+		if m.RHSModifiers[i].EqNo == fieldNo {
+			m.RHSModifiers[i].RHSModifier(data)
+		}
+	}
 	return data
 }
 
@@ -428,4 +445,29 @@ func (m *Model) EqNumber(fieldName string) int {
 	}
 	msg := fmt.Sprintf("EqNumber: Could not find an equation for field %s\n", fieldName)
 	panic(msg)
+}
+
+// RegisterRHSModifier adds a modifier that is applied to the fourier transformed right hand
+// side of the equation. The modifier will be applied to the right hand side of the equation
+// passed. If several modifiers are added to the same equation, the one that is added first
+// will be applied first
+//
+// Simple example case:
+// If we want to convert the units of the right from let's milli joules to joules, we should
+// multiply the current right hand side by a factor 1e-3. We therefore supply the following
+// modifier
+//
+// func (data []complex128) {
+//	for i := range data {
+//		data[i] *= 1e-3
+//	}
+//}
+//
+// The frequency corresponding to each node can be obtained from the frequency method
+// of the fourier transformer used (see for example FFTWWrapper)
+func (m *Model) RegisterRHSModifier(eqNumber int, modifier func(data []complex128)) {
+	m.RHSModifiers = append(m.RHSModifiers, eqModifier{
+		EqNo:        eqNumber,
+		RHSModifier: modifier,
+	})
 }
