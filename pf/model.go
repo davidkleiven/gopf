@@ -2,6 +2,7 @@ package pf
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/davidkleiven/gopf/pfutil"
@@ -412,4 +413,19 @@ func (m *Model) Summarize() {
 		fmt.Printf("| %2d | %-70s | %2d | %2d |\n", i, m.Equations[i], len(m.RHS[i].Terms), len(m.RHS[i].Denum))
 	}
 	fmt.Printf("=========================================================================================\n")
+}
+
+// EqNumber returns the equation number corresponding to the passed field name
+func (m *Model) EqNumber(fieldName string) int {
+	re := regexp.MustCompile("d(.*?)/dt")
+	for i, eq := range m.Equations {
+		match := re.FindStringSubmatch(eq) // Full match is first element and capture group is the second
+		if len(match) >= 2 {
+			if match[1] == fieldName {
+				return i
+			}
+		}
+	}
+	msg := fmt.Sprintf("EqNumber: Could not find an equation for field %s\n", fieldName)
+	panic(msg)
 }
