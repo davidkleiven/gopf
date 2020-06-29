@@ -265,3 +265,40 @@ func TestAddGradientCalculator(t *testing.T) {
 		}
 	}
 }
+
+func TestEquationNumber(t *testing.T) {
+	for i, test := range []struct {
+		Eqns   []string
+		Field  string
+		Expect int
+	}{
+		{
+			Eqns:   []string{"dconc/dt = 0"},
+			Field:  "conc",
+			Expect: 0,
+		},
+		{
+			Eqns:   []string{"dconcA/dt = 0", "dconcB/dt = 0"},
+			Field:  "concB",
+			Expect: 1,
+		},
+		{
+			Eqns:   []string{"dconcA/dt = 0", "dconcB/dt = 0"},
+			Field:  "concA",
+			Expect: 0,
+		},
+		{
+			Eqns:   []string{"dtemp/dt = 0", "dconc/dt = 0", "dvoltage/dt = 0"},
+			Field:  "voltage",
+			Expect: 2,
+		},
+	} {
+		model := NewModel()
+		model.Equations = test.Eqns
+		index := model.EqNumber(test.Field)
+
+		if index != test.Expect {
+			t.Errorf("Test #%d: Expected %d got %d\n", i, test.Expect, index)
+		}
+	}
+}
