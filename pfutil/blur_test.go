@@ -1,7 +1,6 @@
 package pfutil
 
 import (
-	"fmt"
 	"math"
 	"testing"
 )
@@ -20,7 +19,7 @@ func TestBlur(t *testing.T) {
 	dataOrig := make([]float64, len(data))
 	copy(dataOrig, data)
 
-	Blur(data, []int{N, N}, &BoxKernel{Width: 2})
+	Blur(&RealSlice{data}, []int{N, N}, &BoxKernel{Width: 2})
 
 	// Check that the integral does not change
 	newIntegral := 0.0
@@ -45,5 +44,4 @@ func TestBlur(t *testing.T) {
 			}
 		}
 	}
-	fmt.Printf("%v\n", data)
 }

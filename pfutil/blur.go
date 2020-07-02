@@ -35,7 +35,7 @@ func (bk *BoxKernel) Value(x []int) float64 {
 // domain in each direction. Thus, if domain size is []int{5, 5}, the length of data
 // must be 25 and it is assumed that it represents a 5x5 domain. kernel is a blurring
 // kernel.
-func Blur(data []float64, domainSize []int, kernel BlurKernel) {
+func Blur(data MutableSlice, domainSize []int, kernel BlurKernel) {
 	end := make([]int, len(domainSize))
 	shift := make([]int, len(domainSize))
 	shiftedPos := make([]int, len(domainSize))
@@ -44,10 +44,12 @@ func Blur(data []float64, domainSize []int, kernel BlurKernel) {
 		end[i] = 2*kernel.Cutoff() + 1
 	}
 
-	dataCpy := make([]float64, len(data))
-	copy(dataCpy, data)
+	dataCpy := make([]float64, data.Len())
+	for i := range dataCpy {
+		dataCpy[i] = data.Get(i)
+	}
 
-	for i := range data {
+	for i := range dataCpy {
 		prod := NewProduct(end)
 		center := Pos(domainSize, i)
 		newValue := 0.0
@@ -61,6 +63,6 @@ func Blur(data []float64, domainSize []int, kernel BlurKernel) {
 			newValue += dataCpy[NodeIdx(domainSize, shiftedPos)] * kernel.Value(shift)
 			kernelIntegral += kernel.Value(shift)
 		}
-		data[i] = newValue / kernelIntegral
+		data.Set(i, newValue/kernelIntegral)
 	}
 }
