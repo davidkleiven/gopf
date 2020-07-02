@@ -76,7 +76,7 @@ func GetFields(voronoi []int) []pf.Field {
 				work[i] = 1.0
 			}
 		}
-		pfutil.Blur(work, []int{N, N}, &pfutil.BoxKernel{Width: 8})
+		pfutil.Blur(&pfutil.RealSlice{Data: work}, []int{N, N}, &pfutil.BoxKernel{Width: 8})
 		for i := range work {
 			field.Data[i] = complex(work[i], 0.)
 		}
