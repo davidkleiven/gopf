@@ -104,45 +104,13 @@ type CsvIO struct {
 // X, Y, Z, field1, field2, field3
 // etc.
 func (cio *CsvIO) SaveFields(s *Solver, epoch int) {
-	if cio.DomainSize == nil {
-		panic("Domain size not given. Data will not be written to file\n")
-	}
-
-	if pfutil.ProdInt(cio.DomainSize) != s.Model.NumNodes() {
-		msg := fmt.Sprintf("Inconsistent domain size. Expected %d nodes, got %d\n", s.Model.NumNodes(), pfutil.ProdInt(cio.DomainSize))
-		panic(msg)
-	}
-
-	header := []string{"X", "Y", "Z"}
-	for _, f := range s.Model.Fields {
-		header = append(header, f.Name)
-	}
-
 	fname := cio.Prefix + fmt.Sprintf("_%d.csv", epoch)
-	out, err := os.Create(fname)
-	if err != nil {
-		log.Fatalf("Could not open file: %s\n", err)
-		return
+	csvData := make([]CsvData, len(s.Model.Fields))
+	for i := range csvData {
+		csvData[i].Name = s.Model.Fields[i].Name
+		csvData[i].Data = &pfutil.RealPartSlice{Data: s.Model.Fields[i].Data}
 	}
-	defer out.Close()
-
-	writer := csv.NewWriter(out)
-	defer writer.Flush()
-
-	writer.Write(header)
-	record := make([]string, len(header))
-	pos := make([]int, 3)
-	for i := 0; i < s.Model.NumNodes(); i++ {
-		position := pfutil.Pos(cio.DomainSize, i)
-		copy(pos, position)
-		for j := 0; j < 3; j++ {
-			record[j] = fmt.Sprintf("%d", pos[j])
-		}
-		for j, f := range s.Model.Fields {
-			record[j+3] = fmt.Sprintf("%f", real(f.Data[i]))
-		}
-		writer.Write(record)
-	}
+	SaveCsv(fname, csvData, cio.DomainSize)
 }
 
 // LoadCSV loads data from CSV file and returns an array of fields
@@ -179,5 +147,63 @@ func LoadCSV(fname string) []Field {
 			v, _ := strconv.ParseFloat(record[i+3], 64)
 			fields[i].Data = append(fields[i].Data, complex(v, 0.0))
 		}
+	}
+}
+
+// CsvData is a type that can be used to store data to a CSV file
+// Name will be placed as header
+type CsvData struct {
+	Name string
+	Data pfutil.ImmutableSlice
+}
+
+// SaveCsv stores data to a csv file. The format is
+// X, Y, Z, field1, field2, field3
+// DomainSize gives the shape of the domain
+func SaveCsv(fname string, data []CsvData, domainSize []int) {
+	if domainSize == nil {
+		panic("Domain size not given. Data will not be written to file\n")
+	}
+
+	if len(data) == 0 {
+		log.Printf("No data provided, will not write anything\n.")
+		return
+	}
+
+	numNodes := data[0].Data.Len()
+
+	if pfutil.ProdInt(domainSize) != numNodes {
+		msg := fmt.Sprintf("Inconsistent domain size. Expected %d nodes, got %d\n", numNodes, pfutil.ProdInt(domainSize))
+		panic(msg)
+	}
+
+	header := []string{"X", "Y", "Z"}
+	for _, f := range data {
+		header = append(header, f.Name)
+	}
+
+	out, err := os.Create(fname)
+	if err != nil {
+		log.Fatalf("Could not open file: %s\n", err)
+		return
+	}
+	defer out.Close()
+
+	writer := csv.NewWriter(out)
+	defer writer.Flush()
+
+	writer.Write(header)
+	record := make([]string, len(header))
+	pos := make([]int, 3)
+	for i := 0; i < numNodes; i++ {
+		position := pfutil.Pos(domainSize, i)
+		copy(pos, position)
+		for j := 0; j < 3; j++ {
+			record[j] = fmt.Sprintf("%d", pos[j])
+		}
+		for j, f := range data {
+			record[j+3] = fmt.Sprintf("%f", f.Data.Get(i))
+		}
+		writer.Write(record)
 	}
 }
