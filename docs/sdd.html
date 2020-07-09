@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOPF</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <div class="main">
+        <div class="title under">
+            <h2>Shrinking Dimer Dynamics</h2>
+        </div>
+        <div class="button">
+            <a href="index.html" class="btn">Back</a>
+        </div>
+        <div style="width: 100%; float: left;">
+            <div style="width: 30%; float: left;">
+                <a href="https://github.com/davidkleiven/gopf/blob/master/examples/heterogeneousNucleation/main.go">
+                <img src="assets/github.svg" height=48px style="float: left;">
+            </a>
+            </div>
+        </div>
+        
+        
+        <div class="exampletext">
+            <p class="paragraph">This example goes through the basic theory behind Shrinking Dimer Dynamics (SDD),
+                as well as application for identifying the critical droplet size for heterogenous nucleation.
+                Several phase field equations are derived from a an energy functional that depends on a set
+                of fields <i>&phi;<sub>i</sub></i>.
+            </p>
+            <img src="assets/sdd/energyFunc.svg" height="48px"/>
+
+            <p class="paragraph">
+                where <i>f({&phi;<sub>i</sub>})</i> is a bulk energy density that depends on all the fields, and
+                <i>&gamma;<sub>i</sub></i> are gradient coefficients that adds an energy penalty for forming interfaces
+                between the various fields. From the energy functional we can define a generalized force acting on the field
+                as the functional derivative of the energy with respect to each field. Furthermore, if we define the equation
+                motion such that the field evolves in the direction of the negative gradient of the force, the fields will eventually
+                end up in a local minimum.
+            </p>
+
+            <img src="assets/sdd/eqMotion.svg" height="48px"/>
+
+            <p class ="paragraph">
+                where <i>L</i> is a constant that controls how rapidly the field changes. For several applications, the local
+                energy minimum is not the most interesting solution, but rather the saddle points. By introducing a small change
+                to the equation of motion above, we can get the fields to evolve towards a saddle point instead. First, we 
+                introduce an "unstable" direction <b>v</b>. The reason why it is called "unstable" will become clear later.
+                We want the system to move along the <i>positive</i> force direction parallel to <b>v</b> and along the negative
+                force in all other directions. For simplivity we label the generalized force <b>q</b> in the following. The component
+                of <b>q</b> on along <b>v</b> is given by <b>q<sub>&parallel;</sub></b> = <b>vv<sup>T</sup>q</b>. We can, thus, flip
+                the sign of the component of the force along <b>v</b>, while leaving the other directions unchanged, by appliying the
+                operation <i>I - 2</i><b>vv<sup>T</sup></b> to the force vector. Thus, the equation of motion for the field becomes
+            </p>
+
+            <img src="assets/sdd/eqMotionSaddle.svg" height="48px"/>
+
+            <p class="paragraph">
+                The "unstable" direction <b>v</b> is still unknown. However, we can find an equation of motion such that it aligns
+                with the underlying unstable direction. First, we calculate the generalized force at two shifted positions
+                <b>q<sub>1</sub></b> = <b>q</b>({&phi;<sub>i</sub>} - <i>0.5l</i><b>v</b>) and <b>q<sub>2</sub></b> = <b>q</b>({&phi;<sub>i</sub>} + <i>0.5l</i><b>v</b>),
+                where <i>l</i> is the length. If we now imagine that the dimer is a "rod" of length <i>l</i> and orientation <b>v</b>, we can calculate the 
+                torque acting on the rod.
+            </p>
+            <img src="assets/sdd/rodSketch.svg" width="25%"/>
+
+            <p class="paragraph">
+                The component of <v>q<sub>1</sub></v> acting in the anti-clockwise direction is <b>q<sub>&perp;,1</sub></b> = 
+                <i>(I - </i><b>vv<sup>T</sup></b>)<b>q<sub>1</sub></b> and similar for for <b>q<sub>2</sub></b>. The net force along
+                the anti-clockwise direction is given by the difference between <b>q<sub>2</sub></b> and <b>q<sub>1</sub></b> since they
+                act on different ends. The final equation of motion for the orientation vector <b>v</b> is thus,
+            </p>
+            <img src="assets/sdd/eqOrientation.svg" height="48px"/>
+            <p class="paragraph">
+                where <i>&tau;</i> is an artificial time constant controlling how quickly the orientation vector responds to the applie torque.
+                The last step, is to define an equation for the length of the dimer. For convergence, it is important that the length shrinks
+                to zero as the time approaches infinity [1]. We adopt the following equation for the dimer length
+            </p>
+
+            <img src="assets/sdd/eqLength.svg" height="48px"/>
+
+            <h3> Application To Heterogeneous Nucleation</h3>
+            <p class="paragraph">
+            As an example case, we apply the approach outlined above to solve the problem initially studied by Zhang <i>et al.</i> [2].
+            We consider a model that has two stable phases <i>&phi;=-1</i> and <i>&phi; = 1</i>. The functional at hand is
+            </p>
+
+            <img src="assets/sdd/eqFuncNucleation.svg" height="48px"/>
+
+            <p class="paragraph">The generalized force is therefore given by</p>
+
+            <img src="assets/sdd/force.svg" height="48px"/>
+
+            <p class="paragraph">The function <i>&theta;</i> describes an inhomogeneity and is here given by</p>
+
+            <img src="assets/sdd/theta.svg" height="48px"/>
+
+            <p class="paragraph">where <i>&alpha;=0.99</i> is used in the present case. The effect of the inhomogeneity is that
+            any variation in the field <i>&phi;</i> "costs" less energy if it happens at the inhomogeneity. By starting the system from
+            a small semi-circle located at the inhomogeneity, we can evolve the equations until it stops at the saddle point.</p>
+
+            <img src="assets/sdd/fieldEvolution.svg" width="75%"/>
+
+            <p class="paragraph">
+                We observe that the critical size of the droplet is affected by the inhomogeneity and is clearly not circular as it would
+                be if there was no inhomogeneity present.
+            </p>
+
+
+            <p class="paragraph">
+                [1] <a href=https://doi.org/10.1137/110843149>Zhang, J. and Du, Q., 2012. <i>Shrinking dimer dynamics and its applications to saddle point search.</i> SIAM Journal on Numerical Analysis</a>
+                
+            </p>
+            <p class="paragraph">[2] <a href=https://doi.org/10.4208/cicp.250913.240314a>Zhang, L., Zhang, J. and Du, Q., 2014. <i>Finding critical nuclei in phase transformations by shrinking dimer dynamics and its variants.</i> Communications in Computational Physics.</a></p>
+        </div>
+        <div class="examplefig">
+            <img src="assets/heterogeneousNucleation.svg"/>
+            <div class="bottom">
+                <img src="assets/gopher.svg"/>
+            </div>
+        </div>
+    </div>
+</html>

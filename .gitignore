@@ -16,3 +16,10 @@
 *.bin
 *.xdmf
 .vscode/*
+
+*.csv
+*.png
+*.db
+main
+*xdmf
+*.txt
