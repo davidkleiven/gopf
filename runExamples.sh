@@ -45,3 +45,6 @@ echo "Running charge transport example"
 go run examples/electricConductivity/main.go
 rm grainBoundaryCurrent.db
 rm current.csv
+
+echo "Running heterogeneous nucleation example"
+go run examples/heterogeneousNucleation/main.go -dim 64 -innerR 0.05 -outerR 0.02 -dt 0.01 -epoch 2 -step 10
