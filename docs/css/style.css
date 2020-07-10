@@ -57,13 +57,13 @@ ul li a:hover{
 
 .main .sidebar{
     float: left;
-    width: 30%;
+    width: 25%;
     height: 90%;
 }
 
 .main .slideshow{
     float: left;
-    width: 40%;
+    width: 50%;
     height: 90%;
     position: relative;
     margin: auto;
@@ -185,4 +185,11 @@ img {
     display: block;
     object-fit: contain;
     margin: auto;
+}
+
+.logoHeader {
+    width: 100%;
+    float: left;
+    height: 120px;
+    margin-bottom: 20px;
 }
