@@ -74,8 +74,9 @@ will be selected.
 
 		data := NewHeatMapData(rows)
 		colormap := moreland.SmoothGreenRed()
-		colormap.SetMin(min)
-		colormap.SetMax(max)
+		rng := max - min
+		colormap.SetMin(min - 0.05*rng)
+		colormap.SetMax(max + 0.05*rng)
 		palette := colormap.Palette(255)
 		hm := plotter.NewHeatMap(data, palette)
 
