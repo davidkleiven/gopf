@@ -1,4 +1,4 @@
-# GOPF
+![Logo](docs/assets/logo.svg)
 
 [![Build Status](https://travis-ci.org/davidkleiven/gopf.svg?branch=master)](https://travis-ci.org/davidkleiven/gopf)
 [![Coverage Status](https://coveralls.io/repos/github/davidkleiven/gopf/badge.svg?branch=master)](https://coveralls.io/github/davidkleiven/gopf?branch=master)
