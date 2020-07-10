@@ -65,6 +65,10 @@ will be selected.
 			return
 		}
 
+		header := readHeader(fname)
+		idx := getColIndex(header, column)
+		column = header[idx]
+
 		rows := readData(fname, column)
 		min, max := dataRange(rows)
 
