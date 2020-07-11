@@ -194,3 +194,9 @@ img {
     height: 120px;
     margin-bottom: 20px;
 }
+
+.github {
+    width: 100%;
+    margin-top: 20px;
+    float: left;
+}
