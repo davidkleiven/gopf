@@ -34,8 +34,11 @@ ul li a:hover{
     font-family: Helvetica;
 }
 
-.title h1{
+.title {
     color: #333;
+    overflow: hidden;
+}
+.title h1{
     font-size: 68px;
     margin-top: 25px;
     margin-bottom: 60px;
@@ -43,15 +46,14 @@ ul li a:hover{
 }
 
 .title h2{
-    color: #333;
     font-size: 32px;
     margin-left: 25px;
-    margin-top: 50px;
+    margin-top: 0px;
+    float: left;
 }
 
 .under {
     width: 98%;
-    display:block;
     position: relative;
     border-bottom: 5px solid #742D18;
   }
