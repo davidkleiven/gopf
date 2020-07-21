@@ -42,6 +42,9 @@ gopf db attr $DBNAME
 # Show a single attribute
 gopf db attr $DBNAME -n meanConc
 
+# Show general information 
+gopf db info $DBNAME
+
 # Clean-up
 rm timeseries.csv
 rm concentration.csv
