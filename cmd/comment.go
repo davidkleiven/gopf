@@ -3,6 +3,7 @@ package cmd
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -51,7 +52,8 @@ is used.
 		}
 
 		if simid < 0 {
-			simid = newestSimulationID(sqlDB)
+			printAllComments(sqlDB)
+			return
 		}
 
 		if newMsg != "" {
@@ -78,23 +80,48 @@ is used.
 	},
 }
 
+func printAllComments(db *sql.DB) {
+	rows, err := db.Query("SELECT simId, value FROM comments")
+	if err != nil {
+		log.Fatalf("%s\n", err)
+		return
+	}
+
+	header := fmt.Sprintf("| %-*s | %-*s |", SimIDWidth, "Sim ID.", CommentWidth, "Comment")
+	width := len(header)
+	fmt.Printf("%s\n", singleLine(width))
+	fmt.Printf("%s\n", header)
+	fmt.Printf("%s\n", singleLine(width))
+
+	var simID int
+	var comment string
+	for rows.Next() {
+		rows.Scan(&simID, &comment)
+
+		numLines := len(comment)/CommentWidth + 1
+		var currentComment string
+		start := 0
+		for lineNum := 0; lineNum < numLines; lineNum++ {
+			idString := " "
+			if lineNum == 0 {
+				idString = fmt.Sprintf("%d", simID)
+			}
+
+			if start+CommentWidth > len(comment) {
+				currentComment = comment[start:]
+			} else {
+				end := closestWhiteSpace(comment, start+CommentWidth)
+				currentComment = comment[start:end]
+				start = end + 1
+			}
+			fmt.Printf("| %-*s | %-*s |\n", SimIDWidth, idString, CommentWidth, currentComment)
+		}
+	}
+	fmt.Printf("%s\n", singleLine(width))
+}
+
 func init() {
 	dbCmd.AddCommand(commentCmd)
 	commentCmd.Flags().IntP("simid", "i", -1, "Simulation ID. If negative, the last simulation will be shown.")
 	commentCmd.Flags().StringP("new", "n", "", "New comment. If empty, the existing comment will be shown.")
-}
-
-// newestSimulationID returns the ID of the newest simulation
-func newestSimulationID(db *sql.DB) int {
-	rows, err := db.Query("SELECT simId FROM simIds ORDER BY creationTime DESC LIMIT 1")
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return 0
-	}
-
-	var simID int
-	for rows.Next() {
-		rows.Scan(&simID)
-	}
-	return simID
 }

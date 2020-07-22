@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/davidkleiven/gopf/pfutil"
@@ -243,6 +244,7 @@ func (fdb *FieldDB) SaveFields(s *Solver, epoch int) {
 
 // Comment adds a comment associated with the current simulation ID
 func (fdb *FieldDB) Comment(comment string) {
+	comment = strings.ReplaceAll(comment, "\n", " ")
 	if !fdb.initialized {
 		fdb.initialize()
 	}
