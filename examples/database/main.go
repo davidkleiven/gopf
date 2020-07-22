@@ -81,7 +81,13 @@ func main() {
 		DomainSize: []int{128, 128},
 	}
 
-	fieldDB.Comment("This is my first calculation")
+	comment := "This is a very long comment. We use a very long comment here "
+	comment += "in order to check that the command line interface manages to split the lines correctly "
+	comment += "when printing it. The comment should be printed in a way such that each line has a maximum "
+	comment += "width, the reminding part of the comment should be written on the next line. Furthermore, "
+	comment += "the simulation ID should only be displayed once per comment."
+
+	fieldDB.Comment(comment)
 
 	// Add some attributes
 	attr := make(map[string]float64)

@@ -142,25 +142,18 @@ the name of all timeseries that are tracked.
 			tnames = append(tnames, tname)
 		}
 
+		width := DescWidth + ValueWidth + 7
 		// Print the summary
-		fmt.Printf("%s\n", horizontalLine())
+		fmt.Printf("%s\n", singleLine(width))
 		fmt.Printf("| %-*s | %-*s |\n", DescWidth, "Desc.", ValueWidth, "Value")
-		fmt.Printf("%s\n", horizontalLine())
+		fmt.Printf("%s\n", singleLine(width))
 		fmt.Printf("| %-*s | %*d |\n", DescWidth, "Num calc.", ValueWidth, numCalc)
 		fmt.Printf("| %-*s | %*s |\n", DescWidth, "Dims", ValueWidth, dimString(nx+1, ny+1, nz+1))
 		printList("Fields", fields)
 		printList("Attributes", attrs)
 		printList("Timeseries", tnames)
-		fmt.Printf("%s\n", horizontalLine())
+		fmt.Printf("%s\n", singleLine(width))
 	},
-}
-
-func horizontalLine() string {
-	var line string
-	for i := 0; i < DescWidth+ValueWidth+7; i++ {
-		line += "-"
-	}
-	return line
 }
 
 func dimString(nx, ny, nz int) string {

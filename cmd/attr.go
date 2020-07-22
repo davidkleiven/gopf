@@ -7,19 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// SimIDWidth is the width of the simulation ID field
-const SimIDWidth = 10
-
-// ColWidth is the width of the remaining columns
-const ColWidth = 10
-
-// MaxCols is the maximum number number of columns per line
-const MaxCols = 10
-
-func totalWidth() int {
-	return SimIDWidth + MaxCols*ColWidth
-}
-
 // attrCmd represents the attr command
 var attrCmd = &cobra.Command{
 	Use:   "attr",
@@ -110,14 +97,6 @@ func listUniqueAttributes(db *sql.DB) {
 		rows.Scan(&key)
 		fmt.Printf("%s\n", key)
 	}
-}
-
-func singleLine(length int) string {
-	singleLine := ""
-	for i := 0; i < length; i++ {
-		singleLine += "-"
-	}
-	return singleLine
 }
 
 // listAttributes lists the attributes. If simulationID is greater than 0, only attributes
