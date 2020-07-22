@@ -27,6 +27,9 @@ gopf db export $DBNAME -t fd -o concentration.csv
 # Export field data newest field data
 gopf db export $DBNAME -t fd -s -1 -o concentration.csv
 
+# Export all the timesteps
+gopf db export $DBNAME -t fd -o concentration --all
+
 # Create a plot with the concentration
 gopf contour -f concentration.csv -c conc -o concentration.png
 
@@ -48,6 +51,8 @@ gopf db info $DBNAME
 # Clean-up
 rm timeseries.csv
 rm concentration.csv
+rm concentration0.csv
+rm concentration10.csv
 rm diffusion.db
 rm concentration.png
 rm lineplot.png
