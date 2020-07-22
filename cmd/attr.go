@@ -7,6 +7,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SimIDWidth is the width of the simulation ID field
+const SimIDWidth = 10
+
+// ColWidth is the width of the remaining columns
+const ColWidth = 10
+
+// MaxCols is the maximum number number of columns per line
+const MaxCols = 10
+
+func totalWidth() int {
+	return SimIDWidth + MaxCols*ColWidth
+}
+
 // attrCmd represents the attr command
 var attrCmd = &cobra.Command{
 	Use:   "attr",
@@ -99,6 +112,14 @@ func listUniqueAttributes(db *sql.DB) {
 	}
 }
 
+func singleLine(length int) string {
+	singleLine := ""
+	for i := 0; i < length; i++ {
+		singleLine += "-"
+	}
+	return singleLine
+}
+
 // listAttributes lists the attributes. If simulationID is greater than 0, only attributes
 // belonging to the passed ID is printed. If it is negative, all simulation IDs are included.
 func listAttributes(db *sql.DB, simulationID int) {
@@ -116,11 +137,13 @@ func listAttributes(db *sql.DB, simulationID int) {
 	}
 
 	// Create map where simId is the key, and each item is a list of pairs
-	kvp := make(map[int][]pair)
+	kvp := make(map[int]map[string]string)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
+
+	header := make(map[string]bool) // map[string]bool is the idiomatic way of making a set in Go
 
 	// Go through the float attributes
 	var key string
@@ -129,9 +152,10 @@ func listAttributes(db *sql.DB, simulationID int) {
 	for rows.Next() {
 		rows.Scan(&key, &value, &simID)
 		if _, ok := kvp[simID]; !ok {
-			kvp[simID] = []pair{}
+			kvp[simID] = make(map[string]string)
 		}
-		kvp[simID] = append(kvp[simID], pair{key: key, value: fmt.Sprintf("%f", value)})
+		kvp[simID][key] = fmt.Sprintf("%f", value)
+		header[key] = true
 	}
 
 	// Go through the text attributes
@@ -150,18 +174,42 @@ func listAttributes(db *sql.DB, simulationID int) {
 
 	for rows.Next() {
 		rows.Scan(&key, &txtVal, &simID)
+		header[key] = true
 		if _, ok := kvp[simID]; !ok {
-			kvp[simID] = []pair{}
+			kvp[simID] = make(map[string]string)
 		}
-		kvp[simID] = append(kvp[simID], pair{key: key, value: txtVal})
+		kvp[simID][key] = txtVal
 	}
 
-	for id, attr := range kvp {
-		fmt.Printf("Sim id %d\n", id)
-		for _, item := range attr {
-			fmt.Printf("%s: %s\n", item.key, item.value)
+	headerKeys := set2slice(header)
+	for tableIdx := 0; tableIdx <= len(headerKeys)/MaxCols; tableIdx++ {
+		var currentHeader []string
+		if (tableIdx+1)*MaxCols > len(headerKeys) {
+			currentHeader = headerKeys[tableIdx*MaxCols:]
+		} else {
+			currentHeader = headerKeys[tableIdx*MaxCols : (tableIdx+1)*MaxCols]
 		}
-		fmt.Printf("\n")
+		line := fmt.Sprintf("| %-*s |", SimIDWidth, "Sim. ID")
+		for _, v := range currentHeader {
+			line += fmt.Sprintf(" %-*s |", ColWidth, v)
+		}
+
+		fmt.Printf("%s\n", singleLine(len(line)))
+		fmt.Printf("%s\n", line)
+		fmt.Printf("%s\n", singleLine(len(line)))
+
+		for id, attr := range kvp {
+			line := fmt.Sprintf("| %-*d |", SimIDWidth, id)
+			for _, key := range currentHeader {
+				value, ok := attr[key]
+				if !ok {
+					value = ""
+				}
+				line += fmt.Sprintf(" %*s |", ColWidth, value)
+			}
+			fmt.Printf("%s\n", line)
+		}
+		fmt.Printf("%s\n", singleLine(len(line)))
 	}
 }
 
@@ -197,4 +245,12 @@ func listSingleAttribute(db *sql.DB, simulationID int, name string) {
 		rows.Scan(&value, &simID)
 		fmt.Printf("Sim id %-10d %-20s = %12s\n", simID, name, txtValue)
 	}
+}
+
+func set2slice(set map[string]bool) []string {
+	res := []string{}
+	for k := range set {
+		res = append(res, k)
+	}
+	return res
 }
