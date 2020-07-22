@@ -29,6 +29,11 @@ gopf db export mystabaset.db --type fielddata --timestep 0
 exports the field data for the zeroth timestep. The three first columns contains the
 X, Y and Z position. The remaining columns are field values. The first row is a header
 that describes the content of each column.
+
+gopf db export mydatabaset.db --type fielddata --all -o /path/to/location/dataset
+
+exports all timesteps to csv files. The files will be stored in the folder /path/to/location/
+and have names dataset0.csv, dataset1.csv, dataset2.csv and so on.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
@@ -74,11 +79,25 @@ that describes the content of each column.
 			return
 		}
 
+		all, err := cmd.Flags().GetBool("all")
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			return
+		}
+
 		switch ftype {
 		case "timeseries", "ts":
 			exportTimeseries(db, outfile, simid)
 		case "field", "fieldData", "fd":
-			exportFieldData(db, timestep, simid, outfile)
+			if all {
+				steps := allTimeSteps(db, simid)
+				for _, step := range steps {
+					fname := fmt.Sprintf("%s%d.csv", outfile, step)
+					exportFieldData(db, step, simid, fname)
+				}
+			} else {
+				exportFieldData(db, timestep, simid, outfile)
+			}
 		default:
 			fmt.Printf("Unknown export type %s\n", ftype)
 		}
@@ -91,6 +110,14 @@ func init() {
 	exportCmd.Flags().StringP("out", "o", "", "Name of the output file. If empty, a name will be crafted from the other arguments.")
 	exportCmd.Flags().IntP("simid", "i", -1, "Simulation ID. If negative, the newest ID will be used.")
 	exportCmd.Flags().IntP("timestep", "s", 0, "Timestep to export (only relevant if type is field).")
+	exportCmd.Flags().BoolP("all", "a", false, "If given and type is field, all time steps will exported.")
+}
+
+func appendFileExtension(fname string) string {
+	if fname[len(fname)-4:] != ".csv" {
+		fname += ".csv"
+	}
+	return fname
 }
 
 func exportTimeseries(db *sql.DB, outfile string, simid int) {
@@ -250,4 +277,20 @@ func largestTimestep(db *sql.DB, simid int) int {
 		rows.Scan(&maxts)
 	}
 	return maxts
+}
+
+func allTimeSteps(db *sql.DB, simid int) []int {
+	rows, err := db.Query("SELECT DISTINCT timestep FROM fields WHERE simId=?", simid)
+	timesteps := []int{}
+	if err != nil {
+		log.Fatalf("Coult not select timesteps: %s\n", err)
+		return timesteps
+	}
+
+	var step int
+	for rows.Next() {
+		rows.Scan(&step)
+		timesteps = append(timesteps, step)
+	}
+	return timesteps
 }
