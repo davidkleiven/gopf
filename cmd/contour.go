@@ -17,13 +17,17 @@ package cmd
 
 import (
 	"encoding/csv"
+	"image"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/palette"
 	"gonum.org/v1/plot/palette/moreland"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
@@ -73,24 +77,26 @@ will be selected.
 		min, max := dataRange(rows)
 
 		data := NewHeatMapData(rows)
-		colormap := moreland.SmoothGreenRed()
+		colormap := moreland.Kindlmann()
 		rng := max - min
 		colormap.SetMin(min - 0.05*rng)
 		colormap.SetMax(max + 0.05*rng)
-		palette := colormap.Palette(255)
-		hm := plotter.NewHeatMap(data, palette)
 
 		plt, err := plot.New()
 		if err != nil {
 			log.Fatalf("Could not create plot: %s\n", err)
 		}
 
+		heatImg := fillImage(data, colormap)
+		n, m := data.Dims()
+		pImg := plotter.NewImage(heatImg, 0, 0, float64(n), float64(m))
+		plt.Add(pImg)
+
 		barplt, err := plot.New()
 		if err != nil {
 			log.Fatalf("Could not create plot: %s\n", err)
 		}
 
-		plt.Add(hm)
 		plt.X.Label.Text = "x position (\u0394 x)"
 		plt.Y.Label.Text = "y position (\u0394 x)"
 
@@ -111,6 +117,14 @@ will be selected.
 
 		if err != nil {
 			log.Fatalf("Could not open output file: %s\n", err)
+		}
+
+		format := strings.ToLower(filepath.Ext(out))
+		if len(format) != 0 {
+			format = format[1:]
+		} else {
+			log.Fatalf("Could not extract file extension from outfile.\n")
+			return
 		}
 
 		png := vgimg.PngCanvas{Canvas: img}
@@ -303,4 +317,24 @@ func readHeader(fname string) []string {
 		log.Fatalf("Could not read header: %s\n", err)
 	}
 	return header
+}
+
+func fillImage(data HeatMapData, cmap palette.ColorMap) *image.RGBA64 {
+	n, m := data.Dims()
+	img := image.NewRGBA64(image.Rectangle{
+		Min: image.Point{X: 0, Y: 0},
+		Max: image.Point{X: n, Y: m},
+	})
+
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			color, err := cmap.At(data.Z(i, j))
+			if err != nil {
+				log.Fatalf("%s\n", err)
+				return img
+			}
+			img.Set(i, j, color)
+		}
+	}
+	return img
 }
