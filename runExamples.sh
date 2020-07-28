@@ -48,3 +48,7 @@ rm current.csv
 
 echo "Running heterogeneous nucleation example"
 go run examples/heterogeneousNucleation/main.go -dim 64 -innerR 0.05 -outerR 0.02 -dt 0.01 -epoch 2 -step 10
+
+echo "Running shape example"
+go run examples/drawing/main.go
+rm shapes.csv
