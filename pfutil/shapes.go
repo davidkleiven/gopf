@@ -92,7 +92,8 @@ func (b *Ball) BBox() BoundingBox {
 }
 
 // Draw draws the shape onto the passed grid. The passed transfformations is applied
-// to the shape prior to drawing. If a point is inside the passed shape, the value of
+// to the shape prior to drawing. Note that the transformation is applied to the pixel position
+// in the destination image. If a point is inside the passed shape, the value of
 // that grid point will be set to value
 func Draw(shape Shape, grid *Grid, transformation *Affine, value float64) {
 	if transformation == nil {
@@ -103,18 +104,15 @@ func Draw(shape Shape, grid *Grid, transformation *Affine, value float64) {
 	bbox := shape.BBox()
 	bbox.check()
 	dim := len(grid.Dims)
-
-	for ix := bbox.Min[0]; ix <= bbox.Max[0]; ix++ {
-		for iy := bbox.Min[1]; iy <= bbox.Max[1]; iy++ {
-			for iz := bbox.Min[2]; iz <= bbox.Max[2]; iz++ {
-				pos := []float64{float64(ix), float64(iy), float64(iz)}
-				if shape.InteriorPoint(pos[:dim]) {
-					transformation.Apply(pos)
-					intPos := []int{int(pos[0]), int(pos[1]), int(pos[2])}[:dim]
-					Wrap(intPos, grid.Dims)
-					grid.Data[grid.Index(intPos)] = value
-				}
-			}
+	floatPos := make([]float64, 3)
+	for i := range grid.Data {
+		pos := grid.Pos(i)
+		for j := range pos {
+			floatPos[j] = float64(pos[j])
+		}
+		transformation.Apply(floatPos)
+		if shape.InteriorPoint(floatPos[:dim]) {
+			grid.Data[i] = value
 		}
 	}
 }
