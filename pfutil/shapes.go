@@ -108,9 +108,9 @@ func Draw(shape Shape, grid *Grid, transformation *Affine, value float64) {
 		for iy := bbox.Min[1]; iy <= bbox.Max[1]; iy++ {
 			for iz := bbox.Min[2]; iz <= bbox.Max[2]; iz++ {
 				pos := []float64{float64(ix), float64(iy), float64(iz)}
-				transformation.Apply(pos)
 				if shape.InteriorPoint(pos[:dim]) {
-					intPos := []int{ix, iy, iz}[:dim]
+					transformation.Apply(pos)
+					intPos := []int{int(pos[0]), int(pos[1]), int(pos[2])}[:dim]
 					Wrap(intPos, grid.Dims)
 					grid.Data[grid.Index(intPos)] = value
 				}
