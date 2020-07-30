@@ -1,8 +1,11 @@
+// +build main
+
 package main
 
-import "github.com/davidkleiven/gopf/pf"
-
-import "golang.org/x/exp/rand"
+import (
+	"github.com/davidkleiven/gopf/pf"
+	"golang.org/x/exp/rand"
+)
 
 // Define some model constants
 const c0 = 0.05   // Preferred concentration in the first phase
