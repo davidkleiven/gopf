@@ -14,8 +14,8 @@ rm *.bin
 rm *.xdmf
 
 echo "Running elasticity CLI"
-go run cmd/gopf-elast-input/main.go -out="inputParams.json"
-go run cmd/gopf-elast-energy/main.go -input="inputParams.json"
+gopf elast template --out="inputParams.json"
+gopf elast energy --input="inputParams.json"
 rm inputParams.json
 
 echo "Running Kardar-Parisi-Zhang example"
