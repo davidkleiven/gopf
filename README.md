@@ -32,3 +32,15 @@ in one DB must have the same domain size. The GOPF database supports
 * Export timeseries and field data to CSV files (useful if a third-party program is used for analysis)
 
 For further information on the schema and example see the [database example](examples/database).
+
+# Typical Flow of a GOPF Program
+
+![flowChart](docs/assets/flow.svg)
+
+1. Register fields, equations and required custom functions in a model
+    * The fields should be populated with their initial value before they are
+        registered
+2. Pass the model to a solver.
+3. Register custom callbacks (or some of the ones shipped with GOPF)
+4. Request the solver to propoagate the model
+5. Analyse the results with your favourite tool
