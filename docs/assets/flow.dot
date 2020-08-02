@@ -1,0 +1,10 @@
+digraph G {
+    node [style=filled]
+    Fields -> Model
+    Equations -> Model
+    "Custom terms" -> Model
+    Model -> Solver
+    Callbacks -> Solver
+    FileIO -> Solver
+    Solver -> Analysis [label=" Solve"]
+}
