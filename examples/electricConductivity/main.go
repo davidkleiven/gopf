@@ -128,7 +128,7 @@ func main() {
 		grainCond.Rotations[i] = rotMatrix(angle)
 	}
 
-	fft := pf.NewFFTW(domainSize)
+	fft := pfutil.NewFFTW(domainSize)
 	charge := pf.ChargeTransport{
 		Conductivity:  grainCond.Conductivity,
 		ExternalField: []float64{1.0, 0.0},

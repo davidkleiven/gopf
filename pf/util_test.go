@@ -217,7 +217,7 @@ func TestUniqueFreqIterator(t *testing.T) {
 			ExpectNumNyquist: 1,
 		},
 	} {
-		ft := NewFFTW(test.DomainSize)
+		ft := pfutil.NewFFTW(test.DomainSize)
 		num := 0
 		iterator := UniqueFreqIterator{
 			Freq: ft.Freq,
@@ -277,7 +277,7 @@ func TestRealAmplitudeIterator(t *testing.T) {
 		},
 	} {
 		iterator := RealAmplitudeIterator{
-			Freq: NewFFTW(test.DomainSize).Freq,
+			Freq: pfutil.NewFFTW(test.DomainSize).Freq,
 			End:  pfutil.ProdInt(test.DomainSize),
 		}
 

@@ -86,7 +86,7 @@ func TestPairCorrelationGetEnergy(t *testing.T) {
 
 	bricks := make(map[string]Brick)
 	bricks["myfield"] = field
-	ft := NewFFTW([]int{N, N})
+	ft := pfutil.NewFFTW([]int{N, N})
 	energy := pair.GetEnergy(bricks, ft, []int{N, N})
 	expect := -0.5 * float64(N*N) * 0.5
 	tol := 1e-10
@@ -205,7 +205,7 @@ func TestPeakWidthConsistency(t *testing.T) {
 		Field:     "density",
 	}
 
-	ft := NewFFTW([]int{N, N})
+	ft := pfutil.NewFFTW([]int{N, N})
 	excessEnergy := term.GetEnergy(bricks, ft, []int{N, N}) / float64(N*N)
 	expectedExcess := -0.5 * float64(term.PairCorrFunc.Peaks[0].NumPlanes) * A11 * A11
 	expectedExcess -= 0.5 * float64(term.PairCorrFunc.Peaks[1].NumPlanes) * A20 * A20

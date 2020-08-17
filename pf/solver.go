@@ -45,7 +45,7 @@ func NewSolver(m *Model, domainSize []int, dt float64) *Solver {
 	solver.Dt = dt
 	solver.Callbacks = []SolverCB{}
 	solver.Monitors = []Monitor{}
-	solver.FT = NewFFTW(domainSize)
+	solver.FT = pfutil.NewFFTW(domainSize)
 
 	solver.Stepper = &Euler{
 		Dt: solver.Dt,

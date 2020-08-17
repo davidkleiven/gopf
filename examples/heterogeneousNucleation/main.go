@@ -96,7 +96,7 @@ func main() {
 	phi := pf.NewField("phi", N*N, nil)
 	rho := 0.05
 	gamma := 0.5
-	ft := pf.NewFFTW([]int{N, N})
+	ft := pfutil.NewFFTW([]int{N, N})
 	spatialLap := SpatialVaryingLap{
 		Gamma: gamma,
 		Ft:    ft,

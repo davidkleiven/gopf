@@ -165,7 +165,7 @@ func TestWeightedLaplacian(t *testing.T) {
 	bricks["prefactor"] = prefactor
 	bricks["field"] = field
 
-	ft := NewFFTW([]int{N, N})
+	ft := pfutil.NewFFTW([]int{N, N})
 
 	// Fourier transform the fields
 	ft.FFT(field.Data)

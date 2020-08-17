@@ -19,7 +19,7 @@ import (
 // if the solution changes rapidly it might be wise to use a small time step.
 type ImplicitEuler struct {
 	Dt          float64
-	FT          *FFTWWrapper
+	FT          *pfutil.FFTWWrapper
 	Filter      ModalFilter
 	CurrentStep int
 
