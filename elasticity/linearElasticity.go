@@ -119,7 +119,18 @@ func HomogeneousModulusEnergy(indicator []complex128, domainSize []int, misfit *
 		}
 	}
 
-	disp := Displacements(force, ft.Freq, &matProp)
+	// Wrap the freq function in case of 2D calculation
+	freq := func(i int) []float64 {
+		if len(domainSize) == 3 {
+			return ft.Freq(i)
+		}
+		f3 := make([]float64, 3)
+		f := ft.Freq(i)
+		copy(f3[:2], f)
+		return f3
+	}
+
+	disp := Displacements(force, freq, &matProp)
 	// Inservse FFT such that we can use it distinguish regions
 	ft.IFFT(indicator)
 	for i := range indicator {
@@ -134,7 +145,7 @@ func HomogeneousModulusEnergy(indicator []complex128, domainSize []int, misfit *
 
 	for i := 0; i < 3; i++ {
 		for j := i; j < 3; j++ {
-			strain := Strain(disp, ft.Freq, i, j)
+			strain := Strain(disp, freq, i, j)
 			ft.IFFT(strain)
 			for k := range strain {
 				re := real(strain[k]) / float64(len(strain))
