@@ -3,6 +3,7 @@ package elasticity
 import (
 	"math"
 
+	"github.com/davidkleiven/gopf/pfutil"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -94,4 +95,60 @@ func EnergyDensity(matProp Rank4Tensor, strain *mat.Dense) float64 {
 		}
 	}
 	return 0.5 * res
+}
+
+// HomogeneousModulusEnergy returns the elastic energy from a
+func HomogeneousModulusEnergy(indicator []complex128, domainSize []int, misfit *mat.Dense, matProp Rank4) float64 {
+	volume := 0.0
+	for i := range indicator {
+		volume += real(indicator[i])
+	}
+
+	effForce := NewEffectiveForceFromMisfit(matProp, misfit)
+	ft := pfutil.NewFFTW(domainSize)
+	ft.FFT(indicator)
+	force := make([][]complex128, len(indicator))
+	for k := range force {
+		force[k] = make([]complex128, 3)
+	}
+
+	for comp := 0; comp < 3; comp++ {
+		fComp := effForce.Get(comp, ft.Freq, indicator)
+		for k := range force {
+			force[k][comp] = fComp[k]
+		}
+	}
+
+	disp := Displacements(force, ft.Freq, &matProp)
+	// Inservse FFT such that we can use it distinguish regions
+	ft.IFFT(indicator)
+	for i := range indicator {
+		indicator[i] /= complex(float64(len(indicator)), 0.0)
+	}
+
+	energy := 0.0
+	strains := make([]*mat.Dense, len(disp))
+	for k := range strains {
+		strains[k] = mat.NewDense(3, 3, nil)
+	}
+
+	for i := 0; i < 3; i++ {
+		for j := i; j < 3; j++ {
+			strain := Strain(disp, ft.Freq, i, j)
+			ft.IFFT(strain)
+			for k := range strain {
+				re := real(strain[k]) / float64(len(strain))
+
+				if real(indicator[k]) > 0.5 {
+					re -= misfit.At(i, j)
+				}
+				strains[k].Set(i, j, re)
+				strains[k].Set(j, i, re)
+			}
+		}
+	}
+	for i := range strains {
+		energy += EnergyDensity(&matProp, strains[i])
+	}
+	return energy / volume
 }

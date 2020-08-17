@@ -30,7 +30,7 @@ func TestFourierOuterProduct(t *testing.T) {
 	}
 
 	// Perform the calculation using FFTs
-	ft := NewFFTW([]int{N, N})
+	ft := pfutil.NewFFTW([]int{N, N})
 	ft.FFT(data)
 	ft.FFT(vector)
 

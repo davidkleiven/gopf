@@ -82,7 +82,7 @@ func TestImplicitEuler(t *testing.T) {
 		}
 
 		solver := ImplicitEuler{
-			FT: NewFFTW(domainSize),
+			FT: pfutil.NewFFTW(domainSize),
 			Dt: test.Dt,
 		}
 
@@ -122,7 +122,7 @@ func TestField2VecRoundTrip(t *testing.T) {
 	}
 
 	// Fourier transform the fields
-	ft := NewFFTW([]int{N, N})
+	ft := pfutil.NewFFTW([]int{N, N})
 	// ft.FFT(fields[0].Data)
 	// ft.FFT(fields[1].Data)
 
@@ -193,7 +193,7 @@ func TestDissipatingHeatEquation(t *testing.T) {
 	solver := NewSolver(&model, []int{N, N}, dt)
 	stepper := ImplicitEuler{
 		Dt: dt,
-		FT: NewFFTW([]int{N, N}),
+		FT: pfutil.NewFFTW([]int{N, N}),
 	}
 	solver.Stepper = &stepper
 	nsteps := 10

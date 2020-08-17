@@ -60,7 +60,7 @@ func TestChargeTransport(t *testing.T) {
 		},
 	} {
 		field := NewField("density", N*N, nil)
-		ft := NewFFTW([]int{N, N})
+		ft := pfutil.NewFFTW([]int{N, N})
 		chargeTransp := ChargeTransport{
 			Conductivity:  test.Conductivity,
 			ExternalField: test.ExternalField,

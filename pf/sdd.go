@@ -114,7 +114,7 @@ type SDD struct {
 	InitDimerLength float64
 
 	orientation []float64
-	ft          *FFTWWrapper
+	ft          *pfutil.FFTWWrapper
 	initialized bool
 }
 
@@ -124,7 +124,7 @@ func NewSDD(domainSize []int, model *Model) SDD {
 		TimeConstants: SDDTimeConstants{1.0, 1.0},
 		Alpha:         0.5,
 		orientation:   make([]float64, model.NumNodes()*len(model.Fields)),
-		ft:            NewFFTW(domainSize),
+		ft:            pfutil.NewFFTW(domainSize),
 		initialized:   false,
 	}
 }

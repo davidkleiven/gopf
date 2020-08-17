@@ -229,7 +229,7 @@ func TestLapUserDefined(t *testing.T) {
 		t.Errorf("Expected 1 term got %d\n", len(terms))
 	}
 
-	freq := NewFFTW([]int{N, N}).Freq
+	freq := pfutil.NewFFTW([]int{N, N}).Freq
 
 	termEval := make([]complex128, N*N)
 	terms[0](freq, 0.0, termEval)

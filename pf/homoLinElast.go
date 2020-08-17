@@ -144,7 +144,7 @@ func NewHomogeneousModolus(fieldName string, domainSize []int, matProp elasticit
 		EffForce:  elasticity.NewEffectiveForceFromMisfit(matProp, misfit),
 		Field:     make([]float64, pfutil.ProdInt(domainSize)),
 		Disps:     elasticity.Displacements,
-		FT:        NewFFTW(domainSize),
+		FT:        pfutil.NewFFTW(domainSize),
 	}
 	return &linElast
 }

@@ -58,7 +58,7 @@ func TestSpectralViscosityTerm(t *testing.T) {
 		t.Errorf("Expected 0 explicit terms, got %d\n", len(rhs.Terms))
 	}
 
-	freq := NewFFTW([]int{N, N}).Freq
+	freq := pfutil.NewFFTW([]int{N, N}).Freq
 	res := make([]complex128, N*N)
 	rhs.Denum[0](freq, 0.0, res)
 	tol := 1e-10

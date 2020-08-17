@@ -1,10 +1,9 @@
-package pf
+package pfutil
 
 import (
 	"math"
 	"testing"
 
-	"github.com/davidkleiven/gopf/pfutil"
 	"github.com/davidkleiven/gosfft/sfft"
 	"gonum.org/v1/gonum/floats"
 )
@@ -75,7 +74,7 @@ func TestConjugateNode(t *testing.T) {
 		},
 	} {
 		ft := NewFFTW(test.Dim)
-		for j := 0; j < pfutil.ProdInt(test.Dim); j++ {
+		for j := 0; j < ProdInt(test.Dim); j++ {
 			f1 := ft.Freq(j)
 			nodeIdx := ft.ConjugateNode(j)
 			f2 := ft.Freq(nodeIdx)

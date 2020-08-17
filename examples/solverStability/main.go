@@ -8,6 +8,7 @@ import (
 	"math/rand"
 
 	"github.com/davidkleiven/gopf/pf"
+	"github.com/davidkleiven/gopf/pfutil"
 )
 
 // DerivChemPot is the derivative of the chemical potential
@@ -45,7 +46,7 @@ func solve(dt float64, solverName string) []complex128 {
 	if solverName == "implicitEuler" {
 		solver.Stepper = &pf.ImplicitEuler{
 			Dt: dt,
-			FT: pf.NewFFTW(domainSize),
+			FT: pfutil.NewFFTW(domainSize),
 		}
 	} else {
 		solver.SetStepper(solverName)
