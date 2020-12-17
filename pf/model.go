@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"log"
 
 	"github.com/davidkleiven/gopf/pfutil"
 )
@@ -41,6 +42,7 @@ func (f Field) SaveReal(fname string) {
 
 // NewField initializes a new field
 func NewField(name string, N int, data []complex128) Field {
+	panicOnPrefixInName(name)
 	var field Field
 	if data == nil {
 		field.Data = make([]complex128, N)
@@ -88,6 +90,7 @@ type Scalar struct {
 
 // NewScalar returns a new scalar value
 func NewScalar(name string, value complex128) Scalar {
+	panicOnPrefixInName(name)
 	return Scalar{
 		Name:  name,
 		Value: value,
@@ -317,6 +320,7 @@ const (
 
 // registerTerm defines a new pure term (linear og non linear)
 func (m *Model) registerTerm(name string, t PureTerm, dFields []DerivedField, termType int) {
+	panicOnPrefixInName(name)
 	switch termType {
 	case implicitTerm:
 		m.ImplicitTerms[name] = t
@@ -363,6 +367,7 @@ func (m *Model) RegisterExplicitTerm(name string, t PureTerm, dFields []DerivedF
 // non-linear part. The linear part will be treated implicitly during time evolution,
 // while the non-linear part is treated explicitly
 func (m *Model) RegisterMixedTerm(name string, t MixedTerm, dFields []DerivedField) {
+	panicOnPrefixInName(name)
 	m.MixedTerms[name] = t
 	m.registerDerivedFields(dFields)
 }
@@ -393,7 +398,7 @@ func (m *Model) IsUserDefinedTerm(desc string) bool {
 
 // RegisterFunction registers a function that may be used in the equations
 func (m *Model) RegisterFunction(name string, F GenericFunction) {
-
+	panicOnPrefixInName(name)
 	dField := DerivedField{
 		Data: make([]complex128, len(m.Fields[0].Data)),
 		Name: name,
@@ -470,4 +475,11 @@ func (m *Model) RegisterRHSModifier(eqNumber int, modifier func(data []complex12
 		EqNo:        eqNumber,
 		RHSModifier: modifier,
 	})
+}
+
+func panicOnPrefixInName(name string) {
+	if len(getKnownPrefixes(name)) > 0 {
+		prefixes := knownPrefixes()
+		log.Fatalf("The words %v are reserved. Do not include them in your variable names\n", prefixes)
+	}
 }

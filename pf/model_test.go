@@ -156,8 +156,8 @@ func TestUserDefinedTerms(t *testing.T) {
 		Calc: GetUsquared(model.Fields),
 		Data: make([]complex128, N*N),
 	}
-	model.RegisterExplicitTerm("LAP_DENSITY_SQUARED", &lapUsq, []DerivedField{dField})
-	model.AddEquation("ddensity/dt = LAP_DENSITY_SQUARED")
+	model.RegisterExplicitTerm("LP_DENSITY_SQUARED", &lapUsq, []DerivedField{dField})
+	model.AddEquation("ddensity/dt = LP_DENSITY_SQUARED")
 	model.Init()
 
 	// Check status

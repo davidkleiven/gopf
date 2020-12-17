@@ -42,7 +42,7 @@ func TestIsRegisterable(t *testing.T) {
 	model.AddField(field)
 	model.RegisterFunction("NEG_VAL_PENALTY", nvp.Evaluate)
 
-	model.AddEquation("ddensity/dt = NEG_VAL_PENALTY")
+	model.AddEquation("ddensity/dt = -NEG_VAL_PENALTY")
 
 	// Evaluate the rhs
 	model.Init()
@@ -51,7 +51,7 @@ func TestIsRegisterable(t *testing.T) {
 	solver.Solve(1, 1)
 
 	// Solver should perform one step
-	expect := []float64{-1.0 + nvp.Penalty(-1.0), 0.0, 0.0, 0.0}
+	expect := []float64{-1.0 - nvp.Penalty(-1.0), 0.0, 0.0, 0.0}
 
 	tol := 1e-6
 	for i := range field.Data {
@@ -59,5 +59,45 @@ func TestIsRegisterable(t *testing.T) {
 		if math.Abs(im) > tol || math.Abs(re - expect[i]) > tol {
 			t.Errorf("Expected\n%v\nGot\n%v\n", expect, field.Data)
 		}
+	}
+}
+
+func TestConservedNegativeValuePenalty(t *testing.T) {
+	// Make sure that the function can be registered
+	model := NewModel()
+	nvp := NegativeValuePenalty{
+		Prefactor: 1.0,
+		Exponent: 3,
+		Field: "density",
+	}
+	
+	field := NewField("density", 16, nil)
+	integral := 0.0
+	for i := range field.Data {
+		field.Data[i] = complex(float64(i) - 8.0, 0.0)
+		integral += real(field.Data[i])
+	}
+	model.AddField(field)
+	model.RegisterFunction("NEG_VAL_PENALTY", nvp.Evaluate)
+
+	model.AddEquation("ddensity/dt = LAP*NEG_VAL_PENALTY")
+
+	// Evaluate the rhs
+	model.Init()
+	
+	solver := NewSolver(&model, []int{4, 4}, 0.005)
+	solver.Solve(2, 100)
+
+	integralAfter := 0.0
+	for i := range field.Data {
+		integralAfter += real(field.Data[i])
+	}
+
+	if math.IsNaN(integralAfter) {
+		t.Errorf("Field diverged to infinity")
+	}
+
+	if math.Abs(integral - integralAfter) > 1e-6 {
+		t.Errorf("Field not conserved when using conserved dynamics. Integral before %f and after %f\n", integral, integralAfter)
 	}
 }

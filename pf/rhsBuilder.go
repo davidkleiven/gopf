@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"log"
 )
 
 // Term is generic function type that evaluates the right hand side of a set of
@@ -32,14 +33,16 @@ func Build(eq string, m *Model) RHS {
 	termsStr := SplitOnMany(sides[1], []string{"+", "-"})
 	var rhs RHS
 	for _, t := range termsStr {
-		name := t.SubString
+		name := removeKnownPrefixes(t.SubString)
+		prefixes := getKnownPrefixes(t.SubString)
+		prefixes = append(prefixes, t.PreceedingDelimiter)
 		if m.IsImplicitTerm(name) {
-			rhs.Denum = append(rhs.Denum, constructFunc(t.PreceedingDelimiter, m.ImplicitTerms[name].Construct(m.Bricks)))
+			rhs.Denum = append(rhs.Denum, constructFunc(m.ImplicitTerms[name].Construct(m.Bricks), prefixes))
 		} else if m.IsExplicitTerm(name) {
-			rhs.Terms = append(rhs.Terms, constructFunc(t.PreceedingDelimiter, m.ExplicitTerms[name].Construct(m.Bricks)))
+			rhs.Terms = append(rhs.Terms, constructFunc(m.ExplicitTerms[name].Construct(m.Bricks), prefixes))
 		} else if m.IsMixedTerm(name) {
-			rhs.Denum = append(rhs.Denum, constructFunc(t.PreceedingDelimiter, m.MixedTerms[name].ConstructLinear(m.Bricks)))
-			rhs.Terms = append(rhs.Terms, constructFunc(t.PreceedingDelimiter, m.MixedTerms[name].ConstructNonLinear(m.Bricks)))
+			rhs.Denum = append(rhs.Denum, constructFunc(m.MixedTerms[name].ConstructLinear(m.Bricks), prefixes))
+			rhs.Terms = append(rhs.Terms, constructFunc(m.MixedTerms[name].ConstructNonLinear(m.Bricks), prefixes))
 		} else if isBilinear(t.SubString, field, m.AllFieldNames()) {
 			t.SubString = strings.Replace(t.SubString, field, "", -1)
 			rhs.Denum = append(rhs.Denum, ConcreteTerm(t, m))
@@ -193,12 +196,96 @@ func flipSign(data []complex128) {
 	}
 }
 
-func constructFunc(preceedingDelim string, term Term) Term {
-	if preceedingDelim == "-" {
-		return func(freq Frequency, t float64, field []complex128) {
+
+func constructFunc(term Term, prefixes []string) Term {
+	var f Term
+	if len(prefixes) == 0 {
+		return term
+	}
+
+	switch prefixes[0] {
+	case "-":
+		f = func(freq Frequency, t float64, field []complex128) {
 			term(freq, t, field)
 			flipSign(field)
 		}
+		break
+	case "LAP^4":
+		f = func(freq Frequency, t float64, field []complex128) {
+			lap := LaplacianN{Power: 4}
+			term(freq, t, field)
+			lap.Eval(freq, field)
+		}
+		break
+	case "LAP^2":
+		f = func(freq Frequency, t float64, field []complex128) {
+			lap := LaplacianN{Power: 2}
+			term(freq, t, field)
+			lap.Eval(freq, field)
+		}
+		break
+	case "LAP":
+		f = func(freq Frequency, t float64, field []complex128) {
+			lap := LaplacianN{Power: 1}
+			term(freq, t, field)
+			lap.Eval(freq, field)
+		}
+		break
+	default:
+		log.Printf("Unrecognizes prefix %s (potential problem)", prefixes[0])
+		f = term
 	}
-	return term
+	return constructFunc(f, prefixes[1:])
+	// if preceedingDelim == "-" {
+	// 	return func(freq Frequency, t float64, field []complex128) {
+	// 		term(freq, t, field)
+	// 		flipSign(field)
+	// 	}
+	// }
+	// return term
+}
+
+func knownPrefixes() []string {
+	return []string{
+		"-",
+		"LAP^4",
+		"LAP^2",
+		"LAP",
+		"*",
+	}
+}
+
+func removeKnownPrefixes(str string) string {
+	prefixes := knownPrefixes()
+	return recursiveRemove(prefixes, str)
+}
+
+func getKnownPrefixes(str string) []string {
+	pref := []string{}
+	prefixes := knownPrefixes()
+	for len(prefixes) > 0 {
+		prefix := prefixes[0]
+		prefixes = prefixes[1:]
+		if strings.HasPrefix(str, prefix) {
+			pref = append(pref, prefix)
+			prefixes = knownPrefixes()
+			str = str[len(prefix):]
+		}
+	}
+	return pref
+}
+
+func recursiveRemove(prefixes []string, str string) string {
+	if len(prefixes) == 0 {
+		return str
+	}
+	prefix := prefixes[0]
+	prefixes = prefixes[1:]
+	if strings.HasPrefix(str, prefix) {
+		str = str[len(prefix):]
+
+		// Reset prefix list in case there are more of the same
+		prefixes = knownPrefixes()
+	}
+	return recursiveRemove(prefixes, str)
 }

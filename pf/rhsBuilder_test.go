@@ -350,3 +350,161 @@ func TestNegativeSignBeforeUserDefined(t *testing.T) {
 	}
 
 }
+
+func TestRemoveKnownPrefixes(t *testing.T){
+	for i, test := range []struct {
+		str string
+		expect string
+	}{
+		{
+			str: "mystring",
+			expect: "mystring",
+		},
+		{
+			str: "*mystring",
+			expect: "mystring",
+		},
+		{
+			str: "LAPmystring",
+			expect: "mystring",
+		},
+		{
+			str: "LAP*mystring",
+			expect: "mystring",
+		},
+		{
+			str: "*LAP*mystring",
+			expect: "mystring",
+		},
+		{
+			str: "*LAPLAPmystring",
+			expect: "mystring",
+		},
+		{
+			str: "*LAP^2mystring",
+			expect: "mystring",
+		},
+	}{
+		res := removeKnownPrefixes(test.str)
+
+		if res != test.expect {
+			t.Errorf("Test #%d: Expected %s got %s\n", i, test.expect, res)
+		}
+	}
+}
+
+func TestGetKnownPrefixes(t *testing.T) {
+	for i, test := range []struct {
+		str string
+		expect []string
+	}{
+		{
+			str: "mystring",
+			expect: []string{},
+		},
+		{
+			str: "*mystring",
+			expect: []string{"*"},
+		},
+		{
+			str: "LAPmystring",
+			expect: []string{"LAP"},
+		},
+		{
+			str: "LAP*mystring",
+			expect: []string{"LAP", "*"},
+		},
+		{
+			str: "*LAP*mystring",
+			expect: []string{"*", "LAP", "*"},
+		},
+		{
+			str: "*LAPLAPmystring",
+			expect: []string{"*", "LAP", "LAP"},
+		},
+		{
+			str: "*LAP^2mystring",
+			expect: []string{"*", "LAP^2"},
+		},
+	}{
+		res := getKnownPrefixes(test.str)
+
+		for j, s := range test.expect {
+			if s != res[j] {
+				t.Errorf("Test #%d: Expected %s got %s\n", i, s, res[j])
+			}
+		}
+	}
+}
+
+func TestConstructorWithPrefixHandling(t *testing.T) {
+	myfunc := func(freq Frequency, t float64, data []complex128) {
+		data[0] = complex(1.0, 0.0)
+	}
+
+	freq := func(i int) []float64 {
+		return []float64{1.0, 1.0}
+	}
+
+	data := make([]complex128, 2)
+
+	twoPi := 2*math.Pi
+	for i, test := range []struct {
+		prefixes []string
+		expect []complex128
+	}{
+		{
+			prefixes: []string{"-"},
+			expect: []complex128{complex(-1.0, 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"-", "-"},
+			expect: []complex128{complex(1.0, 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"-", "-", "-"},
+			expect: []complex128{complex(-1.0, 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"LAP"},
+			expect: []complex128{complex(-2.0*twoPi*twoPi, 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"LAP", "-"},
+			expect: []complex128{complex(2.0*twoPi*twoPi, 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"-", "LAP"},
+			expect: []complex128{complex(2.0*twoPi*twoPi, 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"LAP^2"},
+			expect: []complex128{complex(4.0*twoPi*twoPi*twoPi*twoPi, 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"LAP^4"},
+			expect: []complex128{complex(16.0*math.Pow(twoPi, 8), 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"LAP^4", "-", "-"},
+			expect: []complex128{complex(16.0*math.Pow(twoPi, 8), 0.0), complex(0.0, 0.0)},
+		},
+		{
+			prefixes: []string{"-", "LAP^4", "-"},
+			expect: []complex128{complex(16.0*math.Pow(twoPi, 8), 0.0), complex(0.0, 0.0)},
+		},
+	}{
+		modified := constructFunc(myfunc, test.prefixes)
+		modified(freq, 0.0, data)
+
+		tol := 1e-6
+		for j := range data {
+			re, im := real(data[j]), imag(data[j])
+			reExp, imExp := real(test.expect[j]), imag(test.expect[j])
+
+			if math.Abs(re - reExp) > tol || math.Abs(im - imExp) > tol {
+				t.Errorf("Test #%d: Expected (%f, %f) got (%f, %f)\n", i, reExp, imExp, re, im)
+			}
+		}
+	}
+}	

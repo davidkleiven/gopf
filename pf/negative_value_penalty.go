@@ -32,7 +32,7 @@ func (nvp *NegativeValuePenalty) Evaluate(i int, bricks map[string]Brick) comple
 // Physical Review E, 79(3), p.035701.
 func NewDefaultNegativeValuePenalty(field string) NegativeValuePenalty {
 	return NegativeValuePenalty{
-		Prefactor: -1500.0,
+		Prefactor: 1500.0,
 		Exponent: 3,
 		Field: field,
 	}
