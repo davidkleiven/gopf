@@ -3,7 +3,6 @@ module github.com/davidkleiven/gopf
 go 1.13
 
 require (
-	gioui.org v0.0.0-20201219104124-7adc2a884bd1 // indirect
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/ajstarks/svgo v0.0.0-20200725142600-7a3c8b57fecb // indirect
 	github.com/barnex/fftw v0.0.0-20181125072904-b800f77a10de
