@@ -1,7 +1,7 @@
 language: go
 
 go:
-  - "1.13"
+  - 1.15.x
 
 install:
 - go get golang.org/x/tools/cmd/cover
@@ -9,6 +9,7 @@ install:
 script:
 - go get -d -t -v ./...
 - go install -v ./...
+- export GOPATH=$GOPATH:$HOME/go/bin
 - go test -v ./... -covermode=count -coverprofile=coverage.out
 - "$HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken
   $COVERALLS_TOKEN"

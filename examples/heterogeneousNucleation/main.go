@@ -28,7 +28,7 @@ func position(i int, N int) (float64, float64) {
 // SpatialVaryingLap implements the term f(x, y) LAP phi
 type SpatialVaryingLap struct {
 	Gamma float64
-	Ft    *pf.FFTWWrapper
+	Ft    *pfutil.FFTWWrapper
 }
 
 // Construct builds the fourier transformed right hand side
