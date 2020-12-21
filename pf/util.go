@@ -182,9 +182,7 @@ func SplitOnMany(value string, delimiters []string) []SubStringDelimiter {
 		}
 
 		splits := strings.Split(currentSubString.SubString, delim)
-		fmt.Printf("BEFORE: %s\n", splits)
 		splits = removeEmpty(splits)
-		fmt.Printf("AFTER: %s\n", splits)
 		queue = append(queue, SubStringDelimiter{
 			SubString:           splits[0],
 			PreceedingDelimiter: currentSubString.PreceedingDelimiter,

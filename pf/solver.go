@@ -115,7 +115,7 @@ func (s *Solver) Solve(nepochs int, nsteps int) {
 		for i := range s.Monitors {
 			s.Monitors[i].Add(s.Model.Bricks)
 		}
-		log.Printf("Step %d of %d (%d %)\n", i, nepochs, 100*i/nepochs)
+		log.Printf("Step %d of %d (%d %%)\n", i, nepochs, 100*i/nepochs)
 	}
 }
 
