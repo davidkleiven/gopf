@@ -2,12 +2,12 @@ package pf
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/cmplx"
 	"regexp"
 	"strconv"
 	"strings"
-	"log"
 )
 
 // Term is generic function type that evaluates the right hand side of a set of
@@ -196,7 +196,6 @@ func flipSign(data []complex128) {
 	}
 }
 
-
 func constructFunc(term Term, prefixes []string) Term {
 	var f Term
 	if len(prefixes) == 0 {
@@ -231,18 +230,15 @@ func constructFunc(term Term, prefixes []string) Term {
 			lap.Eval(freq, field)
 		}
 		break
+	case " ", "+":
+		// Do nothing and do not print message that the prefix is unrecognezed
+		f = term
+		break
 	default:
-		log.Printf("Unrecognizes prefix %s (potential problem)", prefixes[0])
+		log.Printf("Unrecognized prefix %s (potential problem)", prefixes[0])
 		f = term
 	}
 	return constructFunc(f, prefixes[1:])
-	// if preceedingDelim == "-" {
-	// 	return func(freq Frequency, t float64, field []complex128) {
-	// 		term(freq, t, field)
-	// 		flipSign(field)
-	// 	}
-	// }
-	// return term
 }
 
 func knownPrefixes() []string {
