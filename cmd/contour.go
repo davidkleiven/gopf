@@ -82,20 +82,14 @@ will be selected.
 		colormap.SetMin(min - 0.05*rng)
 		colormap.SetMax(max + 0.05*rng)
 
-		plt, err := plot.New()
-		if err != nil {
-			log.Fatalf("Could not create plot: %s\n", err)
-		}
+		plt := plot.New()
 
 		heatImg := fillImage(data, colormap)
 		n, m := data.Dims()
 		pImg := plotter.NewImage(heatImg, 0, 0, float64(n), float64(m))
 		plt.Add(pImg)
 
-		barplt, err := plot.New()
-		if err != nil {
-			log.Fatalf("Could not create plot: %s\n", err)
-		}
+		barplt := plot.New()
 
 		plt.X.Label.Text = "x position (\u0394 x)"
 		plt.Y.Label.Text = "y position (\u0394 x)"
