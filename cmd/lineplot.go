@@ -105,11 +105,7 @@ To plot data along a line, at least two of -x, -y and -z must be specified.
 			}
 		}
 
-		plt, err := plot.New()
-		if err != nil {
-			log.Fatalf("Error when creatting plot: %s\n", err)
-			return
-		}
+		plt := plot.New()
 
 		for i, name := range fieldArray {
 			rows := readData(fname, name)
